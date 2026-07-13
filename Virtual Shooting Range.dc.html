@@ -115,6 +115,7 @@ html[data-theme="light"]{
           <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--muted);">{{tRoVelL}}</span><span style="color:var(--text-bright);">{{roVel}}</span></div>
           <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--muted);">{{tRoEnergyL}}</span><span style="color:var(--text-bright);">{{roEnergy}}</span></div>
           <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--muted);">{{tRoTofL}}</span><span style="color:var(--text-bright);">{{roTof}}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--muted);">{{tRoScoreL}}</span><span style="{{roScoreStyle}}">{{roScore}}</span></div>
         </div>
         <div style="border-top:1px solid var(--border2); margin-top:10px; padding-top:8px; display:flex; flex-direction:column; gap:5px; font-size:10px;">
           <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--muted);">{{tRoZerosL}}</span><span style="color:var(--green);">{{roZero}}</span></div>
@@ -251,6 +252,28 @@ html[data-theme="light"]{
           <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
         </div>
       </sc-for>
+      <div onMouseEnter="{{tgtSizeEnter}}" onMouseLeave="{{infoLeave}}" style="margin-top:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+          <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted);">{{tTgtSizeL}}</span>
+          <span style="font-size:11px; color:var(--accent-soft);">{{tgtDimTxt}}</span>
+        </div>
+        <select value="{{tgtTypeVal}}" onChange="{{onTgtType}}" style="width:100%; margin-top:6px; background:var(--panel3); color:var(--text); border:1px solid var(--border); padding:6px 8px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; cursor:pointer;">
+          <option value="ring50">{{tgtOptRing50}}</option>
+          <option value="ring100">{{tgtOptRing100}}</option>
+          <option value="gong30">{{tgtOptGong}}</option>
+          <option value="ipsc">{{tgtOptIpsc}}</option>
+          <option value="custom">{{tgtOptCustom}}</option>
+        </select>
+        <sc-if value="{{tgtCustom}}" hint-placeholder-val="{{false}}">
+          <div style="display:flex; flex-direction:column; gap:3px; margin-top:9px;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+              <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted);">Ø</span>
+              <span style="font-size:11px; color:var(--accent-soft);">{{tgtDiamDisp}}</span>
+            </div>
+            <input type="range" min="10" max="200" step="5" value="{{tgtDiamVal}}" onInput="{{tgtDiamInput}}" style="width:100%;">
+          </div>
+        </sc-if>
+      </div>
     </div>
 
     <div style="margin-bottom:24px;">
@@ -310,7 +333,10 @@ html[data-theme="light"]{
     </div>
 
     <div>
-      <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted); padding-bottom:7px; border-bottom:1px solid var(--border2);">{{tDopeSec}}</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:7px; border-bottom:1px solid var(--border2);">
+        <span style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted);">{{tDopeSec}}</span>
+        <button onClick="{{exportPdf}}" style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:1px; padding:3px 10px; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--muted);">{{tPdfBtn}}</button>
+      </div>
       <div style="display:grid; grid-template-columns:36px 46px 38px 46px 38px 42px 34px; font-size:8.5px; letter-spacing:0.5px; color:var(--dim); margin-top:10px; padding-bottom:5px; border-bottom:1px solid var(--row-border);">
         <span>{{tDRng}}</span><span>{{tDDrop}}</span><span>{{angU}}</span><span>{{tDDrift}}</span><span>{{angU}}</span><span>V m/s</span><span>{{tDTof}}</span>
       </div>
@@ -342,6 +368,9 @@ const T = {
     mFoot: 'TRAINING VISUALIZATION — NOT A FIRING SOLUTION',
     atTarget: 'AT TARGET', dropL: 'DROP', driftL: 'DRIFT', velL: 'VELOCITY', energyL: 'ENERGY', tofL: 'TIME OF FLIGHT', zerosL: 'ZEROS', apexRo: 'APEX',
     targetFace: 'TARGET FACE', ringsNote: 'RINGS', noImpact: 'NO IMPACT',
+    tgtSizeL: 'TARGET TYPE', scoreL: 'SCORE', hitTxt: 'HIT', missTxt: 'MISS', zoneTxt: (z) => 'ZONE ' + z,
+    tgtOpts: { ring50: 'RING TARGET · Ø 50 cm', ring100: 'RING TARGET · Ø 100 cm', gong30: 'STEEL GONG · Ø 30 cm', ipsc: 'IPSC PAPER · 45 × 57.5 cm', custom: 'CUSTOM PLATE · Ø' },
+    pdfBtn: '⎙ PDF', pdfPrinted: 'GENERATED',
     fire: 'FIRE', devScale: 'ARC MAGNIFICATION', skyLbl: 'SKY LIGHT',
     viewMode: 'VIEW MODE', trueBtn: 'TRUE', arcBtn: 'ARC', trueNote: 'TRUE GEOMETRY · 1:1',
     uiTheme: 'PANELS', sceneTheme: 'SCENE', darkBtn: 'DARK', lightBtn: 'LIGHT',
@@ -385,6 +414,7 @@ const T = {
       cor: ['CORIOLIS + EÖTVÖS', 'Earth-rotation effects: horizontal drift (Coriolis) and a vertical shift depending on azimuth (Eötvös).'],
       exag: ['VIEW MODE', 'TRUE shows the real geometry (1:1) — the arc is nearly invisible at range. ARC magnifies deviation from the sight line so the parabola is easy to read. All numbers stay true; scope view is always 1:1.'],
       sky: ['SKY LIGHT', 'Scene brightness only — no ballistic effect.'],
+      tgtSize: ['TARGET TYPE', 'Physical target on the board. Sets the rings/zones the impact is scored against — display and scoring only, no ballistic effect.'],
       theme: ['PANELS THEME', 'Light/dark for the UI chrome — panels, buttons, sliders. The 3-D scene has its own toggle below.'],
       scene: ['SCENE THEME', 'Light/dark for the 3-D range — sky, ground, trajectory markers. Independent from the panels; SKY LIGHT still fine-tunes brightness.'],
     },
@@ -397,6 +427,9 @@ const T = {
     mFoot: 'WIZUALIZACJA SZKOLENIOWA — TO NIE JEST ROZWIĄZANIE OGNIOWE',
     atTarget: 'NA CELU', dropL: 'OPAD', driftL: 'ZNOS', velL: 'PRĘDKOŚĆ', energyL: 'ENERGIA', tofL: 'CZAS LOTU', zerosL: 'ZERA', apexRo: 'WIERZCHOŁEK',
     targetFace: 'TARCZA', ringsNote: 'PIERŚCIENIE', noImpact: 'BRAK TRAFIENIA',
+    tgtSizeL: 'RODZAJ TARCZY', scoreL: 'WYNIK', hitTxt: 'TRAFIONY', missTxt: 'PUDŁO', zoneTxt: (z) => 'STREFA ' + z,
+    tgtOpts: { ring50: 'PIERŚCIENIOWA · Ø 50 cm', ring100: 'PIERŚCIENIOWA · Ø 100 cm', gong30: 'GONG STALOWY · Ø 30 cm', ipsc: 'PAPIEROWA IPSC · 45 × 57,5 cm', custom: 'WŁASNA PŁYTA · Ø' },
+    pdfBtn: '⎙ PDF', pdfPrinted: 'WYGENEROWANO',
     fire: 'OGNIA', devScale: 'POWIĘKSZENIE ŁUKU', skyLbl: 'JASNOŚĆ NIEBA',
     viewMode: 'TRYB WIDOKU', trueBtn: 'REALNY', arcBtn: 'ŁUK', trueNote: 'GEOMETRIA RZECZYWISTA · 1:1',
     uiTheme: 'PANELE', sceneTheme: 'SCENA', darkBtn: 'CIEMNY', lightBtn: 'JASNY',
@@ -440,6 +473,7 @@ const T = {
       cor: ['CORIOLIS + EÖTVÖS', 'Efekty obrotu Ziemi: znos poziomy (Coriolis) i pionowy zależny od azymutu (Eötvös).'],
       exag: ['TRYB WIDOKU', 'REALNY pokazuje prawdziwą geometrię (1:1) — łuk jest wtedy prawie niewidoczny. ŁUK powiększa odchylenie od linii celowania, by parabola była czytelna. Liczby pozostają prawdziwe; luneta zawsze 1:1.'],
       sky: ['JASNOŚĆ NIEBA', 'Tylko oświetlenie sceny — bez wpływu na balistykę.'],
+      tgtSize: ['RODZAJ TARCZY', 'Fizyczna tarcza na stanowisku. Określa pierścienie/strefy, według których punktowane jest trafienie — tylko wygląd i punktacja, bez wpływu na balistykę.'],
       theme: ['PANELE', 'Jasny/ciemny wygląd interfejsu — panele, przyciski, suwaki. Scena 3D ma osobny przełącznik poniżej.'],
       scene: ['SCENA', 'Jasny/ciemny wygląd strzelnicy 3D — niebo, grunt, znaczniki toru. Niezależnie od paneli; JASNOŚĆ NIEBA dalej reguluje jasność.'],
     },
@@ -646,7 +680,7 @@ class Component extends DCLogic {
   state = {
     preset: '.22 LR', mv: 370, massGr: 40, bc: 0.138, cal: 5.7,
     scopeH: 4.5, zeroDist: 50, cant: 0, railMoa: 0, mountMoa: 0, adjUnit: 'MOA', adjElev: 0, adjWind: 0,
-    targetDist: 100, incline: 0,
+    targetDist: 100, incline: 0, tgtType: 'ring50', tgtDiam: 50,
     windSpeed: 3, windDir: 90, temp: 15, pressure: 1013, humidity: 50,
     advOpen: false, spinOn: false, corOn: false, lat: 45, az: 90,
     exag: 8, viewMode: 'arc', cam: 'side', modelOpen: false, firing: false,
@@ -680,6 +714,98 @@ class Component extends DCLogic {
     }
     return this._tr;
   }
+
+  getTarget() {
+    const st = this.state;
+    const t = st.tgtType;
+    if (t === 'ring100') return { id: t, type: 'ring', R: 0.5, step: 0.05, w: 1.1, h: 1.1, label: 'Ø 100 cm' };
+    if (t === 'gong30') return { id: t, type: 'plate', R: 0.15, w: 0.36, h: 0.36, label: 'Ø 30 cm' };
+    if (t === 'ipsc') return { id: t, type: 'ipsc', w: 0.45, h: 0.575, label: '45 × 57.5 cm' };
+    if (t === 'custom') { const R = Math.max(0.05, st.tgtDiam / 200); return { id: t, type: 'plate', R, w: R * 2 + 0.06, h: R * 2 + 0.06, label: 'Ø ' + st.tgtDiam.toFixed(0) + ' cm' }; }
+    return { id: 'ring50', type: 'ring', R: 0.25, step: 0.025, w: 0.56, h: 0.56, label: 'Ø 50 cm' };
+  }
+  score(imp, L) {
+    if (!imp) return { txt: '—', hit: false, none: true };
+    const t = this.getTarget();
+    const x = imp.devH, y = imp.devV;
+    if (t.type === 'ipsc') {
+      const ax = Math.abs(x), ay = Math.abs(y);
+      if (ax <= 0.075 && ay <= 0.14) return { txt: L.zoneTxt('A'), hit: true };
+      if (ax <= 0.15 && ay <= 0.225) return { txt: L.zoneTxt('C'), hit: true };
+      if (ax <= t.w / 2 && ay <= t.h / 2) return { txt: L.zoneTxt('D'), hit: true };
+      return { txt: L.missTxt, hit: false };
+    }
+    const r = Math.hypot(x, y);
+    if (r > t.R + 1e-9) return { txt: L.missTxt, hit: false };
+    if (t.type === 'ring') {
+      const s = Math.max(1, Math.min(10, 11 - Math.ceil(Math.max(r, 1e-9) / t.step)));
+      return { txt: s + '/10', hit: true };
+    }
+    return { txt: L.hitTxt, hit: true };
+  }
+  onTgtType = (e) => this.setState({ tgtType: e.target.value });
+  exportPdf = () => {
+    const tr = this.getTraj();
+    const st = this.state;
+    if (!tr || !tr.samples || !tr.samples.length) return;
+    const L = T[st.lang] || T.EN;
+    const isMil = st.adjUnit === 'MIL', unit = st.adjUnit;
+    const isYd = st.distUnit === 'yd', YDf = 0.9144, dU = isYd ? 'yd' : 'm';
+    const D = st.targetDist;
+    const mass = st.massGr * GRAIN;
+    const ang = (dev, s) => { if (!s) return '—'; const r = Math.atan2(dev, s); const v = isMil ? r / MILR : r / MOA; return (v >= 0 ? '+' : '') + v.toFixed(1); };
+    const cm = (dev) => (dev >= 0 ? '+' : '') + (dev * 100).toFixed(1);
+    const dispD = (m) => Math.round(m / (isYd ? YDf : 1));
+    const stepDisp = (D / (isYd ? YDf : 1)) <= 400 ? 25 : 50;
+    const stepM = stepDisp * (isYd ? YDf : 1);
+    const rows = [];
+    const pushRow = (x, sm, hl) => rows.push('<tr' + (hl ? ' class="hl"' : '') + '><td>' + dispD(x) + (hl ? ' · ' + L.tgtRow : '') + '</td><td>' + cm(sm.devV) + '</td><td>' + ang(sm.devV, x) + '</td><td>' + cm(sm.devH) + '</td><td>' + ang(sm.devH, x) + '</td><td>' + sm.v.toFixed(0) + '</td><td>' + (0.5 * mass * sm.v * sm.v).toFixed(0) + '</td><td>' + sm.t.toFixed(2) + '</td></tr>');
+    for (let x = stepM; x < D - 1e-6; x += stepM) {
+      const sm = interpAt(tr.samples, x);
+      if (!sm) break;
+      pushRow(x, sm, false);
+    }
+    if (tr.impact) pushRow(D, tr.impact, true);
+    const tgt = this.getTarget();
+    const wDir = Math.round(st.windDir / 30) === 0 ? 12 : Math.round(st.windDir / 30);
+    const adjTxt = (moa) => (isMil ? ((moa * 0.290888 >= 0 ? '+' : '') + (moa * 0.290888).toFixed(1)) : ((moa >= 0 ? '+' : '') + moa.toFixed(2))) + ' ' + unit;
+    const meta = [
+      [L.ammo, st.preset + ' · ' + st.mv.toFixed(0) + ' m/s · ' + st.massGr.toFixed(0) + ' gr · BC ' + st.bc.toFixed(3) + ' (G1)'],
+      [L.rifle, L.scopeHL + ' ' + st.scopeH.toFixed(1) + ' cm · ' + L.zeroL + ' ' + dispD(st.zeroDist) + ' ' + dU + ' · ELEV ' + adjTxt(st.adjElev) + ' · WIND ' + adjTxt(st.adjWind)],
+      [L.envSec, L.windLbl + ' ' + st.windSpeed.toFixed(1) + ' m/s @ ' + wDir + 'h · ' + st.temp.toFixed(0) + ' °C · ' + st.pressure.toFixed(0) + ' hPa · RH ' + st.humidity.toFixed(0) + ' %'],
+      [L.shotSec, L.tgtDistL + ' ' + dispD(D) + ' ' + dU + ' · ' + L.inclineL + ' ' + st.incline.toFixed(0) + '° · ' + L.tgtSizeL + ' ' + tgt.label],
+    ].map((kv) => '<div class="meta"><span>' + kv[0] + '</span><b>' + kv[1] + '</b></div>').join('');
+    const now = new Date();
+    const sTag = '<scr' + 'ipt>', sEnd = '</scr' + 'ipt>';
+    const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + L.dopeSec + ' — ' + st.preset + ' — ' + dispD(D) + ' ' + dU + '</title><style>'
+      + '@page{size:A4;margin:14mm;}'
+      + 'body{font-family:"Courier New",monospace;color:#111;margin:0;font-size:11px;}'
+      + 'h1{font-family:Helvetica,Arial,sans-serif;font-size:15px;letter-spacing:3px;margin:0 0 2px;}'
+      + '.sub{font-size:9px;letter-spacing:1px;color:#555;margin-bottom:12px;}'
+      + '.meta{display:flex;gap:10px;border-bottom:1px solid #ddd;padding:4px 0;font-size:10px;}'
+      + '.meta span{width:150px;flex:none;color:#666;letter-spacing:1px;}'
+      + '.meta b{font-weight:normal;}'
+      + 'table{border-collapse:collapse;width:100%;margin-top:14px;}'
+      + 'th{font-family:Helvetica,Arial,sans-serif;font-size:9px;letter-spacing:1px;text-align:right;border-bottom:1.5px solid #111;padding:4px 6px;}'
+      + 'td{text-align:right;padding:3.5px 6px;border-bottom:1px solid #e4e4e4;font-size:10.5px;}'
+      + 'th:first-child,td:first-child{text-align:left;}'
+      + 'tr.hl td{font-weight:bold;background:#f0f0f0;border-top:1.5px solid #111;border-bottom:1.5px solid #111;}'
+      + '.foot{margin-top:14px;font-size:8.5px;letter-spacing:1px;color:#777;}'
+      + '</style></head><body>'
+      + '<h1>' + L.dopeSec + '</h1>'
+      + '<div class="sub">' + L.title + ' · ' + L.pdfPrinted + ' ' + now.toLocaleString(st.lang === 'PL' ? 'pl-PL' : 'en-GB') + '</div>'
+      + meta
+      + '<table><thead><tr><th>' + L.dRng + ' ' + dU + '</th><th>' + L.dDrop + '</th><th>' + unit + '</th><th>' + L.dDrift + '</th><th>' + unit + '</th><th>V m/s</th><th>E J</th><th>' + L.dTof + ' s</th></tr></thead><tbody>'
+      + rows.join('') + '</tbody></table>'
+      + '<div class="foot">' + L.mFoot + '</div>'
+      + sTag + 'window.onload=function(){setTimeout(function(){window.print();},250);};' + sEnd
+      + '</body></html>';
+    const w = window.open('', '_blank');
+    if (!w) return;
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+  };
 
   h(key) {
     if (!this._h[key]) this._h[key] = (e) => {
@@ -961,7 +1087,8 @@ class Component extends DCLogic {
     this.line(ctx, cam, [mz[0] - 0.7 * tr.dir[0], mz[1] - 0.7 * tr.dir[1], mz[2] - 0.7 * tr.dir[2]], [mz[0] + 0.9 * tr.dir[0], mz[1] + 0.9 * tr.dir[1], mz[2] + 0.9 * tr.dir[2]], SC.barrel, 3 * dpr);
 
     const aim = cam.aim;
-    const bw = 0.7, bh = 1.0;
+    const tgt3 = this.getTarget();
+    const bw = tgt3.w, bh = tgt3.h;
     const c4 = [[aim[0], aim[1] + bh / 2, aim[2] - bw / 2], [aim[0], aim[1] + bh / 2, aim[2] + bw / 2], [aim[0], aim[1] - bh / 2, aim[2] + bw / 2], [aim[0], aim[1] - bh / 2, aim[2] - bw / 2]];
     const pts = c4.map((p) => this.pt2(cam, p));
     if (pts.every(Boolean)) {
@@ -972,8 +1099,8 @@ class Component extends DCLogic {
       ctx.fillStyle = SC.boardFill; ctx.fill();
       ctx.strokeStyle = SC.boardEdge; ctx.lineWidth = 1.4 * dpr; ctx.stroke();
     }
-    for (const rr of [0.09, 0.21, 0.33]) {
-      ctx.beginPath(); ctx.strokeStyle = SC.boardRings; ctx.lineWidth = 1 * dpr;
+    const circ3 = (rr, col, lw) => {
+      ctx.beginPath(); ctx.strokeStyle = col; ctx.lineWidth = lw;
       let first = true;
       for (let a = 0; a <= Math.PI * 2 + 0.05; a += Math.PI / 16) {
         const p = this.pt2(cam, [aim[0], aim[1] + rr * Math.sin(a), aim[2] + rr * Math.cos(a)]);
@@ -981,7 +1108,25 @@ class Component extends DCLogic {
         if (first) { ctx.moveTo(p[0], p[1]); first = false; } else ctx.lineTo(p[0], p[1]);
       }
       ctx.stroke();
+    };
+    const rect3 = (hw, hh) => {
+      const q = [[aim[0], aim[1] + hh, aim[2] - hw], [aim[0], aim[1] + hh, aim[2] + hw], [aim[0], aim[1] - hh, aim[2] + hw], [aim[0], aim[1] - hh, aim[2] - hw]].map((p) => this.pt2(cam, p));
+      if (!q.every(Boolean)) return;
+      ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]);
+      for (let i = 1; i < 4; i++) ctx.lineTo(q[i][0], q[i][1]);
+      ctx.closePath(); ctx.strokeStyle = SC.boardRings; ctx.lineWidth = 1 * dpr; ctx.stroke();
+    };
+    if (tgt3.type === 'ring') {
+      for (let rr = tgt3.step * 2; rr < tgt3.R - 1e-6; rr += tgt3.step * 2) circ3(rr, SC.boardRings, 1 * dpr);
+      circ3(tgt3.R, SC.boardEdge, 1.3 * dpr);
+    } else if (tgt3.type === 'plate') {
+      circ3(tgt3.R, SC.boardEdge, 1.3 * dpr);
+    } else {
+      rect3(0.075, 0.14);
+      rect3(0.15, 0.225);
     }
+    const pdim = this.pt2(cam, [aim[0], aim[1] + bh / 2 + 0.22, 0]);
+    if (pdim) { ctx.font = 9 * dpr + mono; ctx.fillStyle = SC.lblMajor; ctx.textAlign = 'center'; ctx.fillText(tgt3.label, pdim[0], pdim[1]); }
     const pbull = this.pt2(cam, aim);
     if (pbull) { ctx.fillStyle = SC.los; ctx.beginPath(); ctx.arc(pbull[0], pbull[1], 2.5 * dpr, 0, 7); ctx.fill(); }
     if (aim[1] - bh / 2 > gy) this.line(ctx, cam, [aim[0], aim[1] - bh / 2, 0], [aim[0], gy, 0], SC.boardEdge, 1.4 * dpr);
@@ -1208,19 +1353,37 @@ class Component extends DCLogic {
     c.fillRect(0, 0, W2, H2);
     const imp = tr.impact;
     const gi = this.ghostTraj && this.ghostTraj.impact;
-    let ext = 0.4;
+    const tgt = this.getTarget();
+    const tHalf = tgt.type === 'ipsc' ? tgt.h / 2 : tgt.R;
+    let ext = Math.max(0.28, tHalf * 1.2);
     if (imp) ext = Math.max(ext, Math.abs(imp.devV) * 1.3, Math.abs(imp.devH) * 1.3);
     if (gi) ext = Math.max(ext, Math.abs(gi.devV) * 1.15, Math.abs(gi.devH) * 1.15);
     ext = Math.min(ext, 8);
     const cx = W2 / 2, cy = H2 / 2;
     const sc = (Math.min(W2, H2) / 2 - 10 * d) / ext;
-    const step = ext <= 0.5 ? 0.1 : ext <= 1.2 ? 0.25 : ext <= 2.5 ? 0.5 : 1;
-    c.strokeStyle = '#1e2a3a';
-    c.lineWidth = 1 * d;
-    for (let r = step; r <= ext + 0.001; r += step) {
-      c.beginPath(); c.arc(cx, cy, r * sc, 0, 7); c.stroke();
+    if (tgt.type === 'ipsc') {
+      const rect = (hw, hh, col, lw, fill) => {
+        if (fill) { c.fillStyle = fill; c.fillRect(cx - hw * sc, cy - hh * sc, hw * 2 * sc, hh * 2 * sc); }
+        c.strokeStyle = col; c.lineWidth = lw;
+        c.strokeRect(cx - hw * sc, cy - hh * sc, hw * 2 * sc, hh * 2 * sc);
+      };
+      rect(tgt.w / 2, tgt.h / 2, '#54657a', 1.4 * d, 'rgba(255,255,255,0.03)');
+      rect(0.15, 0.225, '#31435c', 1 * d);
+      rect(0.075, 0.14, '#3d5878', 1 * d, 'rgba(69,214,255,0.05)');
+    } else {
+      c.fillStyle = 'rgba(255,255,255,0.03)';
+      c.beginPath(); c.arc(cx, cy, tgt.R * sc, 0, 7); c.fill();
+      if (tgt.type === 'ring') {
+        c.strokeStyle = '#2b3c52'; c.lineWidth = 1 * d;
+        for (let r = tgt.step; r < tgt.R - 1e-6; r += tgt.step) { c.beginPath(); c.arc(cx, cy, r * sc, 0, 7); c.stroke(); }
+        c.fillStyle = 'rgba(69,214,255,0.07)';
+        c.beginPath(); c.arc(cx, cy, tgt.step * 2 * sc, 0, 7); c.fill();
+      }
+      c.strokeStyle = '#54657a'; c.lineWidth = 1.4 * d;
+      c.beginPath(); c.arc(cx, cy, tgt.R * sc, 0, 7); c.stroke();
     }
     c.strokeStyle = '#223146';
+    c.lineWidth = 1 * d;
     c.beginPath();
     c.moveTo(0, cy); c.lineTo(W2, cy);
     c.moveTo(cx, 0); c.lineTo(cx, H2);
@@ -1228,7 +1391,13 @@ class Component extends DCLogic {
     c.font = 8 * d + "px 'IBM Plex Mono', monospace";
     c.fillStyle = '#54657a';
     c.textAlign = 'left';
-    c.fillText(LT.ringsNote + ' ' + (step * 100).toFixed(0) + ' cm', 6 * d, H2 - 6 * d);
+    c.fillText(tgt.label, 6 * d, H2 - 6 * d);
+    const sc0 = this.score(imp, LT);
+    if (!sc0.none) {
+      c.textAlign = 'right';
+      c.fillStyle = sc0.hit ? '#7fd88f' : '#ff8080';
+      c.fillText(LT.scoreL + ' ' + sc0.txt, W2 - 6 * d, H2 - 6 * d);
+    }
     c.fillStyle = '#45d6ff';
     c.beginPath(); c.arc(cx, cy, 2 * d, 0, 7); c.fill();
     const drawX = (dv, dh, col, r) => {
@@ -1272,6 +1441,8 @@ class Component extends DCLogic {
     const imp = tr.impact;
     const mass = st.massGr * GRAIN;
     const cz = tr.crossings || [];
+    const tgtG = this.getTarget();
+    const sc0 = this.score(imp, L);
 
     const adjDisp = (moa) => {
       if (isMil) { const m = moa * 0.290888; return (m >= 0 ? '+' : '') + m.toFixed(1) + ' MIL'; }
@@ -1408,6 +1579,14 @@ class Component extends DCLogic {
       groundWarn: !!tr.hitGround,
       groundTxt: tr.hitGround ? L.groundWarn(fmtDist(tr.groundS)) : '',
       tgtRef: this.tgtRef,
+      tTgtSizeL: L.tgtSizeL, tgtTypeVal: st.tgtType, onTgtType: this.onTgtType,
+      tgtOptRing50: L.tgtOpts.ring50, tgtOptRing100: L.tgtOpts.ring100, tgtOptGong: L.tgtOpts.gong30, tgtOptIpsc: L.tgtOpts.ipsc, tgtOptCustom: L.tgtOpts.custom,
+      tgtCustom: st.tgtType === 'custom',
+      tgtDiamVal: st.tgtDiam, tgtDiamInput: this.h('tgtDiam'), tgtDiamDisp: st.tgtDiam.toFixed(0) + ' cm',
+      tgtDimTxt: tgtG.label, tgtSizeEnter: this.iE('tgtSize'),
+      tRoScoreL: L.scoreL, roScore: sc0.txt,
+      roScoreStyle: { color: sc0.none ? 'var(--muted)' : sc0.hit ? 'var(--green)' : 'var(--red-soft)' },
+      exportPdf: this.exportPdf, tPdfBtn: L.pdfBtn,
       setEng: this.setEng, setPol: this.setPol,
       engStyle: unitBtn(st.lang === 'EN'), polStyle: unitBtn(st.lang === 'PL'),
       skyVal: st.skyBright, skyInput: this.h('skyBright'),
