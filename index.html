@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1420'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%238fe6ff' stroke-width='2'/%3E%3Cline x1='16' y1='2.5' x2='16' y2='9.5' stroke='%238fe6ff' stroke-width='2'/%3E%3Cline x1='16' y1='22.5' x2='16' y2='29.5' stroke='%238fe6ff' stroke-width='2'/%3E%3Cline x1='2.5' y1='16' x2='9.5' y2='16' stroke='%238fe6ff' stroke-width='2'/%3E%3Cline x1='22.5' y1='16' x2='29.5' y2='16' stroke='%238fe6ff' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='2.2' fill='%23ff5a4e'/%3E%3C/svg%3E">
+<title>Virtual Shooting Range</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;padding:0;height:100%;background:#0a0e14;overflow:hidden;}
+a{color:#45d6ff;text-decoration:none;} a:hover{color:#8fe6ff;}
+input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;height:18px;margin:0;padding:0;cursor:pointer;}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:#243244;border-radius:2px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:11px;height:11px;border-radius:50%;background:#45d6ff;border:none;margin-top:-4px;}
+input[type=range]::-moz-range-track{height:3px;background:#243244;border-radius:2px;}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:#45d6ff;border:none;}
+select{outline:none;}
+::-webkit-scrollbar{width:8px;}
+::-webkit-scrollbar-thumb{background:#223044;border-radius:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+</style>
+</helmet>
+<div style="display:flex; width:100vw; height:100vh; background:#0a0e14; color:#d5dde6; font-family:'IBM Plex Mono',monospace; font-size:12px; user-select:none; -webkit-user-select:none;">
+
+  <div data-screen-label="3D Range View" style="position:relative; flex:1 1 auto; min-width:0; overflow:hidden; background:#0a0e14;">
+    <canvas ref="{{canvasRef}}" onPointerDown="{{vpDown}}" onPointerMove="{{vpMove}}" onPointerUp="{{vpUp}}" onWheel="{{vpWheel}}" style="position:absolute; inset:0; width:100%; height:100%; display:block; cursor:grab; touch-action:none;"></canvas>
+
+    <div style="position:absolute; top:14px; left:14px; background:rgba(10,14,20,0.85); border:1px solid #223146; padding:12px 14px; min-width:212px; backdrop-filter:blur(3px);">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+        <div style="font-family:'Chakra Petch',sans-serif; font-weight:700; font-size:13px; letter-spacing:2px; color:#f2f7ff; max-width:150px;">{{tTitle}}</div>
+        <div style="display:flex; gap:2px; flex:none;">
+          <button onClick="{{setEng}}" style="{{engStyle}}">ENG</button>
+          <button onClick="{{setPol}}" style="{{polStyle}}">POL</button>
+        </div>
+      </div>
+      <div style="font-size:9px; letter-spacing:1.5px; color:#7d8a99; margin-top:3px;">POINT-MASS · G1 · RK4</div>
+      <div style="display:flex; flex-direction:column; gap:7px; margin-top:13px;">
+        <div style="display:flex; align-items:center; gap:9px;"><span style="width:22px; height:3px; background:linear-gradient(90deg,#f2f7ff,#ffd166,#ff8c42,#ff4d4d); flex:none;"></span><span style="font-size:9.5px; letter-spacing:1px; color:#b9c5d2;">{{tLegTraj}}</span></div>
+        <div style="display:flex; align-items:center; gap:9px;"><span style="width:22px; height:2px; background:#45d6ff; flex:none;"></span><span style="font-size:9.5px; letter-spacing:1px; color:#b9c5d2;">{{tLegLos}}</span></div>
+        <div style="display:flex; align-items:center; gap:9px;"><span style="width:22px; height:0; border-top:2px dashed #b48cff; flex:none;"></span><span style="font-size:9.5px; letter-spacing:1px; color:#b9c5d2;">{{tLegBore}}</span></div>
+        <div style="display:flex; align-items:center; gap:9px;"><span style="width:22px; height:2px; background:rgba(130,142,158,0.55); flex:none;"></span><span style="font-size:9.5px; letter-spacing:1px; color:#b9c5d2;">{{tLegGhost}}</span></div>
+      </div>
+      <div style="margin-top:11px; font-size:9px; letter-spacing:1px; color:#ffb454;">{{scaleNote}}</div>
+      <div style="display:flex; gap:4px; margin-top:10px;">
+        <button onClick="{{toggleModel}}" style="flex:1; background:transparent; border:1px solid #223146; color:#7d8a99; font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:1.5px; padding:5px 0; cursor:pointer;" style-hover="border-color:#3a4f6e; color:#b9c5d2;">{{tModelBtn}}</button>
+        <button onClick="{{toggleInfo}}" style="{{infoBtnStyle}}">{{tInfoBtn}}</button>
+      </div>
+    </div>
+
+    <sc-if value="{{modelOpen}}" hint-placeholder-val="{{false}}">
+      <div style="position:absolute; top:14px; left:246px; width:312px; background:rgba(10,14,20,0.94); border:1px solid #2a3a52; padding:14px 16px; z-index:5; backdrop-filter:blur(4px);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-family:'Chakra Petch',sans-serif; font-size:11px; font-weight:600; letter-spacing:2px; color:#f2f7ff;">{{tModelTitle}}</span>
+          <button onClick="{{toggleModel}}" style="background:transparent; border:none; color:#7d8a99; font-size:13px; cursor:pointer; font-family:inherit;">✕</button>
+        </div>
+        <div style="margin-top:9px; font-size:10px; line-height:1.75; color:#9fb0c2;">
+          · {{m1}}<br>
+          · {{m2}}<br>
+          · {{m3}}<br>
+          · {{m4}}<br>
+          · {{m5}}<br>
+          · {{m6}}<br>
+          · {{m7}}<br>
+          · {{m8}}<br>
+          · {{m9}}
+        </div>
+        <div style="margin-top:9px; font-size:9px; letter-spacing:1px; color:#ffb454;">{{mFoot}}</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{infoMode}}" hint-placeholder-val="{{false}}">
+      <div style="position:absolute; left:14px; bottom:86px; width:300px; background:rgba(10,14,20,0.92); border:1px solid #2a3a52; padding:12px 14px; z-index:6; backdrop-filter:blur(4px);">
+        <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2px; color:#45d6ff;">{{infoTitle}}</div>
+        <div style="margin-top:6px; font-size:10.5px; line-height:1.6; color:#b9c5d2;">{{infoText}}</div>
+      </div>
+    </sc-if>
+
+    <div style="position:absolute; top:14px; right:14px; width:228px; display:flex; flex-direction:column; gap:10px;">
+      <div style="background:rgba(10,14,20,0.85); border:1px solid #223146; padding:12px 14px; backdrop-filter:blur(3px);">
+        <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2px; color:#7d8a99;">{{tAtTarget}} · {{targetLabel}}</div>
+        <div style="display:flex; flex-direction:column; gap:5px; margin-top:10px; font-size:10.5px;">
+          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:#7d8a99;">{{tRoDropL}}</span><span style="color:#f2f7ff;">{{roDrop}}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:#7d8a99;">{{tRoDriftL}}</span><span style="color:#f2f7ff;">{{roDrift}}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:#7d8a99;">{{tRoVelL}}</span><span style="color:#f2f7ff;">{{roVel}}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:#7d8a99;">{{tRoEnergyL}}</span><span style="color:#f2f7ff;">{{roEnergy}}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:#7d8a99;">{{tRoTofL}}</span><span style="color:#f2f7ff;">{{roTof}}</span></div>
+        </div>
+        <div style="border-top:1px solid #1d2530; margin-top:10px; padding-top:8px; display:flex; flex-direction:column; gap:5px; font-size:10px;">
+          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:#7d8a99;">{{tRoZerosL}}</span><span style="color:#7ee2a8;">{{roZero}}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:#7d8a99;">{{tRoApexL}}</span><span style="color:#ffd166;">{{roApex}}</span></div>
+        </div>
+      </div>
+      <div style="background:rgba(10,14,20,0.85); border:1px solid #223146; padding:10px 12px; backdrop-filter:blur(3px);">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+          <span style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2px; color:#7d8a99;">{{tTargetFace}}</span>
+          <span style="font-size:9px; color:#54657a;">{{targetLabel}}</span>
+        </div>
+        <canvas ref="{{tgtRef}}" style="display:block; width:100%; height:150px; margin-top:8px;"></canvas>
+      </div>
+    </div>
+
+    <div style="position:absolute; left:14px; right:14px; bottom:14px; display:flex; flex-wrap:wrap-reverse; align-items:center; justify-content:space-between; gap:10px 18px; pointer-events:none;">
+      <div style="display:flex; align-items:center; gap:14px; pointer-events:auto;">
+        <button onClick="{{fire}}" style="font-family:'Chakra Petch',sans-serif; font-weight:700; font-size:15px; letter-spacing:4px; background:#ff5c39; color:#0a0e14; border:none; padding:13px 28px; cursor:pointer;" style-hover="background:#ff7a5c;">{{tFire}}</button>
+        <div>
+          <div style="font-size:9px; letter-spacing:1.5px; color:#7d8a99;">{{tTofLabel}}</div>
+          <div style="font-size:19px; color:#f2f7ff; margin-top:1px;"><span ref="{{timerRef}}">0.000</span> <span style="font-size:11px; color:#7d8a99;">s</span></div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:4px; flex-wrap:wrap; pointer-events:auto;">
+        <sc-for list="{{camBtns}}" as="b" hint-placeholder-count="5">
+          <button onClick="{{b.onClick}}" style="{{b.style}}">{{b.label}}</button>
+        </sc-for>
+      </div>
+
+      <div style="background:rgba(10,14,20,0.85); border:1px solid #223146; padding:8px 12px; width:150px; pointer-events:auto;">
+        <div onMouseEnter="{{exagEnter}}" onMouseLeave="{{infoLeave}}">
+          <div style="font-size:9px; letter-spacing:1px; color:#7d8a99;">{{tViewMode}}</div>
+          <div style="display:flex; gap:2px; margin-top:5px;">
+            <button onClick="{{setTrue}}" style="{{trueStyle}}">{{tTrueBtn}}</button>
+            <button onClick="{{setArc}}" style="{{arcStyle}}">{{tArcBtn}}</button>
+          </div>
+          <sc-if value="{{arcMode}}" hint-placeholder-val="{{true}}">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:7px;">
+                <span style="font-size:9px; letter-spacing:1px; color:#7d8a99;">{{tDevScale}}</span>
+                <span style="font-size:11px; color:#8fe6ff;">×{{exagVal}}</span>
+              </div>
+              <input type="range" min="2" max="20" step="1" value="{{exagVal}}" onInput="{{exagInput}}" style="width:100%; margin-top:5px;">
+            </div>
+          </sc-if>
+        </div>
+        <div onMouseEnter="{{skyEnter}}" onMouseLeave="{{infoLeave}}">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:7px;">
+            <span style="font-size:9px; letter-spacing:1px; color:#7d8a99;">{{tSky}}</span>
+            <span style="font-size:11px; color:#8fe6ff;">{{skyVal}}%</span>
+          </div>
+          <input type="range" min="0" max="100" step="5" value="{{skyVal}}" onInput="{{skyInput}}" style="width:100%; margin-top:5px;">
+        </div>
+      </div>
+    </div>
+
+    <sc-if value="{{groundWarn}}" hint-placeholder-val="{{false}}">
+      <div style="position:absolute; bottom:66px; left:50%; transform:translateX(-50%); background:rgba(40,10,10,0.9); border:1px solid #ff4d4d; color:#ff8080; font-size:11px; letter-spacing:1.5px; padding:8px 16px;">{{groundTxt}}</div>
+    </sc-if>
+  </div>
+
+  <div data-screen-label="Parameters Panel" style="width:332px; flex:none; background:#0d1219; border-left:1px solid #1d2530; overflow-y:auto; padding:18px 16px 26px; box-sizing:border-box;">
+
+    <div style="margin-bottom:24px;">
+      <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:#7d8a99; padding-bottom:7px; border-bottom:1px solid #1d2530;">{{tAmmo}}</div>
+      <select value="{{presetVal}}" onChange="{{onPreset}}" onMouseEnter="{{presetEnter}}" onMouseLeave="{{infoLeave}}" style="width:100%; margin-top:12px; background:#0f151d; color:#d5dde6; border:1px solid #2a3648; padding:7px 8px; font-family:'IBM Plex Mono',monospace; font-size:11px; cursor:pointer;">
+        <option value=".22 LR">.22 LR</option>
+        <option value="9 mm">9 mm Luger</option>
+        <option value="5.56 NATO">5.56 NATO</option>
+        <option value=".308 Win">.308 Win</option>
+        <option value="6.5 Creedmoor">6.5 Creedmoor</option>
+        <option value=".338 Lapua Mag">.338 Lapua Mag</option>
+        <option value="Custom">{{tCustom}}</option>
+      </select>
+      <sc-for list="{{ammoCtl}}" as="c" hint-placeholder-count="4">
+        <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline;">
+            <span style="font-size:9.5px; letter-spacing:1px; color:#7d8a99;">{{c.label}}</span>
+            <span style="font-size:11px; color:#8fe6ff;">{{c.display}}</span>
+          </div>
+          <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin-bottom:24px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:7px; border-bottom:1px solid #1d2530;">
+        <span style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:#7d8a99;">{{tRifle}}</span>
+        <div style="display:flex; gap:2px;">
+          <button onClick="{{setMoa}}" style="{{moaStyle}}">MOA</button>
+          <button onClick="{{setMil}}" style="{{milStyle}}">MIL</button>
+        </div>
+      </div>
+      <sc-for list="{{rifleCtl}}" as="c" hint-placeholder-count="4">
+        <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline;">
+            <span style="font-size:9.5px; letter-spacing:1px; color:#7d8a99;">{{c.label}}</span>
+            <span style="font-size:11px; color:#8fe6ff;">{{c.display}}</span>
+          </div>
+          <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin-bottom:24px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:7px; border-bottom:1px solid #1d2530;">
+        <span style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:#7d8a99;">{{tShotSec}}</span>
+        <div style="display:flex; gap:2px;">
+          <button onClick="{{setM}}" style="{{mStyle}}">m</button>
+          <button onClick="{{setYd}}" style="{{ydStyle}}">yd</button>
+        </div>
+      </div>
+      <sc-for list="{{shotCtl}}" as="c" hint-placeholder-count="2">
+        <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline;">
+            <span style="font-size:9.5px; letter-spacing:1px; color:#7d8a99;">{{c.label}}</span>
+            <span style="font-size:11px; color:#8fe6ff;">{{c.display}}</span>
+          </div>
+          <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin-bottom:24px;">
+      <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:#7d8a99; padding-bottom:7px; border-bottom:1px solid #1d2530;">{{tEnvSec}}</div>
+      <div onMouseEnter="{{windEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; gap:14px; align-items:center; margin-top:13px;">
+        <div ref="{{dialRef}}" onPointerDown="{{dialDown}}" onPointerMove="{{dialMove}}" onPointerUp="{{dialUp}}" style="position:relative; width:88px; height:88px; border-radius:50%; border:1px solid #2a3648; flex:none; cursor:pointer; background:#0f151d; touch-action:none;">
+          <div style="position:absolute; top:4px; left:50%; transform:translateX(-50%); font-size:8px; letter-spacing:0.5px; color:#7d8a99;">{{tTgtLbl}}</div>
+          <div style="position:absolute; bottom:3px; left:50%; transform:translateX(-50%); font-size:8px; color:#54657a;">6</div>
+          <div style="position:absolute; right:5px; top:50%; transform:translateY(-50%); font-size:8px; color:#54657a;">3</div>
+          <div style="position:absolute; left:5px; top:50%; transform:translateY(-50%); font-size:8px; color:#54657a;">9</div>
+          <div style="{{dialPtrStyle}}"></div>
+          <div style="position:absolute; left:50%; top:50%; width:5px; height:5px; margin:-2.5px 0 0 -2.5px; border-radius:50%; background:#45d6ff;"></div>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline;">
+            <span style="font-size:9.5px; letter-spacing:1px; color:#7d8a99;">{{tWindLbl}}</span>
+            <span style="font-size:11px; color:#8fe6ff;">{{windDisp}}</span>
+          </div>
+          <div style="font-size:9px; color:#7d8a99; margin-top:2px;">{{windFromTxt}}</div>
+          <input type="range" min="0" max="15" step="0.5" value="{{windSpeedVal}}" onInput="{{windSpeedInput}}" style="width:100%; margin-top:6px;">
+        </div>
+      </div>
+      <sc-for list="{{envCtl}}" as="c" hint-placeholder-count="3">
+        <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline;">
+            <span style="font-size:9.5px; letter-spacing:1px; color:#7d8a99;">{{c.label}}</span>
+            <span style="font-size:11px; color:#8fe6ff;">{{c.display}}</span>
+          </div>
+          <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin-bottom:24px;">
+      <button onClick="{{toggleAdv}}" style="display:flex; justify-content:space-between; align-items:center; width:100%; background:transparent; border:none; border-bottom:1px solid #1d2530; padding:0 0 7px; cursor:pointer; font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:#7d8a99;">
+        <span>{{tAdvSec}}</span><span style="font-size:12px;">{{advArrow}}</span>
+      </button>
+      <sc-if value="{{advOpen}}" hint-placeholder-val="{{false}}">
+        <div>
+          <label onMouseEnter="{{spinEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; gap:9px; align-items:center; margin-top:12px; cursor:pointer; font-size:10px; letter-spacing:1px; color:#b9c5d2;">
+            <input type="checkbox" checked="{{spinOn}}" onChange="{{toggleSpin}}" style="accent-color:#45d6ff; margin:0;">{{tSpinLbl}}
+          </label>
+          <label onMouseEnter="{{corEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; gap:9px; align-items:center; margin-top:9px; cursor:pointer; font-size:10px; letter-spacing:1px; color:#b9c5d2;">
+            <input type="checkbox" checked="{{corOn}}" onChange="{{toggleCor}}" style="accent-color:#45d6ff; margin:0;">{{tCorLbl}}
+          </label>
+          <sc-for list="{{advCtl}}" as="c" hint-placeholder-count="2">
+            <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
+              <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                <span style="font-size:9.5px; letter-spacing:1px; color:#7d8a99;">{{c.label}}</span>
+                <span style="font-size:11px; color:#8fe6ff;">{{c.display}}</span>
+              </div>
+              <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+
+    <div>
+      <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:#7d8a99; padding-bottom:7px; border-bottom:1px solid #1d2530;">{{tDopeSec}}</div>
+      <div style="display:grid; grid-template-columns:36px 46px 38px 46px 38px 42px 34px; font-size:8.5px; letter-spacing:0.5px; color:#54657a; margin-top:10px; padding-bottom:5px; border-bottom:1px solid #16202c;">
+        <span>{{tDRng}}</span><span>{{tDDrop}}</span><span>{{angU}}</span><span>{{tDDrift}}</span><span>{{angU}}</span><span>V m/s</span><span>{{tDTof}}</span>
+      </div>
+      <sc-for list="{{dopeRows}}" as="r" hint-placeholder-count="4">
+        <div style="{{r.style}}">
+          <span>{{r.rng}}</span><span>{{r.drop}}</span><span>{{r.dropA}}</span><span>{{r.drift}}</span><span>{{r.driftA}}</span><span>{{r.vel}}</span><span>{{r.tof}}</span>
+        </div>
+      </sc-for>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showDropLines&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scene&quot;},&quot;flightSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:4,&quot;min&quot;:1.5,&quot;max&quot;:10,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Fire animation&quot;},&quot;reticle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;mil-dot&quot;,&quot;duplex&quot;],&quot;default&quot;:&quot;mil-dot&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Scope view&quot;}}">
+const PRESETS = [
+  { name: '.22 LR', mv: 370, massGr: 40, bc: 0.138, cal: 5.7 },
+  { name: '9 mm', mv: 360, massGr: 124, bc: 0.15, cal: 9.0 },
+  { name: '5.56 NATO', mv: 940, massGr: 62, bc: 0.304, cal: 5.7 },
+  { name: '.308 Win', mv: 800, massGr: 168, bc: 0.462, cal: 7.8 },
+  { name: '6.5 Creedmoor', mv: 823, massGr: 140, bc: 0.58, cal: 6.7 },
+  { name: '.338 Lapua Mag', mv: 900, massGr: 250, bc: 0.675, cal: 8.6 },
+];
+const T = {
+  EN: {
+    title: 'VIRTUAL SHOOTING RANGE',
+    legTraj: 'TRAJECTORY · BY VELOCITY', legLos: 'LINE OF SIGHT', legBore: 'BORE AXIS', legGhost: 'GHOST · PREVIOUS SHOT',
+    modelBtn: 'MODEL ASSUMPTIONS', modelTitle: 'MODEL',
+    m: ['Point mass (3-DOF) — no yaw, no aerodynamic jump', 'Drag: G1 standard-projectile Cd(Mach), scaled by 1/BC', 'Air density ρ(T, P, RH) · speed of sound a(T)', 'Integration: RK4 at Δt = 2 ms', 'Zero angle solved on a flat range, applied to inclined shot', 'Spin drift: Litz approximation (SG ≈ 1.8, RH twist)', 'Coriolis: a = −2 Ω × v from latitude + azimuth', 'Scene exaggerates deviation from the LOS (scope is true scale)', 'Caliber affects display only — drag is carried by the BC'],
+    mFoot: 'TRAINING VISUALIZATION — NOT A FIRING SOLUTION',
+    atTarget: 'AT TARGET', dropL: 'DROP', driftL: 'DRIFT', velL: 'VELOCITY', energyL: 'ENERGY', tofL: 'TIME OF FLIGHT', zerosL: 'ZEROS', apexRo: 'APEX',
+    targetFace: 'TARGET FACE', ringsNote: 'RINGS', noImpact: 'NO IMPACT',
+    fire: 'FIRE', devScale: 'ARC MAGNIFICATION', skyLbl: 'SKY LIGHT',
+    viewMode: 'VIEW MODE', trueBtn: 'TRUE', arcBtn: 'ARC', trueNote: 'TRUE GEOMETRY · 1:1',
+    cams: { side: 'SIDE', top: 'TOP', shooter: 'SHOOTER', scope: 'SCOPE', free: 'ORBIT' },
+    ammo: 'AMMUNITION', rifle: 'RIFLE & OPTIC', shotSec: 'SHOT', envSec: 'ENVIRONMENT', advSec: 'ADVANCED', dopeSec: 'DOPE CARD',
+    custom: 'Custom', tgtLbl: 'TGT', windLbl: 'WIND', tgtRow: 'TGT',
+    mvL: 'MUZZLE VELOCITY', massL: 'BULLET MASS', bcL: 'BALLISTIC COEFF · G1', calL: 'CALIBER',
+    scopeHL: 'SCOPE HEIGHT OVER BORE', zeroL: 'ZERO DISTANCE', cantL: 'CANT ANGLE · + = RIGHT', elevL: 'ELEVATION ADJ', windAdjL: 'WINDAGE ADJ',
+    railL: 'RAIL INCLINE (BASE)', mountL: 'MOUNT INCLINE (RINGS)',
+    tgtDistL: 'TARGET DISTANCE', inclineL: 'INCLINE ANGLE',
+    tempL: 'TEMPERATURE', pressL: 'PRESSURE', humL: 'HUMIDITY',
+    spinLbl: 'SPIN DRIFT · RH TWIST (LITZ)', corLbl: 'CORIOLIS + EÖTVÖS', latL: 'LATITUDE', azL: 'SHOT AZIMUTH · 0=N',
+    dRng: 'RNG', dDrop: 'DROP cm', dDrift: 'DRF cm', dTof: 'TOF',
+    calm: 'CALM', fromClock: (h) => 'FROM ' + h + " O'CLOCK", driftsL: 'DRIFTS LEFT', driftsR: 'DRIFTS RIGHT', headTail: 'HEAD/TAIL',
+    groundWarn: (x) => '⚠ BULLET STRIKES GROUND AT ' + x + ' — SHORT OF TARGET',
+    scaleNote: (n) => 'DEVIATION FROM LOS SHOWN ×' + n, scopeNote: 'SCOPE VIEW · TRUE SCALE',
+    firingLine: 'FIRING LINE', wind: 'WIND', near: 'NEAR', far: 'FAR', apex: 'APEX', transonic: 'TRANSONIC', ground: 'GROUND', impact: 'IMPACT', low: 'LOW', high: 'HIGH', rr: 'R', ll: 'L',
+    infoHint: 'Hover over a parameter to see what it does.',
+    info: {
+      preset: ['CARTRIDGE PRESET', 'Factory load presets (velocity, mass, BC, caliber). Moving any ammunition slider switches to Custom.'],
+      mv: ['MUZZLE VELOCITY', 'Bullet speed at the muzzle. More velocity = flatter arc, shorter flight time, more energy.'],
+      massGr: ['BULLET MASS', 'Weight in grains (1 gr = 64.8 mg). Sets kinetic energy; the drag behaviour itself comes from the BC.'],
+      bc: ['BALLISTIC COEFFICIENT (G1)', 'How well the bullet fights drag vs. the G1 standard projectile. Higher BC = flatter trajectory and less wind drift.'],
+      cal: ['CALIBER', 'Bullet diameter. Cosmetic here — the BC already contains the aerodynamic effect.'],
+      scopeH: ['SCOPE HEIGHT', 'Vertical offset between bore axis and scope axis. It is why the bullet crosses the sight line twice (near and far zero).'],
+      zeroDist: ['ZERO DISTANCE', 'Range where trajectory and line of sight are set to cross. Defines the upward bore tilt.'],
+      railMoa: ['RAIL INCLINE', 'Fixed tilt machined into the base (e.g. 20 MOA). Not auto-compensated here: it lifts the impact until you dial elevation back down.'],
+      mountMoa: ['MOUNT INCLINE', 'Additional tilt from adjustable rings, added on top of the rail.'],
+      cant: ['CANT ANGLE', 'Rifle rolled around the sight line. Tilts the built-in elevation sideways: shots go low and toward the cant.'],
+      adjElev: ['ELEVATION ADJUSTMENT', 'Scope turret elevation (MOA/MIL). Positive = barrel points higher = impact rises.'],
+      adjWind: ['WINDAGE ADJUSTMENT', 'Scope turret windage. Positive = impact moves right.'],
+      targetDist: ['TARGET DISTANCE', 'Range to the target measured along the line of sight.'],
+      incline: ['INCLINE ANGLE', 'Up/downhill angle. Gravity acts on the horizontal component only, so inclined shots hit high.'],
+      wind: ['WIND', 'Speed and the clock direction the wind blows FROM (12 = from the target). Crosswind drifts the bullet; head/tail wind changes little.'],
+      temp: ['TEMPERATURE', 'Warm air is thinner: less drag, flatter shot. Cold air does the opposite.'],
+      pressure: ['PRESSURE', 'Lower station pressure (higher altitude) = thinner air = less drag.'],
+      humidity: ['HUMIDITY', 'Humid air is slightly LESS dense than dry air — a very small effect.'],
+      lat: ['LATITUDE', 'Where on Earth you shoot; scales the Coriolis deflection.'],
+      az: ['SHOT AZIMUTH', 'Compass bearing of the shot (0 = north). Shooting east lifts the impact, west lowers it (Eötvös).'],
+      spin: ['SPIN DRIFT', 'Gyroscopic drift from the spinning bullet — right-hand twist drifts right, growing with flight time.'],
+      cor: ['CORIOLIS + EÖTVÖS', 'Earth-rotation effects: horizontal drift (Coriolis) and a vertical shift depending on azimuth (Eötvös).'],
+      exag: ['VIEW MODE', 'TRUE shows the real geometry (1:1) — the arc is nearly invisible at range. ARC magnifies deviation from the sight line so the parabola is easy to read. All numbers stay true; scope view is always 1:1.'],
+      sky: ['SKY LIGHT', 'Scene brightness only — no ballistic effect.'],
+    },
+  },
+  PL: {
+    title: 'WIRTUALNA STRZELNICA',
+    legTraj: 'TOR LOTU · WG PRĘDKOŚCI', legLos: 'LINIA CELOWANIA', legBore: 'OŚ LUFY', legGhost: 'DUCH · POPRZEDNI STRZAŁ',
+    modelBtn: 'ZAŁOŻENIA MODELU', modelTitle: 'MODEL',
+    m: ['Punkt materialny (3-DOF) — bez myszkowania i skoku aerodyn.', 'Opór: G1 — Cd(Mach) pocisku wzorcowego, skalowany 1/BC', 'Gęstość powietrza ρ(T, P, RH) · prędkość dźwięku a(T)', 'Całkowanie: RK4, Δt = 2 ms', 'Kąt zerowania liczony na płaskim torze, stosowany do strzału z nachyleniem', 'Derywacja: przybliżenie Litza (SG ≈ 1,8, gwint prawy)', 'Coriolis: a = −2 Ω × v z szerokości geogr. i azymutu', 'Scena wyolbrzymia odchylenie od linii celowania (luneta: skala 1:1)', 'Kaliber wpływa tylko na wygląd — opór zawiera się w BC'],
+    mFoot: 'WIZUALIZACJA SZKOLENIOWA — TO NIE JEST ROZWIĄZANIE OGNIOWE',
+    atTarget: 'NA CELU', dropL: 'OPAD', driftL: 'ZNOS', velL: 'PRĘDKOŚĆ', energyL: 'ENERGIA', tofL: 'CZAS LOTU', zerosL: 'ZERA', apexRo: 'WIERZCHOŁEK',
+    targetFace: 'TARCZA', ringsNote: 'PIERŚCIENIE', noImpact: 'BRAK TRAFIENIA',
+    fire: 'OGNIA', devScale: 'POWIĘKSZENIE ŁUKU', skyLbl: 'JASNOŚĆ NIEBA',
+    viewMode: 'TRYB WIDOKU', trueBtn: 'REALNY', arcBtn: 'ŁUK', trueNote: 'GEOMETRIA RZECZYWISTA · 1:1',
+    cams: { side: 'BOK', top: 'GÓRA', shooter: 'STRZELEC', scope: 'LUNETA', free: 'ORBITA' },
+    ammo: 'AMUNICJA', rifle: 'KARABIN I OPTYKA', shotSec: 'STRZAŁ', envSec: 'ŚRODOWISKO', advSec: 'ZAAWANSOWANE', dopeSec: 'TABELA POPRAWEK',
+    custom: 'Własny', tgtLbl: 'CEL', windLbl: 'WIATR', tgtRow: 'CEL',
+    mvL: 'PRĘDKOŚĆ POCZĄTKOWA', massL: 'MASA POCISKU', bcL: 'WSP. BALISTYCZNY · G1', calL: 'KALIBER',
+    scopeHL: 'WYSOKOŚĆ LUNETY NAD LUFĄ', zeroL: 'ODLEGŁOŚĆ ZEROWANIA', cantL: 'PRZECHYŁ · + = W PRAWO', elevL: 'POPRAWKA PIONOWA', windAdjL: 'POPRAWKA POZIOMA',
+    railL: 'NACHYLENIE SZYNY MONTAŻU', mountL: 'NACHYLENIE MONTAŻU',
+    tgtDistL: 'ODLEGŁOŚĆ CELU', inclineL: 'KĄT NACHYLENIA',
+    tempL: 'TEMPERATURA', pressL: 'CIŚNIENIE', humL: 'WILGOTNOŚĆ',
+    spinLbl: 'DERYWACJA · GWINT PRAWY (LITZ)', corLbl: 'CORIOLIS + EÖTVÖS', latL: 'SZEROKOŚĆ GEOGR.', azL: 'AZYMUT STRZAŁU · 0=N',
+    dRng: 'ODL', dDrop: 'OPAD cm', dDrift: 'ZNS cm', dTof: 'CZAS',
+    calm: 'BEZWIETRZNIE', fromClock: (h) => 'Z GODZ. ' + h, driftsL: 'ZNOS W LEWO', driftsR: 'ZNOS W PRAWO', headTail: 'CZOŁOWY/TYLNY',
+    groundWarn: (x) => '⚠ POCISK UDERZA W ZIEMIĘ NA ' + x + ' — PRZED CELEM',
+    scaleNote: (n) => 'ODCHYLENIE OD LINII CELOWANIA ×' + n, scopeNote: 'WIDOK LUNETY · SKALA 1:1',
+    firingLine: 'LINIA OGNIA', wind: 'WIATR', near: 'BLISKIE Z.', far: 'DALEKIE Z.', apex: 'WIERZCH.', transonic: 'PRÓG DŹWIĘKU', ground: 'GRUNT', impact: 'TRAFIENIE', low: 'NISKO', high: 'WYSOKO', rr: 'P', ll: 'L',
+    infoHint: 'Najedź kursorem na parametr, aby zobaczyć wyjaśnienie.',
+    info: {
+      preset: ['NABÓJ (PRESET)', 'Fabryczne zestawy (prędkość, masa, BC, kaliber). Ruch dowolnym suwakiem amunicji przełącza na Własny.'],
+      mv: ['PRĘDKOŚĆ POCZĄTKOWA', 'Prędkość pocisku u wylotu lufy. Większa = bardziej płaski tor, krótszy czas lotu, większa energia.'],
+      massGr: ['MASA POCISKU', 'Masa w granach (1 gr = 64,8 mg). Decyduje o energii; sam opór opisuje BC.'],
+      bc: ['WSPÓŁCZYNNIK BALISTYCZNY (G1)', 'Jak dobrze pocisk pokonuje opór względem wzorca G1. Wyższy BC = płaski tor i mniejszy znos wiatrem.'],
+      cal: ['KALIBER', 'Średnica pocisku. Tutaj tylko wizualna — efekt aerodynamiczny zawiera BC.'],
+      scopeH: ['WYSOKOŚĆ LUNETY', 'Odległość osi lunety od osi lufy. To przez nią tor przecina linię celowania dwa razy (bliskie i dalekie zero).'],
+      zeroDist: ['ODLEGŁOŚĆ ZEROWANIA', 'Dystans, na którym tor przecina linię celowania. Wyznacza kąt podniesienia lufy.'],
+      railMoa: ['NACHYLENIE SZYNY', 'Stałe pochylenie szyny (np. 20 MOA). Bez ponownego zerowania podnosi punkt trafienia — skompensuj poprawką pionową.'],
+      mountMoa: ['NACHYLENIE MONTAŻU', 'Dodatkowe pochylenie z regulowanego montażu, sumuje się z szyną.'],
+      cant: ['PRZECHYŁ', 'Obrót karabinu wokół linii celowania. Przechylona broń strzela nisko i w stronę przechyłu.'],
+      adjElev: ['POPRAWKA PIONOWA', 'Nastawa pionowa wieżyczki (MOA/MIL). Dodatnia = trafienie wyżej.'],
+      adjWind: ['POPRAWKA POZIOMA', 'Nastawa pozioma wieżyczki. Dodatnia = trafienie w prawo.'],
+      targetDist: ['ODLEGŁOŚĆ CELU', 'Dystans do celu mierzony wzdłuż linii celowania.'],
+      incline: ['KĄT NACHYLENIA', 'Strzał w górę/w dół. Grawitacja działa na składową poziomą — strzały pod kątem trafiają wyżej.'],
+      wind: ['WIATR', 'Prędkość i kierunek, SKĄD wieje (12 = od celu). Wiatr boczny znosi pocisk; czołowy/tylny zmienia niewiele.'],
+      temp: ['TEMPERATURA', 'Ciepłe powietrze jest rzadsze: mniejszy opór, bardziej płaski tor. Zimne — odwrotnie.'],
+      pressure: ['CIŚNIENIE', 'Niższe ciśnienie (większa wysokość n.p.m.) = rzadsze powietrze = mniejszy opór.'],
+      humidity: ['WILGOTNOŚĆ', 'Wilgotne powietrze jest odrobinę RZADSZE niż suche — efekt bardzo mały.'],
+      lat: ['SZEROKOŚĆ GEOGR.', 'Miejsce strzału na Ziemi; skaluje odchylenie Coriolisa.'],
+      az: ['AZYMUT STRZAŁU', 'Kierunek strzału (0 = północ). Strzał na wschód podnosi trafienie, na zachód obniża (Eötvös).'],
+      spin: ['DERYWACJA', 'Żyroskopowy znos wirującego pocisku — gwint prawy znosi w prawo, rośnie z czasem lotu.'],
+      cor: ['CORIOLIS + EÖTVÖS', 'Efekty obrotu Ziemi: znos poziomy (Coriolis) i pionowy zależny od azymutu (Eötvös).'],
+      exag: ['TRYB WIDOKU', 'REALNY pokazuje prawdziwą geometrię (1:1) — łuk jest wtedy prawie niewidoczny. ŁUK powiększa odchylenie od linii celowania, by parabola była czytelna. Liczby pozostają prawdziwe; luneta zawsze 1:1.'],
+      sky: ['JASNOŚĆ NIEBA', 'Tylko oświetlenie sceny — bez wpływu na balistykę.'],
+    },
+  },
+};
+const G1M = [0, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975, 1.0, 1.025, 1.05, 1.1, 1.15, 1.2, 1.3, 1.4, 1.5, 1.6, 1.8, 2.0, 2.2, 2.5, 3.0, 3.5, 4.0];
+const G1CD = [0.263, 0.210, 0.203, 0.203, 0.217, 0.231, 0.255, 0.290, 0.314, 0.342, 0.373, 0.408, 0.445, 0.481, 0.514, 0.543, 0.588, 0.619, 0.639, 0.659, 0.663, 0.657, 0.647, 0.621, 0.593, 0.569, 0.540, 0.513, 0.504, 0.501];
+function g1cd(M) {
+  if (M <= 0) return G1CD[0];
+  if (M >= 4) return G1CD[G1CD.length - 1];
+  let i = 1;
+  while (i < G1M.length && G1M[i] < M) i++;
+  const f = (M - G1M[i - 1]) / (G1M[i] - G1M[i - 1]);
+  return G1CD[i - 1] + f * (G1CD[i] - G1CD[i - 1]);
+}
+function airDensity(tC, pHpa, rh) {
+  const T = tC + 273.15;
+  const psat = 6.1078 * Math.pow(10, 7.5 * tC / (tC + 237.3));
+  const pv = rh / 100 * psat, pd = pHpa - pv;
+  return (pd * 100) / (287.058 * T) + (pv * 100) / (461.495 * T);
+}
+const MOA = 2.908882e-4, MILR = 1e-3, GRAIN = 6.479891e-5, KD = 5.5844e-4, G = 9.80665, OMEGA = 7.292e-5, D2R = Math.PI / 180;
+
+function rk4step(r, v, dt, acc) {
+  const k1 = acc(v[0], v[1], v[2]);
+  const k2 = acc(v[0] + k1[0] * dt / 2, v[1] + k1[1] * dt / 2, v[2] + k1[2] * dt / 2);
+  const k3 = acc(v[0] + k2[0] * dt / 2, v[1] + k2[1] * dt / 2, v[2] + k2[2] * dt / 2);
+  const k4 = acc(v[0] + k3[0] * dt, v[1] + k3[1] * dt, v[2] + k3[2] * dt);
+  const r2 = [0, 0, 0], v2 = [0, 0, 0];
+  for (let i = 0; i < 3; i++) {
+    r2[i] = r[i] + dt * v[i] + dt * dt / 6 * (k1[i] + k2[i] + k3[i]);
+    v2[i] = v[i] + dt / 6 * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]);
+  }
+  return [r2, v2];
+}
+function flatY(p, rho, sos, ang) {
+  let r = [0, 0, 0], v = [Math.cos(ang) * p.mv, Math.sin(ang) * p.mv, 0], t = 0;
+  const dt = 0.002;
+  const acc = (vx, vy, vz) => {
+    const s = Math.sqrt(vx * vx + vy * vy + vz * vz) || 1e-9;
+    const d = -KD * rho * g1cd(s / sos) / p.bc * s;
+    return [d * vx, d * vy - G, d * vz];
+  };
+  let px = 0, py = 0;
+  while (t < 9) {
+    const st = rk4step(r, v, dt, acc); r = st[0]; v = st[1]; t += dt;
+    if (r[0] >= p.zeroDist) {
+      const f = (p.zeroDist - px) / ((r[0] - px) || 1e-9);
+      return py + f * (r[1] - py);
+    }
+    if (v[0] < 15) break;
+    px = r[0]; py = r[1];
+  }
+  return NaN;
+}
+function solveZero(p, rho, sos) {
+  const h = p.scopeH;
+  const tof = p.zeroDist / (p.mv * 0.8);
+  let a0 = 0, a1 = Math.atan((h + 0.5 * G * tof * tof) / p.zeroDist);
+  let f0 = flatY(p, rho, sos, a0) - h;
+  let f1 = flatY(p, rho, sos, a1) - h;
+  if (isNaN(f0)) return 0.002;
+  if (isNaN(f1)) return a1;
+  for (let i = 0; i < 10 && Math.abs(f1) > 0.0002; i++) {
+    let a2 = a1 - f1 * (a1 - a0) / ((f1 - f0) || 1e-9);
+    a2 = Math.max(-0.15, Math.min(0.3, a2));
+    const f2 = flatY(p, rho, sos, a2) - h;
+    if (isNaN(f2)) break;
+    a0 = a1; f0 = f1; a1 = a2; f1 = f2;
+  }
+  return a1;
+}
+function interpAt(samples, s) {
+  if (!samples || !samples.length || samples[samples.length - 1].s < s - 0.01) return null;
+  let i = 1;
+  while (i < samples.length && samples[i].s < s) i++;
+  const a = samples[i - 1], b = samples[Math.min(i, samples.length - 1)];
+  const f = (b.s > a.s) ? (s - a.s) / (b.s - a.s) : 0;
+  const L = (u, w) => u + f * (w - u);
+  return { s, x: L(a.x, b.x), y: L(a.y, b.y), z: L(a.z, b.z), devV: L(a.devV, b.devV), devH: L(a.devH, b.devH), v: L(a.v, b.v), t: L(a.t, b.t) };
+}
+function simulate(p) {
+  const rho = airDensity(p.temp, p.pressure, p.humidity);
+  const sos = 331.3 * Math.sqrt(1 + p.temp / 273.15);
+  const zeroAngle = solveZero(p, rho, sos);
+  const inc = p.incline;
+  const losU = [Math.cos(inc), Math.sin(inc), 0];
+  const vUp = [-Math.sin(inc), Math.cos(inc), 0];
+  const scope = [vUp[0] * p.scopeH, vUp[1] * p.scopeH, 0];
+  const cant = p.cant || 0;
+  const rUp = [vUp[0] * Math.cos(cant), vUp[1] * Math.cos(cant), Math.sin(cant)];
+  const rRt = [-vUp[0] * Math.sin(cant), -vUp[1] * Math.sin(cant), Math.cos(cant)];
+  const muzzle = [scope[0] - rUp[0] * p.scopeH, scope[1] - rUp[1] * p.scopeH, scope[2] - rUp[2] * p.scopeH];
+  const eps = zeroAngle + p.adjElev + (p.rail || 0) + (p.mount || 0), aw = p.adjWind;
+  const dir = norm3([losU[0] + eps * rUp[0] + aw * rRt[0], losU[1] + eps * rUp[1] + aw * rRt[1], losU[2] + eps * rUp[2] + aw * rRt[2]]);
+  const w = [-Math.cos(p.windDir) * p.windSpeed, 0, -Math.sin(p.windDir) * p.windSpeed];
+  let Ox = 0, Oy = 0, Oz = 0;
+  if (p.corOn) {
+    Ox = OMEGA * Math.cos(p.lat) * Math.cos(p.az);
+    Oy = OMEGA * Math.sin(p.lat);
+    Oz = -OMEGA * Math.cos(p.lat) * Math.sin(p.az);
+  }
+  const acc = (vx, vy, vz) => {
+    const rx = vx - w[0], ry = vy, rz = vz - w[2];
+    const s = Math.sqrt(rx * rx + ry * ry + rz * rz) || 1e-9;
+    const d = -KD * rho * g1cd(s / sos) / p.bc * s;
+    let ax = d * rx, ay = d * ry - G, az = d * rz;
+    if (p.corOn) {
+      ax -= 2 * (Oy * vz - Oz * vy);
+      ay -= 2 * (Oz * vx - Ox * vz);
+      az -= 2 * (Ox * vy - Oy * vx);
+    }
+    return [ax, ay, az];
+  };
+  const dt = 0.002, groundY = -1.5;
+  let r = [muzzle[0], muzzle[1], muzzle[2]], v = [dir[0] * p.mv, dir[1] * p.mv, dir[2] * p.mv], t = 0;
+  const samples = [];
+  const rec = () => {
+    const rx = r[0] - scope[0], ry = r[1] - scope[1];
+    const s = rx * losU[0] + ry * losU[1];
+    const lx = scope[0] + s * losU[0], ly = scope[1] + s * losU[1];
+    let z = r[2];
+    if (p.spinOn) z += 0.09525 * Math.pow(Math.max(t, 0), 1.83);
+    const devV = (r[0] - lx) * vUp[0] + (r[1] - ly) * vUp[1];
+    samples.push({ x: r[0], y: r[1], z, s, devV, devH: z, v: Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]), t });
+    return s;
+  };
+  let lastS = rec();
+  const recEvery = Math.max(0.8, p.targetDist / 450);
+  let hitGround = false, steps = 0;
+  while (steps++ < 8000) {
+    const st = rk4step(r, v, dt, acc); r = st[0]; v = st[1]; t += dt;
+    const rx = r[0] - scope[0], ry = r[1] - scope[1];
+    const s = rx * losU[0] + ry * losU[1];
+    if (r[1] < groundY) { rec(); hitGround = true; break; }
+    if (s >= p.targetDist) { rec(); break; }
+    if (s - lastS >= recEvery) lastS = rec();
+    if (t > 9 || (v[0] * losU[0] + v[1] * losU[1]) < 0) break;
+  }
+  const crossings = [];
+  for (let i = 1; i < samples.length; i++) {
+    const a = samples[i - 1], b = samples[i];
+    if (a.s > 1 && ((a.devV <= 0 && b.devV > 0) || (a.devV > 0 && b.devV <= 0))) {
+      const f = Math.abs(a.devV) / ((Math.abs(a.devV) + Math.abs(b.devV)) || 1e-9);
+      crossings.push(a.s + f * (b.s - a.s));
+    }
+  }
+  let apex = samples[0];
+  for (const sm of samples) if (sm.devV > apex.devV) apex = sm;
+  const last = samples[samples.length - 1];
+  const impact = (!hitGround && last.s >= p.targetDist - 0.5) ? interpAt(samples, Math.min(p.targetDist, last.s)) : null;
+  let transonic = null;
+  for (let i = 1; i < samples.length; i++) {
+    if (samples[i - 1].v >= sos && samples[i].v < sos) { transonic = samples[i]; break; }
+  }
+  return { samples, scope, losU, vUp, dir, muzzle, zeroAngle, sos, rho, crossings, apex, impact, transonic, hitGround, groundY, groundS: hitGround ? last.s : null };
+}
+function velColor(f, a) {
+  const stops = [[0.2, 255, 77, 77], [0.45, 255, 140, 66], [0.7, 255, 209, 102], [1.0, 242, 247, 255]];
+  f = Math.max(0.2, Math.min(1, f));
+  let lo = stops[0], hi = stops[stops.length - 1];
+  for (let i = 0; i < stops.length - 1; i++) {
+    if (f >= stops[i][0] && f <= stops[i + 1][0]) { lo = stops[i]; hi = stops[i + 1]; break; }
+  }
+  const t = (f - lo[0]) / ((hi[0] - lo[0]) || 1);
+  const r = Math.round(lo[1] + t * (hi[1] - lo[1]));
+  const g = Math.round(lo[2] + t * (hi[2] - lo[2]));
+  const b = Math.round(lo[3] + t * (hi[3] - lo[3]));
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + (a == null ? 1 : a) + ')';
+}
+const sub3 = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+const add3 = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+const scale3 = (a, k) => [a[0] * k, a[1] * k, a[2] * k];
+const dot3 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const cross3 = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const len3 = (a) => Math.sqrt(dot3(a, a));
+const norm3 = (a) => { const l = len3(a) || 1e-9; return [a[0] / l, a[1] / l, a[2] / l]; };
+
+class Component extends DCLogic {
+  state = {
+    preset: '.22 LR', mv: 370, massGr: 40, bc: 0.138, cal: 5.7,
+    scopeH: 4.5, zeroDist: 50, cant: 0, railMoa: 0, mountMoa: 0, adjUnit: 'MOA', adjElev: 0, adjWind: 0,
+    targetDist: 100, incline: 0,
+    windSpeed: 3, windDir: 90, temp: 15, pressure: 1013, humidity: 50,
+    advOpen: false, spinOn: false, corOn: false, lat: 45, az: 90,
+    exag: 8, viewMode: 'arc', cam: 'side', modelOpen: false, firing: false,
+    lang: 'EN', skyBright: 15, distUnit: 'm', infoMode: false, infoKey: null,
+  };
+  canvasRef = React.createRef();
+  timerRef = React.createRef();
+  dialRef = React.createRef();
+  tgtRef = React.createRef();
+  orbit = { yaw: Math.PI / 2 + 0.35, pitch: 0.24, dist: 260 };
+  _h = {};
+
+  getParams() {
+    const s = this.state;
+    return {
+      mv: s.mv, massGr: s.massGr, bc: s.bc, cal: s.cal,
+      scopeH: s.scopeH / 100, zeroDist: s.zeroDist, cant: s.cant * D2R,
+      rail: s.railMoa * MOA, mount: s.mountMoa * MOA,
+      adjElev: s.adjElev * MOA, adjWind: s.adjWind * MOA,
+      targetDist: s.targetDist, incline: s.incline * D2R,
+      windSpeed: s.windSpeed, windDir: s.windDir * D2R,
+      temp: s.temp, pressure: s.pressure, humidity: s.humidity,
+      spinOn: s.spinOn, corOn: s.corOn, lat: s.lat * D2R, az: s.az * D2R,
+    };
+  }
+  getTraj() {
+    const p = this.getParams();
+    const key = JSON.stringify(p);
+    if (this._trKey !== key) {
+      try { this._tr = simulate(p); this._trKey = key; } catch (e) { console.error(e); }
+    }
+    return this._tr;
+  }
+
+  h(key) {
+    if (!this._h[key]) this._h[key] = (e) => {
+      const v = parseFloat(e.target.value);
+      const patch = { [key]: v };
+      if (key === 'mv' || key === 'massGr' || key === 'bc' || key === 'cal') patch.preset = 'Custom';
+      this.setState(patch);
+    };
+    return this._h[key];
+  }
+  hMil(key) {
+    const k = 'mil_' + key;
+    if (!this._h[k]) this._h[k] = (e) => this.setState({ [key]: parseFloat(e.target.value) / 0.290888 });
+    return this._h[k];
+  }
+  hYd(key) {
+    const k = 'yd_' + key;
+    if (!this._h[k]) this._h[k] = (e) => this.setState({ [key]: parseFloat(e.target.value) * 0.9144 });
+    return this._h[k];
+  }
+  sl(key, label, min, max, step, display) {
+    return { key, label, min, max, step, value: this.state[key], display, onInput: this.h(key), onEnter: this.iE(key) };
+  }
+  onPreset = (e) => {
+    const pr = PRESETS.find((x) => x.name === e.target.value);
+    if (pr) this.setState({ preset: pr.name, mv: pr.mv, massGr: pr.massGr, bc: pr.bc, cal: pr.cal });
+    else this.setState({ preset: 'Custom' });
+  };
+  presetOrbit(cam) {
+    const D = this.state.targetDist;
+    if (cam === 'side') return { yaw: Math.PI / 2, pitch: 0.07, dist: Math.max(40, D * 0.68) };
+    if (cam === 'top') return { yaw: Math.PI / 2, pitch: 1.47, dist: Math.max(40, D * 0.85) };
+    return null;
+  }
+  camH(k) {
+    const key = 'cam_' + k;
+    if (!this._h[key]) this._h[key] = () => {
+      if (k === 'free') { const o = this.presetOrbit(this.state.cam); if (o) this.orbit = { ...o, yaw: o.yaw + 0.3, pitch: Math.min(1.4, o.pitch + 0.15) }; }
+      this.setState({ cam: k });
+    };
+    return this._h[key];
+  }
+  vpDown = (e) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    if (this.state.cam !== 'free') {
+      const o = this.presetOrbit(this.state.cam);
+      if (o) this.orbit = { ...o };
+      this.setState({ cam: 'free' });
+    }
+    this._drag = { x: e.clientX, y: e.clientY, yaw: this.orbit.yaw, pitch: this.orbit.pitch };
+  };
+  vpMove = (e) => {
+    if (!this._drag) return;
+    this.orbit.yaw = this._drag.yaw + (e.clientX - this._drag.x) * 0.005;
+    this.orbit.pitch = Math.max(-0.05, Math.min(1.52, this._drag.pitch + (e.clientY - this._drag.y) * 0.005));
+  };
+  vpUp = () => { this._drag = null; };
+  vpWheel = (e) => {
+    const c = this.state.cam;
+    if (c === 'scope' || c === 'shooter') return;
+    if (c !== 'free') {
+      const o = this.presetOrbit(c);
+      if (o) this.orbit = { ...o };
+      this.setState({ cam: 'free' });
+    }
+    this.orbit.dist = Math.max(6, Math.min(6000, this.orbit.dist * Math.exp(e.deltaY * 0.0012)));
+  };
+  dialSet = (e) => {
+    const el = this.dialRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+    let deg = Math.atan2(dx, -dy) * 180 / Math.PI;
+    deg = (Math.round(deg / 5) * 5 + 360) % 360;
+    this.setState({ windDir: deg });
+  };
+  dialDown = (e) => { e.currentTarget.setPointerCapture(e.pointerId); this._dial = true; this.dialSet(e); };
+  dialMove = (e) => { if (this._dial) this.dialSet(e); };
+  dialUp = () => { this._dial = false; };
+  fire = () => {
+    const tr = this.getTraj();
+    if (!tr) return;
+    this.ghostTraj = { samples: tr.samples, losU: tr.losU, vUp: tr.vUp, scope: tr.scope, impact: tr.impact };
+    this.fireStart = performance.now();
+    this.setState({ firing: true });
+  };
+  toggleModel = () => this.setState((s) => ({ modelOpen: !s.modelOpen }));
+  toggleAdv = () => this.setState((s) => ({ advOpen: !s.advOpen }));
+  toggleSpin = (e) => this.setState({ spinOn: e.target.checked });
+  toggleCor = (e) => this.setState({ corOn: e.target.checked });
+  setMoa = () => this.setState({ adjUnit: 'MOA' });
+  setMil = () => this.setState({ adjUnit: 'MIL' });
+  setEng = () => this.setState({ lang: 'EN' });
+  setPol = () => this.setState({ lang: 'PL' });
+  setM = () => this.setState({ distUnit: 'm' });
+  setYd = () => this.setState({ distUnit: 'yd' });
+  toggleInfo = () => this.setState((s) => ({ infoMode: !s.infoMode, infoKey: null }));
+  setTrueMode = () => this.setState({ viewMode: 'true' });
+  setArcMode = () => this.setState({ viewMode: 'arc' });
+  infoLeave = () => { if (this.state.infoKey) this.setState({ infoKey: null }); };
+  iE(key) {
+    const k = 'info_' + key;
+    if (!this._h[k]) this._h[k] = () => { if (this.state.infoMode && this.state.infoKey !== key) this.setState({ infoKey: key }); };
+    return this._h[k];
+  }
+
+  componentDidMount() {
+    const cv = this.canvasRef.current;
+    this._ro = new ResizeObserver(() => {
+      const p = cv.parentElement, r = p.getBoundingClientRect();
+      const d = window.devicePixelRatio || 1;
+      this.dpr = d;
+      cv.width = Math.max(2, Math.round(r.width * d));
+      cv.height = Math.max(2, Math.round(r.height * d));
+    });
+    this._ro.observe(cv.parentElement);
+    const loop = () => {
+      try { this.draw(); } catch (e) { if (!this._err) { this._err = 1; console.error(e); } }
+      this._raf = requestAnimationFrame(loop);
+    };
+    this._raf = requestAnimationFrame(loop);
+  }
+  componentWillUnmount() {
+    cancelAnimationFrame(this._raf);
+    if (this._ro) this._ro.disconnect();
+  }
+
+  camera(tr, W, H) {
+    const st = this.state, D = st.targetDist;
+    const aim = [tr.scope[0] + tr.losU[0] * D, tr.scope[1] + tr.losU[1] * D, 0];
+    let eye, look, fov = 50;
+    if (st.cam === 'shooter') { eye = [-2.6, 0.6, 1.0]; look = aim; fov = 42; }
+    else if (st.cam === 'scope') { eye = [tr.scope[0], tr.scope[1], 0]; look = aim; fov = 2.0; }
+    else {
+      const o = (st.cam === 'free') ? this.orbit : (this.presetOrbit(st.cam) || this.orbit);
+      const c = [aim[0] * 0.52, Math.max(1.0, aim[1] * 0.5), 0];
+      eye = [c[0] + o.dist * Math.cos(o.pitch) * Math.cos(o.yaw), c[1] + o.dist * Math.sin(o.pitch), o.dist * Math.cos(o.pitch) * Math.sin(o.yaw)];
+      look = c;
+    }
+    const F = norm3(sub3(look, eye));
+    let R = cross3(F, [0, 1, 0]);
+    const rl = len3(R);
+    R = rl < 1e-6 ? [0, 0, 1] : scale3(R, 1 / rl);
+    const U = cross3(R, F);
+    const f = (H / 2) / Math.tan(fov * D2R / 2);
+    return { eye, F, R, U, f, hw: W / 2, hh: H / 2, aim };
+  }
+  view(p, cam) {
+    const q = sub3(p, cam.eye);
+    return [dot3(q, cam.R), dot3(q, cam.U), dot3(q, cam.F)];
+  }
+  pt2(cam, p) {
+    const V = this.view(p, cam);
+    if (V[2] < 0.12) return null;
+    return [cam.hw + V[0] * cam.f / V[2], cam.hh - V[1] * cam.f / V[2], V[2]];
+  }
+  seg(ctx, cam, a, b) {
+    let A = this.view(a, cam), B = this.view(b, cam);
+    const n = 0.12;
+    if (A[2] < n && B[2] < n) return false;
+    if (A[2] < n) { const f = (n - A[2]) / (B[2] - A[2]); A = [A[0] + f * (B[0] - A[0]), A[1] + f * (B[1] - A[1]), n]; }
+    else if (B[2] < n) { const f = (n - B[2]) / (A[2] - B[2]); B = [B[0] + f * (A[0] - B[0]), B[1] + f * (A[1] - B[1]), n]; }
+    ctx.moveTo(cam.hw + A[0] * cam.f / A[2], cam.hh - A[1] * cam.f / A[2]);
+    ctx.lineTo(cam.hw + B[0] * cam.f / B[2], cam.hh - B[1] * cam.f / B[2]);
+    return true;
+  }
+  line(ctx, cam, a, b, color, w, dash) {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = w;
+    if (dash) ctx.setLineDash(dash);
+    if (this.seg(ctx, cam, a, b)) ctx.stroke();
+    if (dash) ctx.setLineDash([]);
+  }
+
+  draw() {
+    const cv = this.canvasRef.current;
+    if (!cv || !cv.width) return;
+    const ctx = cv.getContext('2d');
+    const W = cv.width, H = cv.height, dpr = this.dpr || 1;
+    const st = this.state;
+    const tr = this.getTraj();
+    if (!tr) return;
+    const D = st.targetDist;
+    const ex = (st.cam === 'scope' || st.viewMode === 'true') ? 1 : st.exag;
+    const cam = this.camera(tr, W, H);
+    const gy = tr.groundY;
+    const mono = "px 'IBM Plex Mono', monospace";
+
+    const LT = T[st.lang] || T.EN;
+    const uD = st.distUnit === 'yd' ? 0.9144 : 1;
+    const dUn = uD === 1 ? ' m' : ' yd';
+    const bri = (st.skyBright ?? 15) / 100;
+    const mixc = (c0, c1) => 'rgb(' + Math.round(c0[0] + (c1[0] - c0[0]) * bri) + ',' + Math.round(c0[1] + (c1[1] - c0[1]) * bri) + ',' + Math.round(c0[2] + (c1[2] - c0[2]) * bri) + ')';
+    const skyTop = mixc([11, 16, 25], [110, 152, 196]);
+    const skyHor = mixc([13, 19, 29], [172, 198, 220]);
+    const groundCol = mixc([11, 15, 22], [52, 66, 82]);
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, skyTop);
+    sky.addColorStop(1, skyHor);
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, H);
+    const fy = cam.F[1];
+    if (fy < -0.985) { ctx.fillStyle = groundCol; ctx.fillRect(0, 0, W, H); }
+    else if (fy < 0.985) {
+      const fh = norm3([cam.F[0], 0, cam.F[2]]);
+      const rot = (v, a) => [v[0] * Math.cos(a) + v[2] * Math.sin(a), 0, -v[0] * Math.sin(a) + v[2] * Math.cos(a)];
+      const pa = this.pt2(cam, add3([cam.eye[0], gy, cam.eye[2]], scale3(rot(fh, 1.0), 1e6)));
+      const pb = this.pt2(cam, add3([cam.eye[0], gy, cam.eye[2]], scale3(rot(fh, -1.0), 1e6)));
+      if (pa && pb && Math.abs(pb[0] - pa[0]) > 1) {
+        const slope = (pb[1] - pa[1]) / (pb[0] - pa[0]);
+        const y0 = pa[1] - slope * pa[0], y1 = pa[1] + slope * (W - pa[0]);
+        ctx.fillStyle = groundCol;
+        ctx.beginPath();
+        ctx.moveTo(0, y0); ctx.lineTo(W, y1); ctx.lineTo(W, H); ctx.lineTo(0, H);
+        ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = '#1d2a3c'; ctx.lineWidth = 1 * dpr;
+        ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y1); ctx.stroke();
+      }
+    }
+
+    const maxD = D + 60;
+    ctx.lineWidth = 1 * dpr;
+    ctx.beginPath(); ctx.strokeStyle = '#151d29';
+    for (let z = -25; z <= 25; z += 5) this.seg(ctx, cam, [-20, gy, z], [maxD, gy, z]);
+    ctx.stroke();
+    ctx.beginPath(); ctx.strokeStyle = '#1a2433';
+    for (let k = 25; k * uD <= maxD; k += 25) if (k % 100) this.seg(ctx, cam, [k * uD, gy, -25], [k * uD, gy, 25]);
+    ctx.stroke();
+    ctx.beginPath(); ctx.strokeStyle = '#263850'; ctx.lineWidth = 1.4 * dpr;
+    for (let k = 0; k * uD <= maxD; k += 100) this.seg(ctx, cam, [k * uD, gy, -25], [k * uD, gy, 25]);
+    ctx.stroke();
+    this.line(ctx, cam, [0, gy, -25], [0, gy, 25], '#3b4f6b', 2 * dpr);
+    for (let k = 50; k * uD <= maxD - 40; k += 50) {
+      const x = k * uD;
+      const major = k % 100 === 0;
+      this.line(ctx, cam, [x, gy, -13], [x, gy + (major ? 0.9 : 0.5), -13], major ? '#3b4f6b' : '#2a3a50', 1.5 * dpr);
+      const p = this.pt2(cam, [x, gy + (major ? 1.4 : 0.95), -13]);
+      if (p) {
+        ctx.font = (major ? 11 : 9) * dpr + mono;
+        ctx.fillStyle = major ? '#8fa2b8' : '#5c6b7e';
+        ctx.textAlign = 'center';
+        ctx.fillText(k + '', p[0], p[1]);
+      }
+    }
+    const pfl = this.pt2(cam, [0, gy + 0.4, -16]);
+    if (pfl) { ctx.font = 9 * dpr + mono; ctx.fillStyle = '#5c6b7e'; ctx.textAlign = 'center'; ctx.fillText(LT.firingLine, pfl[0], pfl[1]); }
+
+    if (st.windSpeed > 0.2) {
+      const wd = st.windDir * D2R;
+      const wx = -Math.cos(wd), wz = -Math.sin(wd);
+      const L = 4 + st.windSpeed * 1.2, bx = D * 0.5, bz = 16;
+      const wc = 'rgba(255,209,102,0.7)';
+      const b = [bx + wx * L, gy + 0.05, bz + wz * L];
+      this.line(ctx, cam, [bx, gy + 0.05, bz], b, wc, 1.6 * dpr);
+      this.line(ctx, cam, b, [b[0] + (-wx - wz * 0.5) * 1.4, b[1], b[2] + (-wz + wx * 0.5) * 1.4], wc, 1.6 * dpr);
+      this.line(ctx, cam, b, [b[0] + (-wx + wz * 0.5) * 1.4, b[1], b[2] + (-wz - wx * 0.5) * 1.4], wc, 1.6 * dpr);
+      const p = this.pt2(cam, [bx, gy + 0.7, bz]);
+      if (p) { ctx.font = 9 * dpr + mono; ctx.fillStyle = wc; ctx.textAlign = 'center'; ctx.fillText(LT.wind + ' ' + st.windSpeed.toFixed(1) + ' m/s', p[0], p[1]); }
+    }
+
+    const mz = tr.muzzle || [0, 0, 0];
+    this.line(ctx, cam, [mz[0], gy, mz[2]], mz, '#33445c', 1.5 * dpr);
+    this.line(ctx, cam, [mz[0] - 0.7 * tr.dir[0], mz[1] - 0.7 * tr.dir[1], mz[2] - 0.7 * tr.dir[2]], [mz[0] + 0.9 * tr.dir[0], mz[1] + 0.9 * tr.dir[1], mz[2] + 0.9 * tr.dir[2]], '#9fb2c8', 3 * dpr);
+
+    const aim = cam.aim;
+    const bw = 0.7, bh = 1.0;
+    const c4 = [[aim[0], aim[1] + bh / 2, aim[2] - bw / 2], [aim[0], aim[1] + bh / 2, aim[2] + bw / 2], [aim[0], aim[1] - bh / 2, aim[2] + bw / 2], [aim[0], aim[1] - bh / 2, aim[2] - bw / 2]];
+    const pts = c4.map((p) => this.pt2(cam, p));
+    if (pts.every(Boolean)) {
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < 4; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(18,24,33,0.92)'; ctx.fill();
+      ctx.strokeStyle = '#31435c'; ctx.lineWidth = 1.4 * dpr; ctx.stroke();
+    }
+    for (const rr of [0.09, 0.21, 0.33]) {
+      ctx.beginPath(); ctx.strokeStyle = '#2b3c52'; ctx.lineWidth = 1 * dpr;
+      let first = true;
+      for (let a = 0; a <= Math.PI * 2 + 0.05; a += Math.PI / 16) {
+        const p = this.pt2(cam, [aim[0], aim[1] + rr * Math.sin(a), aim[2] + rr * Math.cos(a)]);
+        if (!p) { first = true; continue; }
+        if (first) { ctx.moveTo(p[0], p[1]); first = false; } else ctx.lineTo(p[0], p[1]);
+      }
+      ctx.stroke();
+    }
+    const pbull = this.pt2(cam, aim);
+    if (pbull) { ctx.fillStyle = '#45d6ff'; ctx.beginPath(); ctx.arc(pbull[0], pbull[1], 2.5 * dpr, 0, 7); ctx.fill(); }
+    if (aim[1] - bh / 2 > gy) this.line(ctx, cam, [aim[0], aim[1] - bh / 2, 0], [aim[0], gy, 0], '#31435c', 1.4 * dpr);
+
+    const dispOf = (fr, sm) => [
+      fr.scope[0] + sm.s * fr.losU[0] + fr.vUp[0] * sm.devV * ex,
+      fr.scope[1] + sm.s * fr.losU[1] + fr.vUp[1] * sm.devV * ex,
+      sm.devH * ex,
+    ];
+
+    const gh = this.ghostTraj;
+    if (gh) {
+      ctx.beginPath(); ctx.strokeStyle = 'rgba(130,142,158,0.5)'; ctx.lineWidth = 1.4 * dpr;
+      for (let i = 1; i < gh.samples.length; i++) this.seg(ctx, cam, dispOf(gh, gh.samples[i - 1]), dispOf(gh, gh.samples[i]));
+      ctx.stroke();
+      if (gh.impact) {
+        const p = this.pt2(cam, dispOf(gh, gh.impact));
+        if (p) {
+          ctx.strokeStyle = 'rgba(130,142,158,0.7)'; ctx.lineWidth = 1.5 * dpr;
+          const r5 = 4 * dpr;
+          ctx.beginPath();
+          ctx.moveTo(p[0] - r5, p[1] - r5); ctx.lineTo(p[0] + r5, p[1] + r5);
+          ctx.moveTo(p[0] + r5, p[1] - r5); ctx.lineTo(p[0] - r5, p[1] + r5);
+          ctx.stroke();
+        }
+      }
+    }
+
+    this.line(ctx, cam, tr.scope, aim, 'rgba(69,214,255,0.18)', 4.5 * dpr);
+    this.line(ctx, cam, tr.scope, aim, '#45d6ff', 1.4 * dpr);
+
+    ctx.beginPath(); ctx.strokeStyle = '#b48cff'; ctx.lineWidth = 1.3 * dpr; ctx.setLineDash([7 * dpr, 6 * dpr]);
+    let prevB = null;
+    for (let k = 0; k <= 30; k++) {
+      const L = D * 1.02 * k / 30;
+      const P = [mz[0] + tr.dir[0] * L, mz[1] + tr.dir[1] * L, mz[2] + tr.dir[2] * L];
+      const rx = P[0] - tr.scope[0], ry = P[1] - tr.scope[1];
+      const s = rx * tr.losU[0] + ry * tr.losU[1];
+      const lx = tr.scope[0] + s * tr.losU[0], ly = tr.scope[1] + s * tr.losU[1];
+      const devV = (P[0] - lx) * tr.vUp[0] + (P[1] - ly) * tr.vUp[1];
+      const dp = [lx + tr.vUp[0] * devV * ex, ly + tr.vUp[1] * devV * ex, P[2] * ex];
+      if (prevB) this.seg(ctx, cam, prevB, dp);
+      prevB = dp;
+    }
+    ctx.stroke(); ctx.setLineDash([]);
+
+    if ((this.props.showDropLines ?? true) && st.cam !== 'scope') {
+      ctx.beginPath(); ctx.strokeStyle = 'rgba(255,77,77,0.25)'; ctx.lineWidth = 1 * dpr;
+      for (let x = 50 * uD; x < D; x += 50 * uD) {
+        const sm = interpAt(tr.samples, x);
+        if (!sm) continue;
+        const dp = dispOf(tr, sm);
+        this.seg(ctx, cam, dp, [dp[0], gy, dp[2]]);
+      }
+      ctx.stroke();
+    }
+
+    const v0 = st.mv, sms = tr.samples;
+    for (let pass = 0; pass < 2; pass++) {
+      ctx.lineWidth = pass ? 2.4 * dpr : 7 * dpr;
+      for (let i = 1; i < sms.length; i++) {
+        ctx.beginPath();
+        ctx.strokeStyle = velColor(sms[i].v / v0, pass ? 1 : 0.15);
+        if (this.seg(ctx, cam, dispOf(tr, sms[i - 1]), dispOf(tr, sms[i]))) ctx.stroke();
+      }
+    }
+
+    const markPt = (dp, label, color, dy) => {
+      if (st.cam === 'scope') return;
+      const p = this.pt2(cam, dp);
+      if (!p) return;
+      if (p[0] < -4 || p[0] > W + 4 || p[1] < -4 || p[1] > H + 4) return;
+      ctx.fillStyle = color;
+      ctx.beginPath(); ctx.arc(p[0], p[1], 3 * dpr, 0, 7); ctx.fill();
+      ctx.font = 10 * dpr + mono; ctx.textAlign = 'center';
+      const tw = ctx.measureText(label).width;
+      const lx = Math.max(tw / 2 + 6 * dpr, Math.min(W - tw / 2 - 6 * dpr, p[0]));
+      ctx.fillStyle = 'rgba(10,14,20,0.78)';
+      ctx.fillRect(lx - tw / 2 - 4 * dpr, p[1] + dy * dpr - 9 * dpr, tw + 8 * dpr, 12 * dpr);
+      ctx.fillStyle = color;
+      ctx.fillText(label, lx, p[1] + dy * dpr);
+    };
+    const cz = tr.crossings;
+    if (cz[0] && cz[0] < D - 1) { const sm = interpAt(tr.samples, cz[0]); if (sm) markPt(dispOf(tr, sm), LT.near + ' ' + Math.round(cz[0] / uD) + dUn, '#7ee2a8', 22); }
+    if (cz[1] && cz[1] < D + 1) { const sm = interpAt(tr.samples, cz[1]); if (sm) markPt(dispOf(tr, sm), LT.far + ' ' + Math.round(cz[1] / uD) + dUn, '#7ee2a8', 22); }
+    if (tr.apex && tr.apex.devV > 0.003) markPt(dispOf(tr, tr.apex), LT.apex + ' +' + (tr.apex.devV * 100).toFixed(1) + ' cm', '#ffd166', -14);
+    if (tr.transonic && tr.transonic.s < D) markPt(dispOf(tr, tr.transonic), LT.transonic, '#ff8c42', 22);
+    if (tr.hitGround) {
+      const lastSm = tr.samples[tr.samples.length - 1];
+      markPt(dispOf(tr, lastSm), LT.ground + ' ' + Math.round(lastSm.s / uD) + dUn, '#ff4d4d', -14);
+    }
+    if (tr.impact && st.cam !== 'scope') {
+      const p = this.pt2(cam, dispOf(tr, tr.impact));
+      if (p) {
+        ctx.strokeStyle = '#ff4d4d'; ctx.lineWidth = 2 * dpr;
+        const r5 = 5 * dpr;
+        ctx.beginPath();
+        ctx.moveTo(p[0] - r5, p[1] - r5); ctx.lineTo(p[0] + r5, p[1] + r5);
+        ctx.moveTo(p[0] + r5, p[1] - r5); ctx.lineTo(p[0] - r5, p[1] + r5);
+        ctx.stroke();
+      }
+      markPt(dispOf(tr, tr.impact), LT.impact, '#ff4d4d', -16);
+    }
+
+    const dur = this.props.flightSeconds ?? 4;
+    let timerVal = tr.impact ? tr.impact.t : (sms.length ? sms[sms.length - 1].t : 0);
+    if (st.firing) {
+      const tofEnd = timerVal;
+      const el = (performance.now() - this.fireStart) / 1000;
+      const tt = Math.min(1, el / dur) * tofEnd;
+      timerVal = tt;
+      let i = 1;
+      while (i < sms.length && sms[i].t < tt) i++;
+      const a = sms[Math.max(0, i - 1)], b = sms[Math.min(i, sms.length - 1)];
+      const f = (b.t > a.t) ? (tt - a.t) / (b.t - a.t) : 0;
+      const sm = { s: a.s + f * (b.s - a.s), devV: a.devV + f * (b.devV - a.devV), devH: a.devH + f * (b.devH - a.devH) };
+      if (el <= dur) {
+        const p = this.pt2(cam, dispOf(tr, sm));
+        if (p) {
+          ctx.fillStyle = 'rgba(255,240,200,0.22)';
+          ctx.beginPath(); ctx.arc(p[0], p[1], 10 * dpr, 0, 7); ctx.fill();
+          ctx.fillStyle = '#fff2cc';
+          ctx.beginPath(); ctx.arc(p[0], p[1], 3.4 * dpr, 0, 7); ctx.fill();
+        }
+      }
+      const endPt = tr.impact || tr.samples[tr.samples.length - 1];
+      if (el > dur && el < dur + 0.7) {
+        const p2 = this.pt2(cam, dispOf(tr, endPt));
+        if (p2) {
+          const q = (el - dur) / 0.7;
+          ctx.strokeStyle = 'rgba(255,77,77,' + (1 - q).toFixed(2) + ')';
+          ctx.lineWidth = 2 * dpr;
+          ctx.beginPath(); ctx.arc(p2[0], p2[1], (4 + q * 24) * dpr, 0, 7); ctx.stroke();
+        }
+      }
+      if (el > dur + 0.8 && !this._ending) {
+        this._ending = true;
+        this.setState({ firing: false }, () => { this._ending = false; });
+      }
+    }
+    if (this.timerRef.current) this.timerRef.current.textContent = timerVal.toFixed(3);
+    this.drawInset(tr, LT);
+
+    if (st.cam === 'scope') {
+      const cx = cam.hw, cy = cam.hh;
+      const Rv = Math.min(W, H) * 0.47;
+      const vg = ctx.createRadialGradient(cx, cy, Rv * 0.8, cx, cy, Rv);
+      vg.addColorStop(0, 'rgba(2,4,6,0)');
+      vg.addColorStop(1, 'rgba(2,4,6,1)');
+      ctx.fillStyle = vg;
+      ctx.beginPath(); ctx.arc(cx, cy, Rv, 0, 7); ctx.fill();
+      ctx.fillStyle = '#020406';
+      ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.arc(cx, cy, Rv, 0, Math.PI * 2, true); ctx.fill('evenodd');
+      ctx.strokeStyle = '#0e1620'; ctx.lineWidth = 3 * dpr;
+      ctx.beginPath(); ctx.arc(cx, cy, Rv, 0, 7); ctx.stroke();
+
+      const mpx = cam.f * 0.001;
+      const rc = '#dfe8f2';
+      ctx.strokeStyle = rc; ctx.lineWidth = 1.1 * dpr;
+      ctx.beginPath();
+      ctx.moveTo(cx - Rv, cy); ctx.lineTo(cx + Rv, cy);
+      ctx.moveTo(cx, cy - Rv); ctx.lineTo(cx, cy + Rv);
+      ctx.stroke();
+      const ret = this.props.reticle ?? 'mil-dot';
+      for (let m = 1; m <= 14; m++) {
+        const off = m * mpx;
+        if (off > Rv * 0.92) break;
+        const hl = (m % 5 === 0 ? 7 : 4) * dpr;
+        ctx.beginPath();
+        ctx.moveTo(cx + off, cy - hl); ctx.lineTo(cx + off, cy + hl);
+        ctx.moveTo(cx - off, cy - hl); ctx.lineTo(cx - off, cy + hl);
+        ctx.moveTo(cx - hl, cy + off); ctx.lineTo(cx + hl, cy + off);
+        ctx.moveTo(cx - hl, cy - off); ctx.lineTo(cx + hl, cy - off);
+        ctx.stroke();
+        if (ret === 'mil-dot') {
+          ctx.fillStyle = rc;
+          for (const [qx, qy] of [[cx + off, cy], [cx - off, cy], [cx, cy + off], [cx, cy - off]]) {
+            ctx.beginPath(); ctx.arc(qx, qy, 1.5 * dpr, 0, 7); ctx.fill();
+          }
+        }
+        if (m % 5 === 0) {
+          ctx.font = 9 * dpr + mono; ctx.fillStyle = '#8fa2b8'; ctx.textAlign = 'center';
+          ctx.fillText(m + '', cx + off, cy - 10 * dpr);
+          ctx.fillText(m + '', cx, cy + off + 3 * dpr);
+        }
+      }
+      if (ret === 'duplex') {
+        ctx.strokeStyle = rc; ctx.lineWidth = 4.5 * dpr;
+        const d6 = 6 * mpx;
+        ctx.beginPath();
+        ctx.moveTo(cx + d6, cy); ctx.lineTo(cx + Rv, cy);
+        ctx.moveTo(cx - d6, cy); ctx.lineTo(cx - Rv, cy);
+        ctx.moveTo(cx, cy + d6); ctx.lineTo(cx, cy + Rv);
+        ctx.moveTo(cx, cy - d6); ctx.lineTo(cx, cy - Rv);
+        ctx.stroke();
+      }
+      if (tr.impact) {
+        const dmil = -(tr.impact.devV / D) * 1000;
+        const wmil = (tr.impact.devH / D) * 1000;
+        const hx = cx + wmil * mpx, hy = cy + dmil * mpx;
+        const pulse = 0.6 + 0.4 * Math.sin(performance.now() / 280);
+        ctx.strokeStyle = 'rgba(255,180,84,' + pulse.toFixed(2) + ')';
+        ctx.lineWidth = 1.6 * dpr;
+        ctx.beginPath(); ctx.arc(hx, hy, 5.5 * dpr, 0, 7); ctx.stroke();
+        ctx.fillStyle = '#ffb454';
+        ctx.beginPath(); ctx.arc(hx, hy, 1.6 * dpr, 0, 7); ctx.fill();
+        ctx.font = 10 * dpr + mono; ctx.textAlign = 'left';
+        const lbl = LT.impact + ' · ' + Math.abs(dmil).toFixed(1) + ' MIL ' + (dmil >= 0 ? LT.low : LT.high) + (Math.abs(wmil) > 0.05 ? ' · ' + Math.abs(wmil).toFixed(1) + ' ' + (wmil >= 0 ? LT.rr : LT.ll) : '');
+        ctx.fillText(lbl, hx + 10 * dpr, hy + 3 * dpr);
+      }
+    }
+  }
+
+  drawInset(tr, LT) {
+    const cv = this.tgtRef.current;
+    if (!cv) return;
+    const d = window.devicePixelRatio || 1;
+    const wc = cv.clientWidth, hc = cv.clientHeight;
+    if (!wc || !hc) return;
+    if (cv.width !== Math.round(wc * d) || cv.height !== Math.round(hc * d)) { cv.width = Math.round(wc * d); cv.height = Math.round(hc * d); }
+    const c = cv.getContext('2d');
+    const W2 = cv.width, H2 = cv.height;
+    c.fillStyle = '#0b1017';
+    c.fillRect(0, 0, W2, H2);
+    const imp = tr.impact;
+    const gi = this.ghostTraj && this.ghostTraj.impact;
+    let ext = 0.4;
+    if (imp) ext = Math.max(ext, Math.abs(imp.devV) * 1.3, Math.abs(imp.devH) * 1.3);
+    if (gi) ext = Math.max(ext, Math.abs(gi.devV) * 1.15, Math.abs(gi.devH) * 1.15);
+    ext = Math.min(ext, 8);
+    const cx = W2 / 2, cy = H2 / 2;
+    const sc = (Math.min(W2, H2) / 2 - 10 * d) / ext;
+    const step = ext <= 0.5 ? 0.1 : ext <= 1.2 ? 0.25 : ext <= 2.5 ? 0.5 : 1;
+    c.strokeStyle = '#1e2a3a';
+    c.lineWidth = 1 * d;
+    for (let r = step; r <= ext + 0.001; r += step) {
+      c.beginPath(); c.arc(cx, cy, r * sc, 0, 7); c.stroke();
+    }
+    c.strokeStyle = '#223146';
+    c.beginPath();
+    c.moveTo(0, cy); c.lineTo(W2, cy);
+    c.moveTo(cx, 0); c.lineTo(cx, H2);
+    c.stroke();
+    c.font = 8 * d + "px 'IBM Plex Mono', monospace";
+    c.fillStyle = '#54657a';
+    c.textAlign = 'left';
+    c.fillText(LT.ringsNote + ' ' + (step * 100).toFixed(0) + ' cm', 6 * d, H2 - 6 * d);
+    c.fillStyle = '#45d6ff';
+    c.beginPath(); c.arc(cx, cy, 2 * d, 0, 7); c.fill();
+    const drawX = (dv, dh, col, r) => {
+      const x = cx + dh * sc, y = cy - dv * sc;
+      c.strokeStyle = col;
+      c.lineWidth = 1.8 * d;
+      c.beginPath();
+      c.moveTo(x - r, y - r); c.lineTo(x + r, y + r);
+      c.moveTo(x + r, y - r); c.lineTo(x - r, y + r);
+      c.stroke();
+    };
+    if (gi) drawX(gi.devV, gi.devH, 'rgba(130,142,158,0.7)', 4 * d);
+    if (imp) drawX(imp.devV, imp.devH, '#ff4d4d', 5 * d);
+    else {
+      c.fillStyle = '#ff8080';
+      c.textAlign = 'center';
+      c.font = 9 * d + "px 'IBM Plex Mono', monospace";
+      c.fillText(LT.noImpact, cx, cy - 10 * d);
+    }
+  }
+
+  renderVals() {
+    const st = this.state;
+    const tr = this.getTraj() || {};
+    const isMil = st.adjUnit === 'MIL';
+    const unit = st.adjUnit;
+    const D = st.targetDist;
+    const L = T[st.lang] || T.EN;
+    const inf = st.infoKey ? L.info[st.infoKey] : null;
+    const angOf = (dev, s) => {
+      if (!s) return '—';
+      const r = Math.atan2(dev, s);
+      const v = isMil ? r / MILR : r / MOA;
+      return (v >= 0 ? '+' : '') + v.toFixed(1) + ' ' + unit;
+    };
+    const angNum = (dev, s) => {
+      const r = Math.atan2(dev, s);
+      return ((isMil ? r / MILR : r / MOA)).toFixed(1);
+    };
+    const cmF = (dev) => (dev >= 0 ? '+' : '') + (dev * 100).toFixed(1) + ' cm';
+    const imp = tr.impact;
+    const mass = st.massGr * GRAIN;
+    const cz = tr.crossings || [];
+
+    const adjDisp = (moa) => {
+      if (isMil) { const m = moa * 0.290888; return (m >= 0 ? '+' : '') + m.toFixed(1) + ' MIL'; }
+      return (moa >= 0 ? '+' : '') + moa.toFixed(2) + ' MOA';
+    };
+    const milCtl = (key, label, minMil, maxMil) => ({
+      key, label, min: minMil, max: maxMil, step: 0.1,
+      value: Math.round(st[key] * 0.290888 * 10) / 10,
+      display: adjDisp(st[key]), onInput: this.hMil(key), onEnter: this.iE(key),
+    });
+    const isYd = st.distUnit === 'yd';
+    const YDf = 0.9144;
+    const dU = isYd ? 'yd' : 'm';
+    const fmtDist = (m) => Math.round(m / (isYd ? YDf : 1)) + ' ' + dU;
+    const distCtl = (key, label, minM, maxM, stepV) => isYd ? {
+      key, label, min: Math.round(minM / YDf), max: Math.round(maxM / YDf), step: stepV,
+      value: Math.round(st[key] / YDf), display: Math.round(st[key] / YDf) + ' yd',
+      onInput: this.hYd(key), onEnter: this.iE(key),
+    } : this.sl(key, label, minM, maxM, stepV, st[key].toFixed(0) + ' m');
+
+    const ammoCtl = [
+      this.sl('mv', L.mvL, 200, 1100, 5, st.mv.toFixed(0) + ' m/s'),
+      this.sl('massGr', L.massL, 20, 300, 1, st.massGr.toFixed(0) + ' gr'),
+      this.sl('bc', L.bcL, 0.05, 1, 0.005, st.bc.toFixed(3)),
+      this.sl('cal', L.calL, 4, 10, 0.1, st.cal.toFixed(1) + ' mm'),
+    ];
+    const rifleCtl = [
+      this.sl('scopeH', L.scopeHL, 2, 10, 0.1, st.scopeH.toFixed(1) + ' cm'),
+      distCtl('zeroDist', L.zeroL, 25, 600, 5),
+      isMil ? milCtl('railMoa', L.railL, 0, 17.5) : this.sl('railMoa', L.railL, 0, 60, 1, adjDisp(st.railMoa)),
+      isMil ? milCtl('mountMoa', L.mountL, 0, 20) : this.sl('mountMoa', L.mountL, 0, 70, 1, adjDisp(st.mountMoa)),
+      this.sl('cant', L.cantL, -30, 30, 1, (st.cant >= 0 ? '+' : '') + st.cant.toFixed(0) + '°'),
+      isMil ? milCtl('adjElev', L.elevL, -6, 12) : this.sl('adjElev', L.elevL, -20, 40, 0.25, adjDisp(st.adjElev)),
+      isMil ? milCtl('adjWind', L.windAdjL, -4.5, 4.5) : this.sl('adjWind', L.windAdjL, -15, 15, 0.25, adjDisp(st.adjWind)),
+    ];
+    const shotCtl = [
+      distCtl('targetDist', L.tgtDistL, 50, 1500, 10),
+      this.sl('incline', L.inclineL, -45, 45, 1, (st.incline >= 0 ? '+' : '') + st.incline.toFixed(0) + '°'),
+    ];
+    const envCtl = [
+      this.sl('temp', L.tempL, -20, 45, 1, st.temp.toFixed(0) + ' °C'),
+      this.sl('pressure', L.pressL, 850, 1050, 1, st.pressure.toFixed(0) + ' hPa'),
+      this.sl('humidity', L.humL, 0, 100, 5, st.humidity.toFixed(0) + ' %'),
+    ];
+    const advCtl = [
+      this.sl('lat', L.latL, -90, 90, 1, st.lat.toFixed(0) + '°'),
+      this.sl('az', L.azL, 0, 360, 5, st.az.toFixed(0) + '°'),
+    ];
+
+    const cams = [['side', L.cams.side], ['top', L.cams.top], ['shooter', L.cams.shooter], ['scope', L.cams.scope], ['free', L.cams.free]];
+    const btnBase = {
+      fontFamily: "'Chakra Petch', sans-serif", fontWeight: 600, fontSize: '9.5px', letterSpacing: '1.5px',
+      padding: '7px 11px', cursor: 'pointer', border: '1px solid #223146',
+      background: 'rgba(13,18,25,0.88)', color: '#8fa2b8',
+    };
+    const camBtns = cams.map(([k, label]) => ({
+      label,
+      onClick: this.camH(k),
+      style: st.cam === k ? { ...btnBase, background: '#45d6ff', color: '#0a0e14', border: '1px solid #45d6ff' } : btnBase,
+    }));
+
+    const rowStyle = (hl) => ({
+      display: 'grid', gridTemplateColumns: '36px 46px 38px 46px 38px 42px 34px',
+      fontSize: '9.5px', padding: '4px 0', borderBottom: '1px solid #131b26',
+      color: hl ? '#f2f7ff' : '#9fb0c2', background: hl ? 'rgba(69,214,255,0.06)' : 'transparent',
+    });
+    const dopeRows = [];
+    if (tr.samples) {
+      const step = ((D / (isYd ? YDf : 1)) <= 250 ? 50 : 100) * (isYd ? YDf : 1);
+      const mkRow = (x, sm, hl) => ({
+        rng: hl ? L.tgtRow : Math.round(x / (isYd ? YDf : 1)) + '', drop: (sm.devV * 100).toFixed(1), dropA: angNum(sm.devV, x),
+        drift: (sm.devH * 100).toFixed(1), driftA: angNum(sm.devH, x),
+        vel: sm.v.toFixed(0), tof: sm.t.toFixed(2), style: rowStyle(hl),
+      });
+      for (let x = step; x < D; x += step) {
+        const sm = interpAt(tr.samples, x);
+        if (!sm) break;
+        dopeRows.push(mkRow(x, sm, false));
+      }
+      if (imp) dopeRows.push(mkRow(D, imp, true));
+    }
+
+    const h = Math.round(st.windDir / 30) === 0 ? 12 : Math.round(st.windDir / 30);
+    const sw = Math.sin(st.windDir * D2R);
+    const windFromTxt = st.windSpeed < 0.3 ? L.calm : L.fromClock(h) + ' · ' + (sw > 0.25 ? L.driftsL : sw < -0.25 ? L.driftsR : L.headTail);
+    const unitBtn = (on) => ({
+      fontFamily: "'IBM Plex Mono', monospace", fontSize: '9px', letterSpacing: '1px', padding: '3px 8px',
+      cursor: 'pointer', border: '1px solid ' + (on ? '#45d6ff' : '#223146'),
+      background: on ? '#45d6ff' : 'transparent', color: on ? '#0a0e14' : '#7d8a99',
+    });
+
+    return {
+      canvasRef: this.canvasRef, timerRef: this.timerRef, dialRef: this.dialRef,
+      vpDown: this.vpDown, vpMove: this.vpMove, vpUp: this.vpUp, vpWheel: this.vpWheel,
+      dialDown: this.dialDown, dialMove: this.dialMove, dialUp: this.dialUp,
+      fire: this.fire, onPreset: this.onPreset,
+      toggleModel: this.toggleModel, toggleAdv: this.toggleAdv,
+      toggleSpin: this.toggleSpin, toggleCor: this.toggleCor,
+      setMoa: this.setMoa, setMil: this.setMil,
+      moaStyle: unitBtn(!isMil), milStyle: unitBtn(isMil),
+      presetVal: st.preset, modelOpen: st.modelOpen, advOpen: st.advOpen,
+      advArrow: st.advOpen ? '−' : '+',
+      spinOn: st.spinOn, corOn: st.corOn,
+      ammoCtl, rifleCtl, shotCtl, envCtl, advCtl, camBtns, dopeRows,
+      angU: unit,
+      targetLabel: fmtDist(D),
+      scaleNote: st.cam === 'scope' ? L.scopeNote : (st.viewMode === 'true' ? L.trueNote : L.scaleNote(st.exag)),
+      setTrue: this.setTrueMode, setArc: this.setArcMode,
+      arcMode: st.viewMode === 'arc',
+      trueStyle: { ...unitBtn(st.viewMode === 'true'), flex: 1 }, arcStyle: { ...unitBtn(st.viewMode === 'arc'), flex: 1 },
+      tViewMode: L.viewMode, tTrueBtn: L.trueBtn, tArcBtn: L.arcBtn,
+      exagVal: st.exag, exagInput: this.h('exag'),
+      windSpeedVal: st.windSpeed, windSpeedInput: this.h('windSpeed'),
+      windDisp: st.windSpeed.toFixed(1) + ' m/s · ' + st.windDir.toFixed(0) + '°',
+      windFromTxt,
+      dialPtrStyle: {
+        position: 'absolute', left: '50%', bottom: '50%', width: '2px', height: '33px',
+        marginLeft: '-1px', background: 'linear-gradient(to top, rgba(69,214,255,0.15), #45d6ff)',
+        transformOrigin: '50% 100%', transform: 'rotate(' + st.windDir + 'deg)',
+      },
+      roDrop: imp ? cmF(imp.devV) + ' · ' + angOf(imp.devV, D) : '—',
+      roDrift: imp ? cmF(imp.devH) + ' · ' + angOf(imp.devH, D) : '—',
+      roVel: imp ? imp.v.toFixed(0) + ' m/s' : '—',
+      roEnergy: imp ? (0.5 * mass * imp.v * imp.v).toFixed(0) + ' J' : '—',
+      roTof: imp ? imp.t.toFixed(3) + ' s' : '—',
+      roZero: cz.length ? cz.slice(0, 2).map((s) => Math.round(s / (isYd ? YDf : 1))).join(' / ') + ' ' + dU : '—',
+      roApex: (tr.apex && tr.apex.devV > 0) ? '+' + (tr.apex.devV * 100).toFixed(1) + ' cm @ ' + fmtDist(tr.apex.s) : '—',
+      groundWarn: !!tr.hitGround,
+      groundTxt: tr.hitGround ? L.groundWarn(fmtDist(tr.groundS)) : '',
+      tgtRef: this.tgtRef,
+      setEng: this.setEng, setPol: this.setPol,
+      engStyle: unitBtn(st.lang === 'EN'), polStyle: unitBtn(st.lang === 'PL'),
+      skyVal: st.skyBright, skyInput: this.h('skyBright'),
+      setM: this.setM, setYd: this.setYd, mStyle: unitBtn(!isYd), ydStyle: unitBtn(isYd),
+      toggleInfo: this.toggleInfo, infoLeave: this.infoLeave, infoMode: st.infoMode,
+      tInfoBtn: 'INFO',
+      infoBtnStyle: {
+        fontFamily: "'IBM Plex Mono', monospace", fontSize: '9.5px', letterSpacing: '1.5px', padding: '5px 12px',
+        cursor: 'pointer', border: '1px solid ' + (st.infoMode ? '#45d6ff' : '#223146'),
+        background: st.infoMode ? '#45d6ff' : 'transparent', color: st.infoMode ? '#0a0e14' : '#7d8a99',
+      },
+      windEnter: this.iE('wind'), exagEnter: this.iE('exag'), skyEnter: this.iE('sky'),
+      spinEnter: this.iE('spin'), corEnter: this.iE('cor'), presetEnter: this.iE('preset'),
+      infoTitle: inf ? inf[0] : (st.lang === 'PL' ? 'TRYB INFO' : 'INFO MODE'),
+      infoText: inf ? inf[1] : L.infoHint,
+      tTitle: L.title, tLegTraj: L.legTraj, tLegLos: L.legLos, tLegBore: L.legBore, tLegGhost: L.legGhost,
+      tModelBtn: L.modelBtn, tModelTitle: L.modelTitle,
+      m1: L.m[0], m2: L.m[1], m3: L.m[2], m4: L.m[3], m5: L.m[4], m6: L.m[5], m7: L.m[6], m8: L.m[7], m9: L.m[8],
+      mFoot: L.mFoot,
+      tAtTarget: L.atTarget, tRoDropL: L.dropL, tRoDriftL: L.driftL, tRoVelL: L.velL, tRoEnergyL: L.energyL, tRoTofL: L.tofL, tRoZerosL: L.zerosL, tRoApexL: L.apexRo,
+      tTargetFace: L.targetFace,
+      tFire: L.fire, tTofLabel: L.tofL, tDevScale: L.devScale, tSky: L.skyLbl,
+      tAmmo: L.ammo, tRifle: L.rifle, tShotSec: L.shotSec, tEnvSec: L.envSec, tAdvSec: L.advSec, tDopeSec: L.dopeSec,
+      tCustom: L.custom, tTgtLbl: L.tgtLbl, tWindLbl: L.windLbl, tSpinLbl: L.spinLbl, tCorLbl: L.corLbl,
+      tDRng: L.dRng, tDDrop: L.dDrop, tDDrift: L.dDrift, tDTof: L.dTof,
+    };
+  }
+}
+</script>
+</body>
+</html>
