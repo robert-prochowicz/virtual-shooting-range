@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <script src="./support.js"></script>
 </head>
 <body>
@@ -16,54 +17,74 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-html,body{margin:0;padding:0;height:100%;background:#0a0e14;overflow:hidden;}
-a{color:#45d6ff;text-decoration:none;} a:hover{color:#8fe6ff;}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);overflow:hidden;}
+a{color:var(--accent);text-decoration:none;} a:hover{color:var(--accent-soft);}
 input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;height:18px;margin:0;padding:0;cursor:pointer;}
-input[type=range]::-webkit-slider-runnable-track{height:3px;background:#243244;border-radius:2px;}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:11px;height:11px;border-radius:50%;background:#45d6ff;border:none;margin-top:-4px;}
-input[type=range]::-moz-range-track{height:3px;background:#243244;border-radius:2px;}
-input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:#45d6ff;border:none;}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--track);border-radius:2px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:11px;height:11px;border-radius:50%;background:var(--accent);border:none;margin-top:-4px;}
+input[type=range]::-moz-range-track{height:3px;background:var(--track);border-radius:2px;}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--accent);border:none;}
 select{outline:none;}
 ::-webkit-scrollbar{width:8px;}
-::-webkit-scrollbar-thumb{background:#223044;border-radius:4px;}
+::-webkit-scrollbar-thumb{background:var(--scroll);border-radius:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+html{
+--bg:#0A0E14; --panel2:#0D1219; --panel3:#0F151D;
+--panel-85:rgba(10, 14, 20, 0.85); --panel-88:rgba(13, 18, 25, 0.88); --panel-92:rgba(10, 14, 20, 0.92); --panel-94:rgba(10, 14, 20, 0.94);
+--border:#223146; --border2:#1D2530; --border3:#2A3A52; --row-border:#16202C; --row-border2:#131B26;
+--text:#D5DDE6; --text-bright:#F2F7FF; --text-soft:#B9C5D2; --muted:#7D8A99; --muted2:#8FA2B8; --dim:#54657A;
+--accent:#45D6FF; --accent-soft:#8FE6FF; --accent-fade:rgba(69, 214, 255, 0.15); --on-accent:#0A0E14; --hl-bg:rgba(69, 214, 255, 0.06);
+--amber:#FFB454; --green:#7EE2A8; --gold:#FFD166; --red:#FF4D4D; --red-soft:#FF8080; --warn-bg:rgba(40, 10, 10, 0.9);
+--bore:#B48CFF; --ghost:rgba(130, 142, 158, 0.55);
+--track:#243244; --scroll:#223044; --hover-border:#3A4F6E;
+}
+html[data-theme="light"]{
+--bg:#E8EDF3; --panel2:#EDF1F5; --panel3:#FFFFFF;
+--panel-85:rgba(243, 246, 250, 0.9); --panel-88:rgba(238, 242, 247, 0.92); --panel-92:rgba(243, 246, 250, 0.95); --panel-94:rgba(243, 246, 250, 0.97);
+--border:#B9C6D4; --border2:#D5DDE5; --border3:#9FB1C2; --row-border:#DCE3EA; --row-border2:#E1E7ED;
+--text:#2A3644; --text-bright:#0F1822; --text-soft:#3E4E5F; --muted:#5E7082; --muted2:#4C6073; --dim:#7C8DA0;
+--accent:#0B7EA8; --accent-soft:#08607F; --accent-fade:rgba(11, 126, 168, 0.18); --on-accent:#FFFFFF; --hl-bg:rgba(11, 126, 168, 0.08);
+--amber:#9A6512; --green:#1E7C50; --gold:#8F6A00; --red:#C3352B; --red-soft:#A62F26; --warn-bg:rgba(255, 233, 230, 0.95);
+--bore:#6C4FC7; --ghost:rgba(96, 106, 120, 0.65);
+--track:#C3CEDA; --scroll:#B7C3D0; --hover-border:#8CA0B5;
+}
 </style>
 </helmet>
-<div style="display:flex; width:100vw; height:100vh; background:#0a0e14; color:#d5dde6; font-family:'IBM Plex Mono',monospace; font-size:12px; user-select:none; -webkit-user-select:none;">
+<div style="display:flex; width:100vw; height:100vh; background:var(--bg); color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12px; user-select:none; -webkit-user-select:none;">
 
-  <div data-screen-label="3D Range View" style="position:relative; flex:1 1 auto; min-width:0; overflow:hidden; background:#0a0e14;">
+  <div data-screen-label="3D Range View" style="position:relative; flex:1 1 auto; min-width:0; overflow:hidden; background:var(--bg);">
     <canvas ref="{{canvasRef}}" onPointerDown="{{vpDown}}" onPointerMove="{{vpMove}}" onPointerUp="{{vpUp}}" onWheel="{{vpWheel}}" style="position:absolute; inset:0; width:100%; height:100%; display:block; cursor:grab; touch-action:none;"></canvas>
 
-    <div style="position:absolute; top:14px; left:14px; background:rgba(10,14,20,0.85); border:1px solid #223146; padding:12px 14px; min-width:212px; backdrop-filter:blur(3px);">
+    <div style="position:absolute; top:14px; left:14px; background:var(--panel-85); border:1px solid var(--border); padding:12px 14px; min-width:212px; backdrop-filter:blur(3px);">
       <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
-        <div style="font-family:'Chakra Petch',sans-serif; font-weight:700; font-size:13px; letter-spacing:2px; color:#f2f7ff; max-width:150px;">{{tTitle}}</div>
+        <div style="font-family:'Chakra Petch',sans-serif; font-weight:700; font-size:13px; letter-spacing:2px; color:var(--text-bright); max-width:150px;">{{tTitle}}</div>
         <div style="display:flex; gap:2px; flex:none;">
           <button onClick="{{setEng}}" style="{{engStyle}}">ENG</button>
           <button onClick="{{setPol}}" style="{{polStyle}}">POL</button>
         </div>
       </div>
-      <div style="font-size:9px; letter-spacing:1.5px; color:#7d8a99; margin-top:3px;">POINT-MASS · G1 · RK4</div>
+      <div style="font-size:9px; letter-spacing:1.5px; color:var(--muted); margin-top:3px;">POINT-MASS · G1 · RK4</div>
       <div style="display:flex; flex-direction:column; gap:7px; margin-top:13px;">
-        <div style="display:flex; align-items:center; gap:9px;"><span style="width:22px; height:3px; background:linear-gradient(90deg,#f2f7ff,#ffd166,#ff8c42,#ff4d4d); flex:none;"></span><span style="font-size:9.5px; letter-spacing:1px; color:#b9c5d2;">{{tLegTraj}}</span></div>
-        <div style="display:flex; align-items:center; gap:9px;"><span style="width:22px; height:2px; background:#45d6ff; flex:none;"></span><span style="font-size:9.5px; letter-spacing:1px; color:#b9c5d2;">{{tLegLos}}</span></div>
-        <div style="display:flex; align-items:center; gap:9px;"><span style="width:22px; height:0; border-top:2px dashed #b48cff; flex:none;"></span><span style="font-size:9.5px; letter-spacing:1px; color:#b9c5d2;">{{tLegBore}}</span></div>
-        <div style="display:flex; align-items:center; gap:9px;"><span style="width:22px; height:2px; background:rgba(130,142,158,0.55); flex:none;"></span><span style="font-size:9.5px; letter-spacing:1px; color:#b9c5d2;">{{tLegGhost}}</span></div>
+        <div style="display:flex; align-items:center; gap:9px;"><span style="width:22px; height:3px; background:linear-gradient(90deg,var(--text-bright),var(--gold),#ff8c42,var(--red)); flex:none;"></span><span style="font-size:9.5px; letter-spacing:1px; color:var(--text-soft);">{{tLegTraj}}</span></div>
+        <div style="display:flex; align-items:center; gap:9px;"><span style="width:22px; height:2px; background:var(--accent); flex:none;"></span><span style="font-size:9.5px; letter-spacing:1px; color:var(--text-soft);">{{tLegLos}}</span></div>
+        <div style="display:flex; align-items:center; gap:9px;"><span style="width:22px; height:0; border-top:2px dashed var(--bore); flex:none;"></span><span style="font-size:9.5px; letter-spacing:1px; color:var(--text-soft);">{{tLegBore}}</span></div>
+        <div style="display:flex; align-items:center; gap:9px;"><span style="width:22px; height:2px; background:var(--ghost); flex:none;"></span><span style="font-size:9.5px; letter-spacing:1px; color:var(--text-soft);">{{tLegGhost}}</span></div>
       </div>
-      <div style="margin-top:11px; font-size:9px; letter-spacing:1px; color:#ffb454;">{{scaleNote}}</div>
+      <div style="margin-top:11px; font-size:9px; letter-spacing:1px; color:var(--amber);">{{scaleNote}}</div>
       <div style="display:flex; gap:4px; margin-top:10px;">
-        <button onClick="{{toggleModel}}" style="flex:1; background:transparent; border:1px solid #223146; color:#7d8a99; font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:1.5px; padding:5px 0; cursor:pointer;" style-hover="border-color:#3a4f6e; color:#b9c5d2;">{{tModelBtn}}</button>
+        <button onClick="{{toggleModel}}" style="flex:1; background:transparent; border:1px solid var(--border); color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:1.5px; padding:5px 0; cursor:pointer;" style-hover="border-color:var(--hover-border); color:var(--text-soft);">{{tModelBtn}}</button>
         <button onClick="{{toggleInfo}}" style="{{infoBtnStyle}}">{{tInfoBtn}}</button>
       </div>
     </div>
 
     <sc-if value="{{modelOpen}}" hint-placeholder-val="{{false}}">
-      <div style="position:absolute; top:14px; left:246px; width:312px; background:rgba(10,14,20,0.94); border:1px solid #2a3a52; padding:14px 16px; z-index:5; backdrop-filter:blur(4px);">
+      <div style="position:absolute; top:14px; left:246px; width:312px; background:var(--panel-94); border:1px solid var(--border3); padding:14px 16px; z-index:5; backdrop-filter:blur(4px);">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-family:'Chakra Petch',sans-serif; font-size:11px; font-weight:600; letter-spacing:2px; color:#f2f7ff;">{{tModelTitle}}</span>
-          <button onClick="{{toggleModel}}" style="background:transparent; border:none; color:#7d8a99; font-size:13px; cursor:pointer; font-family:inherit;">✕</button>
+          <span style="font-family:'Chakra Petch',sans-serif; font-size:11px; font-weight:600; letter-spacing:2px; color:var(--text-bright);">{{tModelTitle}}</span>
+          <button onClick="{{toggleModel}}" style="background:transparent; border:none; color:var(--muted); font-size:13px; cursor:pointer; font-family:inherit;">✕</button>
         </div>
-        <div style="margin-top:9px; font-size:10px; line-height:1.75; color:#9fb0c2;">
+        <div style="margin-top:9px; font-size:10px; line-height:1.75; color:var(--text-soft);">
           · {{m1}}<br>
           · {{m2}}<br>
           · {{m3}}<br>
@@ -74,36 +95,36 @@ select{outline:none;}
           · {{m8}}<br>
           · {{m9}}
         </div>
-        <div style="margin-top:9px; font-size:9px; letter-spacing:1px; color:#ffb454;">{{mFoot}}</div>
+        <div style="margin-top:9px; font-size:9px; letter-spacing:1px; color:var(--amber);">{{mFoot}}</div>
       </div>
     </sc-if>
 
     <sc-if value="{{infoMode}}" hint-placeholder-val="{{false}}">
-      <div style="position:absolute; left:14px; bottom:86px; width:300px; background:rgba(10,14,20,0.92); border:1px solid #2a3a52; padding:12px 14px; z-index:6; backdrop-filter:blur(4px);">
-        <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2px; color:#45d6ff;">{{infoTitle}}</div>
-        <div style="margin-top:6px; font-size:10.5px; line-height:1.6; color:#b9c5d2;">{{infoText}}</div>
+      <div style="position:absolute; left:14px; bottom:86px; width:300px; background:var(--panel-92); border:1px solid var(--border3); padding:12px 14px; z-index:6; backdrop-filter:blur(4px);">
+        <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2px; color:var(--accent);">{{infoTitle}}</div>
+        <div style="margin-top:6px; font-size:10.5px; line-height:1.6; color:var(--text-soft);">{{infoText}}</div>
       </div>
     </sc-if>
 
     <div style="position:absolute; top:14px; right:14px; width:228px; display:flex; flex-direction:column; gap:10px;">
-      <div style="background:rgba(10,14,20,0.85); border:1px solid #223146; padding:12px 14px; backdrop-filter:blur(3px);">
-        <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2px; color:#7d8a99;">{{tAtTarget}} · {{targetLabel}}</div>
+      <div style="background:var(--panel-85); border:1px solid var(--border); padding:12px 14px; backdrop-filter:blur(3px);">
+        <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2px; color:var(--muted);">{{tAtTarget}} · {{targetLabel}}</div>
         <div style="display:flex; flex-direction:column; gap:5px; margin-top:10px; font-size:10.5px;">
-          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:#7d8a99;">{{tRoDropL}}</span><span style="color:#f2f7ff;">{{roDrop}}</span></div>
-          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:#7d8a99;">{{tRoDriftL}}</span><span style="color:#f2f7ff;">{{roDrift}}</span></div>
-          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:#7d8a99;">{{tRoVelL}}</span><span style="color:#f2f7ff;">{{roVel}}</span></div>
-          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:#7d8a99;">{{tRoEnergyL}}</span><span style="color:#f2f7ff;">{{roEnergy}}</span></div>
-          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:#7d8a99;">{{tRoTofL}}</span><span style="color:#f2f7ff;">{{roTof}}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--muted);">{{tRoDropL}}</span><span style="color:var(--text-bright);">{{roDrop}}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--muted);">{{tRoDriftL}}</span><span style="color:var(--text-bright);">{{roDrift}}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--muted);">{{tRoVelL}}</span><span style="color:var(--text-bright);">{{roVel}}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--muted);">{{tRoEnergyL}}</span><span style="color:var(--text-bright);">{{roEnergy}}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--muted);">{{tRoTofL}}</span><span style="color:var(--text-bright);">{{roTof}}</span></div>
         </div>
-        <div style="border-top:1px solid #1d2530; margin-top:10px; padding-top:8px; display:flex; flex-direction:column; gap:5px; font-size:10px;">
-          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:#7d8a99;">{{tRoZerosL}}</span><span style="color:#7ee2a8;">{{roZero}}</span></div>
-          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:#7d8a99;">{{tRoApexL}}</span><span style="color:#ffd166;">{{roApex}}</span></div>
+        <div style="border-top:1px solid var(--border2); margin-top:10px; padding-top:8px; display:flex; flex-direction:column; gap:5px; font-size:10px;">
+          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--muted);">{{tRoZerosL}}</span><span style="color:var(--green);">{{roZero}}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--muted);">{{tRoApexL}}</span><span style="color:var(--gold);">{{roApex}}</span></div>
         </div>
       </div>
-      <div style="background:rgba(10,14,20,0.85); border:1px solid #223146; padding:10px 12px; backdrop-filter:blur(3px);">
+      <div style="background:var(--panel-85); border:1px solid var(--border); padding:10px 12px; backdrop-filter:blur(3px);">
         <div style="display:flex; justify-content:space-between; align-items:baseline;">
-          <span style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2px; color:#7d8a99;">{{tTargetFace}}</span>
-          <span style="font-size:9px; color:#54657a;">{{targetLabel}}</span>
+          <span style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2px; color:var(--muted);">{{tTargetFace}}</span>
+          <span style="font-size:9px; color:var(--dim);">{{targetLabel}}</span>
         </div>
         <canvas ref="{{tgtRef}}" style="display:block; width:100%; height:150px; margin-top:8px;"></canvas>
       </div>
@@ -111,10 +132,10 @@ select{outline:none;}
 
     <div style="position:absolute; left:14px; right:14px; bottom:14px; display:flex; flex-wrap:wrap-reverse; align-items:center; justify-content:space-between; gap:10px 18px; pointer-events:none;">
       <div style="display:flex; align-items:center; gap:14px; pointer-events:auto;">
-        <button onClick="{{fire}}" style="font-family:'Chakra Petch',sans-serif; font-weight:700; font-size:15px; letter-spacing:4px; background:#ff5c39; color:#0a0e14; border:none; padding:13px 28px; cursor:pointer;" style-hover="background:#ff7a5c;">{{tFire}}</button>
+        <button onClick="{{fire}}" style="font-family:'Chakra Petch',sans-serif; font-weight:700; font-size:15px; letter-spacing:4px; background:#ff5c39; color:var(--bg); border:none; padding:13px 28px; cursor:pointer;" style-hover="background:#ff7a5c;">{{tFire}}</button>
         <div>
-          <div style="font-size:9px; letter-spacing:1.5px; color:#7d8a99;">{{tTofLabel}}</div>
-          <div style="font-size:19px; color:#f2f7ff; margin-top:1px;"><span ref="{{timerRef}}">0.000</span> <span style="font-size:11px; color:#7d8a99;">s</span></div>
+          <div style="font-size:9px; letter-spacing:1.5px; color:var(--muted);">{{tTofLabel}}</div>
+          <div style="font-size:19px; color:var(--text-bright); margin-top:1px;"><span ref="{{timerRef}}">0.000</span> <span style="font-size:11px; color:var(--muted);">s</span></div>
         </div>
       </div>
 
@@ -124,9 +145,9 @@ select{outline:none;}
         </sc-for>
       </div>
 
-      <div style="background:rgba(10,14,20,0.85); border:1px solid #223146; padding:8px 12px; width:150px; pointer-events:auto;">
+      <div style="background:var(--panel-85); border:1px solid var(--border); padding:8px 12px; width:150px; pointer-events:auto;">
         <div onMouseEnter="{{exagEnter}}" onMouseLeave="{{infoLeave}}">
-          <div style="font-size:9px; letter-spacing:1px; color:#7d8a99;">{{tViewMode}}</div>
+          <div style="font-size:9px; letter-spacing:1px; color:var(--muted);">{{tViewMode}}</div>
           <div style="display:flex; gap:2px; margin-top:5px;">
             <button onClick="{{setTrue}}" style="{{trueStyle}}">{{tTrueBtn}}</button>
             <button onClick="{{setArc}}" style="{{arcStyle}}">{{tArcBtn}}</button>
@@ -134,8 +155,8 @@ select{outline:none;}
           <sc-if value="{{arcMode}}" hint-placeholder-val="{{true}}">
             <div>
               <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:7px;">
-                <span style="font-size:9px; letter-spacing:1px; color:#7d8a99;">{{tDevScale}}</span>
-                <span style="font-size:11px; color:#8fe6ff;">×{{exagVal}}</span>
+                <span style="font-size:9px; letter-spacing:1px; color:var(--muted);">{{tDevScale}}</span>
+                <span style="font-size:11px; color:var(--accent-soft);">×{{exagVal}}</span>
               </div>
               <input type="range" min="2" max="20" step="1" value="{{exagVal}}" onInput="{{exagInput}}" style="width:100%; margin-top:5px;">
             </div>
@@ -143,24 +164,38 @@ select{outline:none;}
         </div>
         <div onMouseEnter="{{skyEnter}}" onMouseLeave="{{infoLeave}}">
           <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:7px;">
-            <span style="font-size:9px; letter-spacing:1px; color:#7d8a99;">{{tSky}}</span>
-            <span style="font-size:11px; color:#8fe6ff;">{{skyVal}}%</span>
+            <span style="font-size:9px; letter-spacing:1px; color:var(--muted);">{{tSky}}</span>
+            <span style="font-size:11px; color:var(--accent-soft);">{{skyVal}}%</span>
           </div>
           <input type="range" min="0" max="100" step="5" value="{{skyVal}}" onInput="{{skyInput}}" style="width:100%; margin-top:5px;">
+        </div>
+        <div onMouseEnter="{{themeEnter}}" onMouseLeave="{{infoLeave}}">
+          <div style="font-size:9px; letter-spacing:1px; color:var(--muted); margin-top:7px;">{{tUiTheme}}</div>
+          <div style="display:flex; gap:2px; margin-top:5px;">
+            <button onClick="{{setDark}}" style="{{darkStyle}}">{{tDarkBtn}}</button>
+            <button onClick="{{setLight}}" style="{{lightStyle}}">{{tLightBtn}}</button>
+          </div>
+        </div>
+        <div onMouseEnter="{{sceneEnter}}" onMouseLeave="{{infoLeave}}">
+          <div style="font-size:9px; letter-spacing:1px; color:var(--muted); margin-top:7px;">{{tSceneTheme}}</div>
+          <div style="display:flex; gap:2px; margin-top:5px;">
+            <button onClick="{{setSceneDark}}" style="{{sceneDarkStyle}}">{{tDarkBtn}}</button>
+            <button onClick="{{setSceneLight}}" style="{{sceneLightStyle}}">{{tLightBtn}}</button>
+          </div>
         </div>
       </div>
     </div>
 
     <sc-if value="{{groundWarn}}" hint-placeholder-val="{{false}}">
-      <div style="position:absolute; bottom:66px; left:50%; transform:translateX(-50%); background:rgba(40,10,10,0.9); border:1px solid #ff4d4d; color:#ff8080; font-size:11px; letter-spacing:1.5px; padding:8px 16px;">{{groundTxt}}</div>
+      <div style="position:absolute; bottom:66px; left:50%; transform:translateX(-50%); background:var(--warn-bg); border:1px solid var(--red); color:var(--red-soft); font-size:11px; letter-spacing:1.5px; padding:8px 16px;">{{groundTxt}}</div>
     </sc-if>
   </div>
 
-  <div data-screen-label="Parameters Panel" style="width:332px; flex:none; background:#0d1219; border-left:1px solid #1d2530; overflow-y:auto; padding:18px 16px 26px; box-sizing:border-box;">
+  <div data-screen-label="Parameters Panel" style="width:332px; flex:none; background:var(--panel2); border-left:1px solid var(--border2); overflow-y:auto; padding:18px 16px 26px; box-sizing:border-box;">
 
     <div style="margin-bottom:24px;">
-      <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:#7d8a99; padding-bottom:7px; border-bottom:1px solid #1d2530;">{{tAmmo}}</div>
-      <select value="{{presetVal}}" onChange="{{onPreset}}" onMouseEnter="{{presetEnter}}" onMouseLeave="{{infoLeave}}" style="width:100%; margin-top:12px; background:#0f151d; color:#d5dde6; border:1px solid #2a3648; padding:7px 8px; font-family:'IBM Plex Mono',monospace; font-size:11px; cursor:pointer;">
+      <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted); padding-bottom:7px; border-bottom:1px solid var(--border2);">{{tAmmo}}</div>
+      <select value="{{presetVal}}" onChange="{{onPreset}}" onMouseEnter="{{presetEnter}}" onMouseLeave="{{infoLeave}}" style="width:100%; margin-top:12px; background:var(--panel3); color:var(--text); border:1px solid var(--border); padding:7px 8px; font-family:'IBM Plex Mono',monospace; font-size:11px; cursor:pointer;">
         <option value=".22 LR">.22 LR</option>
         <option value="9 mm">9 mm Luger</option>
         <option value="5.56 NATO">5.56 NATO</option>
@@ -172,8 +207,8 @@ select{outline:none;}
       <sc-for list="{{ammoCtl}}" as="c" hint-placeholder-count="4">
         <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
           <div style="display:flex; justify-content:space-between; align-items:baseline;">
-            <span style="font-size:9.5px; letter-spacing:1px; color:#7d8a99;">{{c.label}}</span>
-            <span style="font-size:11px; color:#8fe6ff;">{{c.display}}</span>
+            <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted);">{{c.label}}</span>
+            <span style="font-size:11px; color:var(--accent-soft);">{{c.display}}</span>
           </div>
           <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
         </div>
@@ -181,8 +216,8 @@ select{outline:none;}
     </div>
 
     <div style="margin-bottom:24px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:7px; border-bottom:1px solid #1d2530;">
-        <span style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:#7d8a99;">{{tRifle}}</span>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:7px; border-bottom:1px solid var(--border2);">
+        <span style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted);">{{tRifle}}</span>
         <div style="display:flex; gap:2px;">
           <button onClick="{{setMoa}}" style="{{moaStyle}}">MOA</button>
           <button onClick="{{setMil}}" style="{{milStyle}}">MIL</button>
@@ -191,8 +226,8 @@ select{outline:none;}
       <sc-for list="{{rifleCtl}}" as="c" hint-placeholder-count="4">
         <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
           <div style="display:flex; justify-content:space-between; align-items:baseline;">
-            <span style="font-size:9.5px; letter-spacing:1px; color:#7d8a99;">{{c.label}}</span>
-            <span style="font-size:11px; color:#8fe6ff;">{{c.display}}</span>
+            <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted);">{{c.label}}</span>
+            <span style="font-size:11px; color:var(--accent-soft);">{{c.display}}</span>
           </div>
           <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
         </div>
@@ -200,8 +235,8 @@ select{outline:none;}
     </div>
 
     <div style="margin-bottom:24px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:7px; border-bottom:1px solid #1d2530;">
-        <span style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:#7d8a99;">{{tShotSec}}</span>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:7px; border-bottom:1px solid var(--border2);">
+        <span style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted);">{{tShotSec}}</span>
         <div style="display:flex; gap:2px;">
           <button onClick="{{setM}}" style="{{mStyle}}">m</button>
           <button onClick="{{setYd}}" style="{{ydStyle}}">yd</button>
@@ -210,8 +245,8 @@ select{outline:none;}
       <sc-for list="{{shotCtl}}" as="c" hint-placeholder-count="2">
         <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
           <div style="display:flex; justify-content:space-between; align-items:baseline;">
-            <span style="font-size:9.5px; letter-spacing:1px; color:#7d8a99;">{{c.label}}</span>
-            <span style="font-size:11px; color:#8fe6ff;">{{c.display}}</span>
+            <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted);">{{c.label}}</span>
+            <span style="font-size:11px; color:var(--accent-soft);">{{c.display}}</span>
           </div>
           <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
         </div>
@@ -219,30 +254,30 @@ select{outline:none;}
     </div>
 
     <div style="margin-bottom:24px;">
-      <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:#7d8a99; padding-bottom:7px; border-bottom:1px solid #1d2530;">{{tEnvSec}}</div>
+      <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted); padding-bottom:7px; border-bottom:1px solid var(--border2);">{{tEnvSec}}</div>
       <div onMouseEnter="{{windEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; gap:14px; align-items:center; margin-top:13px;">
-        <div ref="{{dialRef}}" onPointerDown="{{dialDown}}" onPointerMove="{{dialMove}}" onPointerUp="{{dialUp}}" style="position:relative; width:88px; height:88px; border-radius:50%; border:1px solid #2a3648; flex:none; cursor:pointer; background:#0f151d; touch-action:none;">
-          <div style="position:absolute; top:4px; left:50%; transform:translateX(-50%); font-size:8px; letter-spacing:0.5px; color:#7d8a99;">{{tTgtLbl}}</div>
-          <div style="position:absolute; bottom:3px; left:50%; transform:translateX(-50%); font-size:8px; color:#54657a;">6</div>
-          <div style="position:absolute; right:5px; top:50%; transform:translateY(-50%); font-size:8px; color:#54657a;">3</div>
-          <div style="position:absolute; left:5px; top:50%; transform:translateY(-50%); font-size:8px; color:#54657a;">9</div>
+        <div ref="{{dialRef}}" onPointerDown="{{dialDown}}" onPointerMove="{{dialMove}}" onPointerUp="{{dialUp}}" style="position:relative; width:88px; height:88px; border-radius:50%; border:1px solid var(--border); flex:none; cursor:pointer; background:var(--panel3); touch-action:none;">
+          <div style="position:absolute; top:4px; left:50%; transform:translateX(-50%); font-size:8px; letter-spacing:0.5px; color:var(--muted);">{{tTgtLbl}}</div>
+          <div style="position:absolute; bottom:3px; left:50%; transform:translateX(-50%); font-size:8px; color:var(--dim);">6</div>
+          <div style="position:absolute; right:5px; top:50%; transform:translateY(-50%); font-size:8px; color:var(--dim);">3</div>
+          <div style="position:absolute; left:5px; top:50%; transform:translateY(-50%); font-size:8px; color:var(--dim);">9</div>
           <div style="{{dialPtrStyle}}"></div>
-          <div style="position:absolute; left:50%; top:50%; width:5px; height:5px; margin:-2.5px 0 0 -2.5px; border-radius:50%; background:#45d6ff;"></div>
+          <div style="position:absolute; left:50%; top:50%; width:5px; height:5px; margin:-2.5px 0 0 -2.5px; border-radius:50%; background:var(--accent);"></div>
         </div>
         <div style="flex:1; min-width:0;">
           <div style="display:flex; justify-content:space-between; align-items:baseline;">
-            <span style="font-size:9.5px; letter-spacing:1px; color:#7d8a99;">{{tWindLbl}}</span>
-            <span style="font-size:11px; color:#8fe6ff;">{{windDisp}}</span>
+            <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted);">{{tWindLbl}}</span>
+            <span style="font-size:11px; color:var(--accent-soft);">{{windDisp}}</span>
           </div>
-          <div style="font-size:9px; color:#7d8a99; margin-top:2px;">{{windFromTxt}}</div>
+          <div style="font-size:9px; color:var(--muted); margin-top:2px;">{{windFromTxt}}</div>
           <input type="range" min="0" max="15" step="0.5" value="{{windSpeedVal}}" onInput="{{windSpeedInput}}" style="width:100%; margin-top:6px;">
         </div>
       </div>
       <sc-for list="{{envCtl}}" as="c" hint-placeholder-count="3">
         <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
           <div style="display:flex; justify-content:space-between; align-items:baseline;">
-            <span style="font-size:9.5px; letter-spacing:1px; color:#7d8a99;">{{c.label}}</span>
-            <span style="font-size:11px; color:#8fe6ff;">{{c.display}}</span>
+            <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted);">{{c.label}}</span>
+            <span style="font-size:11px; color:var(--accent-soft);">{{c.display}}</span>
           </div>
           <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
         </div>
@@ -250,22 +285,22 @@ select{outline:none;}
     </div>
 
     <div style="margin-bottom:24px;">
-      <button onClick="{{toggleAdv}}" style="display:flex; justify-content:space-between; align-items:center; width:100%; background:transparent; border:none; border-bottom:1px solid #1d2530; padding:0 0 7px; cursor:pointer; font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:#7d8a99;">
+      <button onClick="{{toggleAdv}}" style="display:flex; justify-content:space-between; align-items:center; width:100%; background:transparent; border:none; border-bottom:1px solid var(--border2); padding:0 0 7px; cursor:pointer; font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted);">
         <span>{{tAdvSec}}</span><span style="font-size:12px;">{{advArrow}}</span>
       </button>
       <sc-if value="{{advOpen}}" hint-placeholder-val="{{false}}">
         <div>
-          <label onMouseEnter="{{spinEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; gap:9px; align-items:center; margin-top:12px; cursor:pointer; font-size:10px; letter-spacing:1px; color:#b9c5d2;">
-            <input type="checkbox" checked="{{spinOn}}" onChange="{{toggleSpin}}" style="accent-color:#45d6ff; margin:0;">{{tSpinLbl}}
+          <label onMouseEnter="{{spinEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; gap:9px; align-items:center; margin-top:12px; cursor:pointer; font-size:10px; letter-spacing:1px; color:var(--text-soft);">
+            <input type="checkbox" checked="{{spinOn}}" onChange="{{toggleSpin}}" style="accent-color:var(--accent); margin:0;">{{tSpinLbl}}
           </label>
-          <label onMouseEnter="{{corEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; gap:9px; align-items:center; margin-top:9px; cursor:pointer; font-size:10px; letter-spacing:1px; color:#b9c5d2;">
-            <input type="checkbox" checked="{{corOn}}" onChange="{{toggleCor}}" style="accent-color:#45d6ff; margin:0;">{{tCorLbl}}
+          <label onMouseEnter="{{corEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; gap:9px; align-items:center; margin-top:9px; cursor:pointer; font-size:10px; letter-spacing:1px; color:var(--text-soft);">
+            <input type="checkbox" checked="{{corOn}}" onChange="{{toggleCor}}" style="accent-color:var(--accent); margin:0;">{{tCorLbl}}
           </label>
           <sc-for list="{{advCtl}}" as="c" hint-placeholder-count="2">
             <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
               <div style="display:flex; justify-content:space-between; align-items:baseline;">
-                <span style="font-size:9.5px; letter-spacing:1px; color:#7d8a99;">{{c.label}}</span>
-                <span style="font-size:11px; color:#8fe6ff;">{{c.display}}</span>
+                <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted);">{{c.label}}</span>
+                <span style="font-size:11px; color:var(--accent-soft);">{{c.display}}</span>
               </div>
               <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
             </div>
@@ -275,8 +310,8 @@ select{outline:none;}
     </div>
 
     <div>
-      <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:#7d8a99; padding-bottom:7px; border-bottom:1px solid #1d2530;">{{tDopeSec}}</div>
-      <div style="display:grid; grid-template-columns:36px 46px 38px 46px 38px 42px 34px; font-size:8.5px; letter-spacing:0.5px; color:#54657a; margin-top:10px; padding-bottom:5px; border-bottom:1px solid #16202c;">
+      <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted); padding-bottom:7px; border-bottom:1px solid var(--border2);">{{tDopeSec}}</div>
+      <div style="display:grid; grid-template-columns:36px 46px 38px 46px 38px 42px 34px; font-size:8.5px; letter-spacing:0.5px; color:var(--dim); margin-top:10px; padding-bottom:5px; border-bottom:1px solid var(--row-border);">
         <span>{{tDRng}}</span><span>{{tDDrop}}</span><span>{{angU}}</span><span>{{tDDrift}}</span><span>{{angU}}</span><span>V m/s</span><span>{{tDTof}}</span>
       </div>
       <sc-for list="{{dopeRows}}" as="r" hint-placeholder-count="4">
@@ -309,6 +344,7 @@ const T = {
     targetFace: 'TARGET FACE', ringsNote: 'RINGS', noImpact: 'NO IMPACT',
     fire: 'FIRE', devScale: 'ARC MAGNIFICATION', skyLbl: 'SKY LIGHT',
     viewMode: 'VIEW MODE', trueBtn: 'TRUE', arcBtn: 'ARC', trueNote: 'TRUE GEOMETRY · 1:1',
+    uiTheme: 'PANELS', sceneTheme: 'SCENE', darkBtn: 'DARK', lightBtn: 'LIGHT',
     cams: { side: 'SIDE', top: 'TOP', shooter: 'SHOOTER', scope: 'SCOPE', free: 'ORBIT' },
     ammo: 'AMMUNITION', rifle: 'RIFLE & OPTIC', shotSec: 'SHOT', envSec: 'ENVIRONMENT', advSec: 'ADVANCED', dopeSec: 'DOPE CARD',
     custom: 'Custom', tgtLbl: 'TGT', windLbl: 'WIND', tgtRow: 'TGT',
@@ -349,6 +385,8 @@ const T = {
       cor: ['CORIOLIS + EÖTVÖS', 'Earth-rotation effects: horizontal drift (Coriolis) and a vertical shift depending on azimuth (Eötvös).'],
       exag: ['VIEW MODE', 'TRUE shows the real geometry (1:1) — the arc is nearly invisible at range. ARC magnifies deviation from the sight line so the parabola is easy to read. All numbers stay true; scope view is always 1:1.'],
       sky: ['SKY LIGHT', 'Scene brightness only — no ballistic effect.'],
+      theme: ['PANELS THEME', 'Light/dark for the UI chrome — panels, buttons, sliders. The 3-D scene has its own toggle below.'],
+      scene: ['SCENE THEME', 'Light/dark for the 3-D range — sky, ground, trajectory markers. Independent from the panels; SKY LIGHT still fine-tunes brightness.'],
     },
   },
   PL: {
@@ -361,6 +399,7 @@ const T = {
     targetFace: 'TARCZA', ringsNote: 'PIERŚCIENIE', noImpact: 'BRAK TRAFIENIA',
     fire: 'OGNIA', devScale: 'POWIĘKSZENIE ŁUKU', skyLbl: 'JASNOŚĆ NIEBA',
     viewMode: 'TRYB WIDOKU', trueBtn: 'REALNY', arcBtn: 'ŁUK', trueNote: 'GEOMETRIA RZECZYWISTA · 1:1',
+    uiTheme: 'PANELE', sceneTheme: 'SCENA', darkBtn: 'CIEMNY', lightBtn: 'JASNY',
     cams: { side: 'BOK', top: 'GÓRA', shooter: 'STRZELEC', scope: 'LUNETA', free: 'ORBITA' },
     ammo: 'AMUNICJA', rifle: 'KARABIN I OPTYKA', shotSec: 'STRZAŁ', envSec: 'ŚRODOWISKO', advSec: 'ZAAWANSOWANE', dopeSec: 'TABELA POPRAWEK',
     custom: 'Własny', tgtLbl: 'CEL', windLbl: 'WIATR', tgtRow: 'CEL',
@@ -401,6 +440,8 @@ const T = {
       cor: ['CORIOLIS + EÖTVÖS', 'Efekty obrotu Ziemi: znos poziomy (Coriolis) i pionowy zależny od azymutu (Eötvös).'],
       exag: ['TRYB WIDOKU', 'REALNY pokazuje prawdziwą geometrię (1:1) — łuk jest wtedy prawie niewidoczny. ŁUK powiększa odchylenie od linii celowania, by parabola była czytelna. Liczby pozostają prawdziwe; luneta zawsze 1:1.'],
       sky: ['JASNOŚĆ NIEBA', 'Tylko oświetlenie sceny — bez wpływu na balistykę.'],
+      theme: ['PANELE', 'Jasny/ciemny wygląd interfejsu — panele, przyciski, suwaki. Scena 3D ma osobny przełącznik poniżej.'],
+      scene: ['SCENA', 'Jasny/ciemny wygląd strzelnicy 3D — niebo, grunt, znaczniki toru. Niezależnie od paneli; JASNOŚĆ NIEBA dalej reguluje jasność.'],
     },
   },
 };
@@ -556,8 +597,10 @@ function simulate(p) {
   }
   return { samples, scope, losU, vUp, dir, muzzle, zeroAngle, sos, rho, crossings, apex, impact, transonic, hitGround, groundY, groundS: hitGround ? last.s : null };
 }
-function velColor(f, a) {
-  const stops = [[0.2, 255, 77, 77], [0.45, 255, 140, 66], [0.7, 255, 209, 102], [1.0, 242, 247, 255]];
+const VEL_DARK = [[0.2, 255, 77, 77], [0.45, 255, 140, 66], [0.7, 255, 209, 102], [1.0, 242, 247, 255]];
+const VEL_LIGHT = [[0.2, 195, 53, 43], [0.45, 178, 95, 18], [0.7, 138, 104, 0], [1.0, 28, 44, 62]];
+function velColor(f, a, stops) {
+  stops = stops || VEL_DARK;
   f = Math.max(0.2, Math.min(1, f));
   let lo = stops[0], hi = stops[stops.length - 1];
   for (let i = 0; i < stops.length - 1; i++) {
@@ -576,6 +619,28 @@ const dot3 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const cross3 = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 const len3 = (a) => Math.sqrt(dot3(a, a));
 const norm3 = (a) => { const l = len3(a) || 1e-9; return [a[0] / l, a[1] / l, a[2] / l]; };
+function loadTheme() { try { return localStorage.getItem('vsr-theme') || 'dark'; } catch (e) { return 'dark'; } }
+function loadScene() { try { return localStorage.getItem('vsr-scene') || 'dark'; } catch (e) { return 'dark'; } }
+const SCN_DARK = {
+  sky0: [11, 16, 25], sky1: [110, 152, 196], hor0: [13, 19, 29], hor1: [172, 198, 220], gnd0: [11, 15, 22], gnd1: [52, 66, 82],
+  horLine: '#1d2a3c', gridZ: '#151d29', gridMinor: '#1a2433', gridMajor: '#263850', fireLine: '#3b4f6b', tickMinor: '#2a3a50',
+  lblMajor: '#8fa2b8', lblMinor: '#5c6b7e', wind: 'rgba(255,209,102,0.7)', post: '#33445c', barrel: '#9fb2c8',
+  boardFill: 'rgba(18,24,33,0.92)', boardEdge: '#31435c', boardRings: '#2b3c52',
+  los: '#45d6ff', losGlow: 'rgba(69,214,255,0.18)', bore: '#b48cff', ghost: 'rgba(130,142,158,0.5)', ghostX: 'rgba(130,142,158,0.7)',
+  drop: 'rgba(255,77,77,0.25)', vel: VEL_DARK, lblBg: 'rgba(10,14,20,0.78)',
+  green: '#7ee2a8', gold: '#ffd166', orange: '#ff8c42', red: '#ff4d4d', redA: 'rgba(255,77,77,',
+  tracer: '#fff2cc', tracerHalo: 'rgba(255,240,200,0.22)', reticle: '#dfe8f2', hit: '#ffb454', hitA: 'rgba(255,180,84,',
+};
+const SCN_LIGHT = {
+  sky0: [126, 164, 204], sky1: [168, 204, 238], hor0: [188, 205, 220], hor1: [228, 240, 250], gnd0: [132, 142, 152], gnd1: [176, 188, 198],
+  horLine: '#8ea0b2', gridZ: '#96a5b3', gridMinor: '#8fa0af', gridMajor: '#6d8398', fireLine: '#4e6379', tickMinor: '#8ea0b2',
+  lblMajor: '#2e3d4d', lblMinor: '#42556a', wind: 'rgba(122,88,8,0.85)', post: '#6b7f93', barrel: '#36434f',
+  boardFill: 'rgba(242,246,250,0.94)', boardEdge: '#7b8ea2', boardRings: '#a8b7c6',
+  los: '#0b7ea8', losGlow: 'rgba(11,126,168,0.22)', bore: '#6c4fc7', ghost: 'rgba(80,90,102,0.55)', ghostX: 'rgba(80,90,102,0.75)',
+  drop: 'rgba(195,53,43,0.3)', vel: VEL_LIGHT, lblBg: 'rgba(243,246,250,0.85)',
+  green: '#1e7c50', gold: '#8f6a00', orange: '#a85a10', red: '#c3352b', redA: 'rgba(195,53,43,',
+  tracer: '#6e5308', tracerHalo: 'rgba(110,83,8,0.2)', reticle: '#1a242e', hit: '#9a6512', hitA: 'rgba(154,101,18,',
+};
 
 class Component extends DCLogic {
   state = {
@@ -585,7 +650,7 @@ class Component extends DCLogic {
     windSpeed: 3, windDir: 90, temp: 15, pressure: 1013, humidity: 50,
     advOpen: false, spinOn: false, corOn: false, lat: 45, az: 90,
     exag: 8, viewMode: 'arc', cam: 'side', modelOpen: false, firing: false,
-    lang: 'EN', skyBright: 15, distUnit: 'm', infoMode: false, infoKey: null,
+    lang: 'EN', skyBright: 15, distUnit: 'm', infoMode: false, infoKey: null, theme: loadTheme(), sceneTheme: loadScene(),
   };
   canvasRef = React.createRef();
   timerRef = React.createRef();
@@ -714,6 +779,19 @@ class Component extends DCLogic {
   toggleInfo = () => this.setState((s) => ({ infoMode: !s.infoMode, infoKey: null }));
   setTrueMode = () => this.setState({ viewMode: 'true' });
   setArcMode = () => this.setState({ viewMode: 'arc' });
+  applyTheme(t) {
+    try { localStorage.setItem('vsr-theme', t); } catch (e) {}
+    document.documentElement.setAttribute('data-theme', t);
+    this.setState({ theme: t });
+  }
+  setDark = () => this.applyTheme('dark');
+  setLight = () => this.applyTheme('light');
+  applyScene(t) {
+    try { localStorage.setItem('vsr-scene', t); } catch (e) {}
+    this.setState({ sceneTheme: t });
+  }
+  setSceneDark = () => this.applyScene('dark');
+  setSceneLight = () => this.applyScene('light');
   infoLeave = () => { if (this.state.infoKey) this.setState({ infoKey: null }); };
   iE(key) {
     const k = 'info_' + key;
@@ -722,6 +800,7 @@ class Component extends DCLogic {
   }
 
   componentDidMount() {
+    document.documentElement.setAttribute('data-theme', this.state.theme);
     const cv = this.canvasRef.current;
     this._ro = new ResizeObserver(() => {
       const p = cv.parentElement, r = p.getBoundingClientRect();
@@ -805,13 +884,14 @@ class Component extends DCLogic {
     const mono = "px 'IBM Plex Mono', monospace";
 
     const LT = T[st.lang] || T.EN;
+    const SC = st.sceneTheme === 'light' ? SCN_LIGHT : SCN_DARK;
     const uD = st.distUnit === 'yd' ? 0.9144 : 1;
     const dUn = uD === 1 ? ' m' : ' yd';
     const bri = (st.skyBright ?? 15) / 100;
     const mixc = (c0, c1) => 'rgb(' + Math.round(c0[0] + (c1[0] - c0[0]) * bri) + ',' + Math.round(c0[1] + (c1[1] - c0[1]) * bri) + ',' + Math.round(c0[2] + (c1[2] - c0[2]) * bri) + ')';
-    const skyTop = mixc([11, 16, 25], [110, 152, 196]);
-    const skyHor = mixc([13, 19, 29], [172, 198, 220]);
-    const groundCol = mixc([11, 15, 22], [52, 66, 82]);
+    const skyTop = mixc(SC.sky0, SC.sky1);
+    const skyHor = mixc(SC.hor0, SC.hor1);
+    const groundCol = mixc(SC.gnd0, SC.gnd1);
     const sky = ctx.createLinearGradient(0, 0, 0, H);
     sky.addColorStop(0, skyTop);
     sky.addColorStop(1, skyHor);
@@ -831,43 +911,43 @@ class Component extends DCLogic {
         ctx.beginPath();
         ctx.moveTo(0, y0); ctx.lineTo(W, y1); ctx.lineTo(W, H); ctx.lineTo(0, H);
         ctx.closePath(); ctx.fill();
-        ctx.strokeStyle = '#1d2a3c'; ctx.lineWidth = 1 * dpr;
+        ctx.strokeStyle = SC.horLine; ctx.lineWidth = 1 * dpr;
         ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y1); ctx.stroke();
       }
     }
 
     const maxD = D + 60;
     ctx.lineWidth = 1 * dpr;
-    ctx.beginPath(); ctx.strokeStyle = '#151d29';
+    ctx.beginPath(); ctx.strokeStyle = SC.gridZ;
     for (let z = -25; z <= 25; z += 5) this.seg(ctx, cam, [-20, gy, z], [maxD, gy, z]);
     ctx.stroke();
-    ctx.beginPath(); ctx.strokeStyle = '#1a2433';
+    ctx.beginPath(); ctx.strokeStyle = SC.gridMinor;
     for (let k = 25; k * uD <= maxD; k += 25) if (k % 100) this.seg(ctx, cam, [k * uD, gy, -25], [k * uD, gy, 25]);
     ctx.stroke();
-    ctx.beginPath(); ctx.strokeStyle = '#263850'; ctx.lineWidth = 1.4 * dpr;
+    ctx.beginPath(); ctx.strokeStyle = SC.gridMajor; ctx.lineWidth = 1.4 * dpr;
     for (let k = 0; k * uD <= maxD; k += 100) this.seg(ctx, cam, [k * uD, gy, -25], [k * uD, gy, 25]);
     ctx.stroke();
-    this.line(ctx, cam, [0, gy, -25], [0, gy, 25], '#3b4f6b', 2 * dpr);
+    this.line(ctx, cam, [0, gy, -25], [0, gy, 25], SC.fireLine, 2 * dpr);
     for (let k = 50; k * uD <= maxD - 40; k += 50) {
       const x = k * uD;
       const major = k % 100 === 0;
-      this.line(ctx, cam, [x, gy, -13], [x, gy + (major ? 0.9 : 0.5), -13], major ? '#3b4f6b' : '#2a3a50', 1.5 * dpr);
+      this.line(ctx, cam, [x, gy, -13], [x, gy + (major ? 0.9 : 0.5), -13], major ? SC.fireLine : SC.tickMinor, 1.5 * dpr);
       const p = this.pt2(cam, [x, gy + (major ? 1.4 : 0.95), -13]);
       if (p) {
         ctx.font = (major ? 11 : 9) * dpr + mono;
-        ctx.fillStyle = major ? '#8fa2b8' : '#5c6b7e';
+        ctx.fillStyle = major ? SC.lblMajor : SC.lblMinor;
         ctx.textAlign = 'center';
         ctx.fillText(k + '', p[0], p[1]);
       }
     }
     const pfl = this.pt2(cam, [0, gy + 0.4, -16]);
-    if (pfl) { ctx.font = 9 * dpr + mono; ctx.fillStyle = '#5c6b7e'; ctx.textAlign = 'center'; ctx.fillText(LT.firingLine, pfl[0], pfl[1]); }
+    if (pfl) { ctx.font = 9 * dpr + mono; ctx.fillStyle = SC.lblMinor; ctx.textAlign = 'center'; ctx.fillText(LT.firingLine, pfl[0], pfl[1]); }
 
     if (st.windSpeed > 0.2) {
       const wd = st.windDir * D2R;
       const wx = -Math.cos(wd), wz = -Math.sin(wd);
       const L = 4 + st.windSpeed * 1.2, bx = D * 0.5, bz = 16;
-      const wc = 'rgba(255,209,102,0.7)';
+      const wc = SC.wind;
       const b = [bx + wx * L, gy + 0.05, bz + wz * L];
       this.line(ctx, cam, [bx, gy + 0.05, bz], b, wc, 1.6 * dpr);
       this.line(ctx, cam, b, [b[0] + (-wx - wz * 0.5) * 1.4, b[1], b[2] + (-wz + wx * 0.5) * 1.4], wc, 1.6 * dpr);
@@ -877,8 +957,8 @@ class Component extends DCLogic {
     }
 
     const mz = tr.muzzle || [0, 0, 0];
-    this.line(ctx, cam, [mz[0], gy, mz[2]], mz, '#33445c', 1.5 * dpr);
-    this.line(ctx, cam, [mz[0] - 0.7 * tr.dir[0], mz[1] - 0.7 * tr.dir[1], mz[2] - 0.7 * tr.dir[2]], [mz[0] + 0.9 * tr.dir[0], mz[1] + 0.9 * tr.dir[1], mz[2] + 0.9 * tr.dir[2]], '#9fb2c8', 3 * dpr);
+    this.line(ctx, cam, [mz[0], gy, mz[2]], mz, SC.post, 1.5 * dpr);
+    this.line(ctx, cam, [mz[0] - 0.7 * tr.dir[0], mz[1] - 0.7 * tr.dir[1], mz[2] - 0.7 * tr.dir[2]], [mz[0] + 0.9 * tr.dir[0], mz[1] + 0.9 * tr.dir[1], mz[2] + 0.9 * tr.dir[2]], SC.barrel, 3 * dpr);
 
     const aim = cam.aim;
     const bw = 0.7, bh = 1.0;
@@ -889,11 +969,11 @@ class Component extends DCLogic {
       ctx.moveTo(pts[0][0], pts[0][1]);
       for (let i = 1; i < 4; i++) ctx.lineTo(pts[i][0], pts[i][1]);
       ctx.closePath();
-      ctx.fillStyle = 'rgba(18,24,33,0.92)'; ctx.fill();
-      ctx.strokeStyle = '#31435c'; ctx.lineWidth = 1.4 * dpr; ctx.stroke();
+      ctx.fillStyle = SC.boardFill; ctx.fill();
+      ctx.strokeStyle = SC.boardEdge; ctx.lineWidth = 1.4 * dpr; ctx.stroke();
     }
     for (const rr of [0.09, 0.21, 0.33]) {
-      ctx.beginPath(); ctx.strokeStyle = '#2b3c52'; ctx.lineWidth = 1 * dpr;
+      ctx.beginPath(); ctx.strokeStyle = SC.boardRings; ctx.lineWidth = 1 * dpr;
       let first = true;
       for (let a = 0; a <= Math.PI * 2 + 0.05; a += Math.PI / 16) {
         const p = this.pt2(cam, [aim[0], aim[1] + rr * Math.sin(a), aim[2] + rr * Math.cos(a)]);
@@ -903,8 +983,8 @@ class Component extends DCLogic {
       ctx.stroke();
     }
     const pbull = this.pt2(cam, aim);
-    if (pbull) { ctx.fillStyle = '#45d6ff'; ctx.beginPath(); ctx.arc(pbull[0], pbull[1], 2.5 * dpr, 0, 7); ctx.fill(); }
-    if (aim[1] - bh / 2 > gy) this.line(ctx, cam, [aim[0], aim[1] - bh / 2, 0], [aim[0], gy, 0], '#31435c', 1.4 * dpr);
+    if (pbull) { ctx.fillStyle = SC.los; ctx.beginPath(); ctx.arc(pbull[0], pbull[1], 2.5 * dpr, 0, 7); ctx.fill(); }
+    if (aim[1] - bh / 2 > gy) this.line(ctx, cam, [aim[0], aim[1] - bh / 2, 0], [aim[0], gy, 0], SC.boardEdge, 1.4 * dpr);
 
     const dispOf = (fr, sm) => [
       fr.scope[0] + sm.s * fr.losU[0] + fr.vUp[0] * sm.devV * ex,
@@ -914,13 +994,13 @@ class Component extends DCLogic {
 
     const gh = this.ghostTraj;
     if (gh) {
-      ctx.beginPath(); ctx.strokeStyle = 'rgba(130,142,158,0.5)'; ctx.lineWidth = 1.4 * dpr;
+      ctx.beginPath(); ctx.strokeStyle = SC.ghost; ctx.lineWidth = 1.4 * dpr;
       for (let i = 1; i < gh.samples.length; i++) this.seg(ctx, cam, dispOf(gh, gh.samples[i - 1]), dispOf(gh, gh.samples[i]));
       ctx.stroke();
       if (gh.impact) {
         const p = this.pt2(cam, dispOf(gh, gh.impact));
         if (p) {
-          ctx.strokeStyle = 'rgba(130,142,158,0.7)'; ctx.lineWidth = 1.5 * dpr;
+          ctx.strokeStyle = SC.ghostX; ctx.lineWidth = 1.5 * dpr;
           const r5 = 4 * dpr;
           ctx.beginPath();
           ctx.moveTo(p[0] - r5, p[1] - r5); ctx.lineTo(p[0] + r5, p[1] + r5);
@@ -930,10 +1010,10 @@ class Component extends DCLogic {
       }
     }
 
-    this.line(ctx, cam, tr.scope, aim, 'rgba(69,214,255,0.18)', 4.5 * dpr);
-    this.line(ctx, cam, tr.scope, aim, '#45d6ff', 1.4 * dpr);
+    this.line(ctx, cam, tr.scope, aim, SC.losGlow, 4.5 * dpr);
+    this.line(ctx, cam, tr.scope, aim, SC.los, 1.4 * dpr);
 
-    ctx.beginPath(); ctx.strokeStyle = '#b48cff'; ctx.lineWidth = 1.3 * dpr; ctx.setLineDash([7 * dpr, 6 * dpr]);
+    ctx.beginPath(); ctx.strokeStyle = SC.bore; ctx.lineWidth = 1.3 * dpr; ctx.setLineDash([7 * dpr, 6 * dpr]);
     let prevB = null;
     for (let k = 0; k <= 30; k++) {
       const L = D * 1.02 * k / 30;
@@ -949,7 +1029,7 @@ class Component extends DCLogic {
     ctx.stroke(); ctx.setLineDash([]);
 
     if ((this.props.showDropLines ?? true) && st.cam !== 'scope') {
-      ctx.beginPath(); ctx.strokeStyle = 'rgba(255,77,77,0.25)'; ctx.lineWidth = 1 * dpr;
+      ctx.beginPath(); ctx.strokeStyle = SC.drop; ctx.lineWidth = 1 * dpr;
       for (let x = 50 * uD; x < D; x += 50 * uD) {
         const sm = interpAt(tr.samples, x);
         if (!sm) continue;
@@ -964,7 +1044,7 @@ class Component extends DCLogic {
       ctx.lineWidth = pass ? 2.4 * dpr : 7 * dpr;
       for (let i = 1; i < sms.length; i++) {
         ctx.beginPath();
-        ctx.strokeStyle = velColor(sms[i].v / v0, pass ? 1 : 0.15);
+        ctx.strokeStyle = velColor(sms[i].v / v0, pass ? 1 : 0.15, SC.vel);
         if (this.seg(ctx, cam, dispOf(tr, sms[i - 1]), dispOf(tr, sms[i]))) ctx.stroke();
       }
     }
@@ -979,31 +1059,31 @@ class Component extends DCLogic {
       ctx.font = 10 * dpr + mono; ctx.textAlign = 'center';
       const tw = ctx.measureText(label).width;
       const lx = Math.max(tw / 2 + 6 * dpr, Math.min(W - tw / 2 - 6 * dpr, p[0]));
-      ctx.fillStyle = 'rgba(10,14,20,0.78)';
+      ctx.fillStyle = SC.lblBg;
       ctx.fillRect(lx - tw / 2 - 4 * dpr, p[1] + dy * dpr - 9 * dpr, tw + 8 * dpr, 12 * dpr);
       ctx.fillStyle = color;
       ctx.fillText(label, lx, p[1] + dy * dpr);
     };
     const cz = tr.crossings;
-    if (cz[0] && cz[0] < D - 1) { const sm = interpAt(tr.samples, cz[0]); if (sm) markPt(dispOf(tr, sm), LT.near + ' ' + Math.round(cz[0] / uD) + dUn, '#7ee2a8', 22); }
-    if (cz[1] && cz[1] < D + 1) { const sm = interpAt(tr.samples, cz[1]); if (sm) markPt(dispOf(tr, sm), LT.far + ' ' + Math.round(cz[1] / uD) + dUn, '#7ee2a8', 22); }
-    if (tr.apex && tr.apex.devV > 0.003) markPt(dispOf(tr, tr.apex), LT.apex + ' +' + (tr.apex.devV * 100).toFixed(1) + ' cm', '#ffd166', -14);
-    if (tr.transonic && tr.transonic.s < D) markPt(dispOf(tr, tr.transonic), LT.transonic, '#ff8c42', 22);
+    if (cz[0] && cz[0] < D - 1) { const sm = interpAt(tr.samples, cz[0]); if (sm) markPt(dispOf(tr, sm), LT.near + ' ' + Math.round(cz[0] / uD) + dUn, SC.green, 22); }
+    if (cz[1] && cz[1] < D + 1) { const sm = interpAt(tr.samples, cz[1]); if (sm) markPt(dispOf(tr, sm), LT.far + ' ' + Math.round(cz[1] / uD) + dUn, SC.green, 22); }
+    if (tr.apex && tr.apex.devV > 0.003) markPt(dispOf(tr, tr.apex), LT.apex + ' +' + (tr.apex.devV * 100).toFixed(1) + ' cm', SC.gold, -14);
+    if (tr.transonic && tr.transonic.s < D) markPt(dispOf(tr, tr.transonic), LT.transonic, SC.orange, 22);
     if (tr.hitGround) {
       const lastSm = tr.samples[tr.samples.length - 1];
-      markPt(dispOf(tr, lastSm), LT.ground + ' ' + Math.round(lastSm.s / uD) + dUn, '#ff4d4d', -14);
+      markPt(dispOf(tr, lastSm), LT.ground + ' ' + Math.round(lastSm.s / uD) + dUn, SC.red, -14);
     }
     if (tr.impact && st.cam !== 'scope') {
       const p = this.pt2(cam, dispOf(tr, tr.impact));
       if (p) {
-        ctx.strokeStyle = '#ff4d4d'; ctx.lineWidth = 2 * dpr;
+        ctx.strokeStyle = SC.red; ctx.lineWidth = 2 * dpr;
         const r5 = 5 * dpr;
         ctx.beginPath();
         ctx.moveTo(p[0] - r5, p[1] - r5); ctx.lineTo(p[0] + r5, p[1] + r5);
         ctx.moveTo(p[0] + r5, p[1] - r5); ctx.lineTo(p[0] - r5, p[1] + r5);
         ctx.stroke();
       }
-      markPt(dispOf(tr, tr.impact), LT.impact, '#ff4d4d', -16);
+      markPt(dispOf(tr, tr.impact), LT.impact, SC.red, -16);
     }
 
     const dur = this.props.flightSeconds ?? 4;
@@ -1021,9 +1101,9 @@ class Component extends DCLogic {
       if (el <= dur) {
         const p = this.pt2(cam, dispOf(tr, sm));
         if (p) {
-          ctx.fillStyle = 'rgba(255,240,200,0.22)';
+          ctx.fillStyle = SC.tracerHalo;
           ctx.beginPath(); ctx.arc(p[0], p[1], 10 * dpr, 0, 7); ctx.fill();
-          ctx.fillStyle = '#fff2cc';
+          ctx.fillStyle = SC.tracer;
           ctx.beginPath(); ctx.arc(p[0], p[1], 3.4 * dpr, 0, 7); ctx.fill();
         }
       }
@@ -1032,7 +1112,7 @@ class Component extends DCLogic {
         const p2 = this.pt2(cam, dispOf(tr, endPt));
         if (p2) {
           const q = (el - dur) / 0.7;
-          ctx.strokeStyle = 'rgba(255,77,77,' + (1 - q).toFixed(2) + ')';
+          ctx.strokeStyle = SC.redA + (1 - q).toFixed(2) + ')';
           ctx.lineWidth = 2 * dpr;
           ctx.beginPath(); ctx.arc(p2[0], p2[1], (4 + q * 24) * dpr, 0, 7); ctx.stroke();
         }
@@ -1059,7 +1139,7 @@ class Component extends DCLogic {
       ctx.beginPath(); ctx.arc(cx, cy, Rv, 0, 7); ctx.stroke();
 
       const mpx = cam.f * 0.001;
-      const rc = '#dfe8f2';
+      const rc = SC.reticle;
       ctx.strokeStyle = rc; ctx.lineWidth = 1.1 * dpr;
       ctx.beginPath();
       ctx.moveTo(cx - Rv, cy); ctx.lineTo(cx + Rv, cy);
@@ -1083,7 +1163,7 @@ class Component extends DCLogic {
           }
         }
         if (m % 5 === 0) {
-          ctx.font = 9 * dpr + mono; ctx.fillStyle = '#8fa2b8'; ctx.textAlign = 'center';
+          ctx.font = 9 * dpr + mono; ctx.fillStyle = SC.lblMajor; ctx.textAlign = 'center';
           ctx.fillText(m + '', cx + off, cy - 10 * dpr);
           ctx.fillText(m + '', cx, cy + off + 3 * dpr);
         }
@@ -1103,10 +1183,10 @@ class Component extends DCLogic {
         const wmil = (tr.impact.devH / D) * 1000;
         const hx = cx + wmil * mpx, hy = cy + dmil * mpx;
         const pulse = 0.6 + 0.4 * Math.sin(performance.now() / 280);
-        ctx.strokeStyle = 'rgba(255,180,84,' + pulse.toFixed(2) + ')';
+        ctx.strokeStyle = SC.hitA + pulse.toFixed(2) + ')';
         ctx.lineWidth = 1.6 * dpr;
         ctx.beginPath(); ctx.arc(hx, hy, 5.5 * dpr, 0, 7); ctx.stroke();
-        ctx.fillStyle = '#ffb454';
+        ctx.fillStyle = SC.hit;
         ctx.beginPath(); ctx.arc(hx, hy, 1.6 * dpr, 0, 7); ctx.fill();
         ctx.font = 10 * dpr + mono; ctx.textAlign = 'left';
         const lbl = LT.impact + ' · ' + Math.abs(dmil).toFixed(1) + ' MIL ' + (dmil >= 0 ? LT.low : LT.high) + (Math.abs(wmil) > 0.05 ? ' · ' + Math.abs(wmil).toFixed(1) + ' ' + (wmil >= 0 ? LT.rr : LT.ll) : '');
@@ -1244,19 +1324,19 @@ class Component extends DCLogic {
     const cams = [['side', L.cams.side], ['top', L.cams.top], ['shooter', L.cams.shooter], ['scope', L.cams.scope], ['free', L.cams.free]];
     const btnBase = {
       fontFamily: "'Chakra Petch', sans-serif", fontWeight: 600, fontSize: '9.5px', letterSpacing: '1.5px',
-      padding: '7px 11px', cursor: 'pointer', border: '1px solid #223146',
-      background: 'rgba(13,18,25,0.88)', color: '#8fa2b8',
+      padding: '7px 11px', cursor: 'pointer', border: '1px solid var(--border)',
+      background: 'var(--panel-88)', color: 'var(--muted2)',
     };
     const camBtns = cams.map(([k, label]) => ({
       label,
       onClick: this.camH(k),
-      style: st.cam === k ? { ...btnBase, background: '#45d6ff', color: '#0a0e14', border: '1px solid #45d6ff' } : btnBase,
+      style: st.cam === k ? { ...btnBase, background: 'var(--accent)', color: 'var(--on-accent)', border: '1px solid var(--accent)' } : btnBase,
     }));
 
     const rowStyle = (hl) => ({
       display: 'grid', gridTemplateColumns: '36px 46px 38px 46px 38px 42px 34px',
-      fontSize: '9.5px', padding: '4px 0', borderBottom: '1px solid #131b26',
-      color: hl ? '#f2f7ff' : '#9fb0c2', background: hl ? 'rgba(69,214,255,0.06)' : 'transparent',
+      fontSize: '9.5px', padding: '4px 0', borderBottom: '1px solid var(--row-border2)',
+      color: hl ? 'var(--text-bright)' : 'var(--text-soft)', background: hl ? 'var(--hl-bg)' : 'transparent',
     });
     const dopeRows = [];
     if (tr.samples) {
@@ -1279,8 +1359,8 @@ class Component extends DCLogic {
     const windFromTxt = st.windSpeed < 0.3 ? L.calm : L.fromClock(h) + ' · ' + (sw > 0.25 ? L.driftsL : sw < -0.25 ? L.driftsR : L.headTail);
     const unitBtn = (on) => ({
       fontFamily: "'IBM Plex Mono', monospace", fontSize: '9px', letterSpacing: '1px', padding: '3px 8px',
-      cursor: 'pointer', border: '1px solid ' + (on ? '#45d6ff' : '#223146'),
-      background: on ? '#45d6ff' : 'transparent', color: on ? '#0a0e14' : '#7d8a99',
+      cursor: 'pointer', border: '1px solid ' + (on ? 'var(--accent)' : 'var(--border)'),
+      background: on ? 'var(--accent)' : 'transparent', color: on ? 'var(--on-accent)' : 'var(--muted)',
     });
 
     return {
@@ -1303,13 +1383,19 @@ class Component extends DCLogic {
       arcMode: st.viewMode === 'arc',
       trueStyle: { ...unitBtn(st.viewMode === 'true'), flex: 1 }, arcStyle: { ...unitBtn(st.viewMode === 'arc'), flex: 1 },
       tViewMode: L.viewMode, tTrueBtn: L.trueBtn, tArcBtn: L.arcBtn,
+      tUiTheme: L.uiTheme, tDarkBtn: L.darkBtn, tLightBtn: L.lightBtn,
+      setDark: this.setDark, setLight: this.setLight, themeEnter: this.iE('theme'),
+      darkStyle: { ...unitBtn(st.theme === 'dark'), flex: 1 }, lightStyle: { ...unitBtn(st.theme === 'light'), flex: 1 },
+      tSceneTheme: L.sceneTheme, sceneEnter: this.iE('scene'),
+      setSceneDark: this.setSceneDark, setSceneLight: this.setSceneLight,
+      sceneDarkStyle: { ...unitBtn(st.sceneTheme === 'dark'), flex: 1 }, sceneLightStyle: { ...unitBtn(st.sceneTheme === 'light'), flex: 1 },
       exagVal: st.exag, exagInput: this.h('exag'),
       windSpeedVal: st.windSpeed, windSpeedInput: this.h('windSpeed'),
       windDisp: st.windSpeed.toFixed(1) + ' m/s · ' + st.windDir.toFixed(0) + '°',
       windFromTxt,
       dialPtrStyle: {
         position: 'absolute', left: '50%', bottom: '50%', width: '2px', height: '33px',
-        marginLeft: '-1px', background: 'linear-gradient(to top, rgba(69,214,255,0.15), #45d6ff)',
+        marginLeft: '-1px', background: 'linear-gradient(to top, var(--accent-fade), var(--accent))',
         transformOrigin: '50% 100%', transform: 'rotate(' + st.windDir + 'deg)',
       },
       roDrop: imp ? cmF(imp.devV) + ' · ' + angOf(imp.devV, D) : '—',
@@ -1330,8 +1416,8 @@ class Component extends DCLogic {
       tInfoBtn: 'INFO',
       infoBtnStyle: {
         fontFamily: "'IBM Plex Mono', monospace", fontSize: '9.5px', letterSpacing: '1.5px', padding: '5px 12px',
-        cursor: 'pointer', border: '1px solid ' + (st.infoMode ? '#45d6ff' : '#223146'),
-        background: st.infoMode ? '#45d6ff' : 'transparent', color: st.infoMode ? '#0a0e14' : '#7d8a99',
+        cursor: 'pointer', border: '1px solid ' + (st.infoMode ? 'var(--accent)' : 'var(--border)'),
+        background: st.infoMode ? 'var(--accent)' : 'transparent', color: st.infoMode ? 'var(--on-accent)' : 'var(--muted)',
       },
       windEnter: this.iE('wind'), exagEnter: this.iE('exag'), skyEnter: this.iE('sky'),
       spinEnter: this.iE('spin'), corEnter: this.iE('cor'), presetEnter: this.iE('preset'),
