@@ -76,6 +76,7 @@ html[data-theme="light"]{
         <button onClick="{{toggleModel}}" style="flex:1; background:transparent; border:1px solid var(--border); color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:1.5px; padding:5px 0; cursor:pointer;" style-hover="border-color:var(--hover-border); color:var(--text-soft);">{{tModelBtn}}</button>
         <button onClick="{{toggleInfo}}" style="{{infoBtnStyle}}">{{tInfoBtn}}</button>
       </div>
+      <button onClick="{{toggleTrain}}" style="{{trainBtnStyle}}">{{tTrainBtn}}</button>
     </div>
 
     <sc-if value="{{modelOpen}}" hint-placeholder-val="{{false}}">
@@ -96,6 +97,22 @@ html[data-theme="light"]{
           · {{m9}}
         </div>
         <div style="margin-top:9px; font-size:9px; letter-spacing:1px; color:var(--amber);">{{mFoot}}</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{trainOn}}" hint-placeholder-val="{{false}}">
+      <div style="position:absolute; top:14px; left:50%; transform:translateX(-50%); background:var(--panel-94); border:1px solid var(--gold); padding:11px 16px 12px; z-index:6; backdrop-filter:blur(4px); display:flex; flex-direction:column; gap:8px; width:280px;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px;">
+          <span style="font-family:'Chakra Petch',sans-serif; font-size:11px; font-weight:600; letter-spacing:2px; color:var(--gold);">{{tTrainTitle}} · {{tRoundL}} {{trainRound}}</span>
+          <span style="font-size:10px; color:var(--text-bright);">{{tTotalL}}: {{trainTotal}} {{tPtsL}}</span>
+        </div>
+        <div style="font-size:10px; line-height:1.6; color:var(--text-soft);">{{trainMsg}}</div>
+        <div style="display:flex; gap:4px;">
+          <sc-if value="{{trainRevealed}}" hint-placeholder-val="{{false}}">
+            <button onClick="{{nextRound}}" style="flex:1; background:var(--gold); color:var(--on-accent); border:1px solid var(--gold); font-family:'Chakra Petch',sans-serif; font-weight:600; font-size:10px; letter-spacing:1.5px; padding:6px 0; cursor:pointer;">{{tNextBtn}}</button>
+          </sc-if>
+          <button onClick="{{exitTrain}}" style="flex:none; background:transparent; border:1px solid var(--border); color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:1.5px; padding:6px 12px; cursor:pointer;">{{tExitBtn}}</button>
+        </div>
       </div>
     </sc-if>
 
@@ -194,8 +211,10 @@ html[data-theme="light"]{
 
   <div data-screen-label="Parameters Panel" style="width:332px; flex:none; background:var(--panel2); border-left:1px solid var(--border2); overflow-y:auto; padding:18px 16px 26px; box-sizing:border-box;">
 
-    <div style="margin-bottom:24px;">
-      <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted); padding-bottom:7px; border-bottom:1px solid var(--border2);">{{tAmmo}}</div>
+    <div style="{{lockStyle}}">
+      <button onClick="{{togAmmo}}" style="display:flex; justify-content:space-between; align-items:center; width:100%; background:transparent; border:none; border-bottom:1px solid var(--border2); padding:0 0 7px; cursor:pointer; font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted);"><span>{{tAmmo}}</span><span style="font-size:12px;">{{ammoArrow}}</span></button>
+      <sc-if value="{{ammoOpen}}" hint-placeholder-val="{{true}}">
+      <div>
       <select value="{{presetVal}}" onChange="{{onPreset}}" onMouseEnter="{{presetEnter}}" onMouseLeave="{{infoLeave}}" style="width:100%; margin-top:12px; background:var(--panel3); color:var(--text); border:1px solid var(--border); padding:7px 8px; font-family:'IBM Plex Mono',monospace; font-size:11px; cursor:pointer;">
         <option value=".22 LR">.22 LR</option>
         <option value="9 mm">9 mm Luger</option>
@@ -214,16 +233,20 @@ html[data-theme="light"]{
           <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
         </div>
       </sc-for>
+      </div>
+      </sc-if>
     </div>
 
     <div style="margin-bottom:24px;">
       <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:7px; border-bottom:1px solid var(--border2);">
-        <span style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted);">{{tRifle}}</span>
+        <span onClick="{{togRifle}}" style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted); flex:1; display:flex; justify-content:space-between; align-items:center; cursor:pointer; margin-right:12px;"><span>{{tRifle}}</span><span style="font-size:12px;">{{rifleArrow}}</span></span>
         <div style="display:flex; gap:2px;">
           <button onClick="{{setMoa}}" style="{{moaStyle}}">MOA</button>
           <button onClick="{{setMil}}" style="{{milStyle}}">MIL</button>
         </div>
       </div>
+      <sc-if value="{{rifleOpen}}" hint-placeholder-val="{{true}}">
+      <div>
       <sc-for list="{{rifleCtl}}" as="c" hint-placeholder-count="4">
         <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
           <div style="display:flex; justify-content:space-between; align-items:baseline;">
@@ -233,16 +256,20 @@ html[data-theme="light"]{
           <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
         </div>
       </sc-for>
+      </div>
+      </sc-if>
     </div>
 
-    <div style="margin-bottom:24px;">
+    <div style="{{lockStyle}}">
       <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:7px; border-bottom:1px solid var(--border2);">
-        <span style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted);">{{tShotSec}}</span>
+        <span onClick="{{togShot}}" style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted); flex:1; display:flex; justify-content:space-between; align-items:center; cursor:pointer; margin-right:12px;"><span>{{tShotSec}}</span><span style="font-size:12px;">{{shotArrow}}</span></span>
         <div style="display:flex; gap:2px;">
           <button onClick="{{setM}}" style="{{mStyle}}">m</button>
           <button onClick="{{setYd}}" style="{{ydStyle}}">yd</button>
         </div>
       </div>
+      <sc-if value="{{shotOpen}}" hint-placeholder-val="{{true}}">
+      <div>
       <sc-for list="{{shotCtl}}" as="c" hint-placeholder-count="2">
         <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
           <div style="display:flex; justify-content:space-between; align-items:baseline;">
@@ -274,10 +301,14 @@ html[data-theme="light"]{
           </div>
         </sc-if>
       </div>
+      </div>
+      </sc-if>
     </div>
 
-    <div style="margin-bottom:24px;">
-      <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted); padding-bottom:7px; border-bottom:1px solid var(--border2);">{{tEnvSec}}</div>
+    <div style="{{lockStyle}}">
+      <button onClick="{{togEnv}}" style="display:flex; justify-content:space-between; align-items:center; width:100%; background:transparent; border:none; border-bottom:1px solid var(--border2); padding:0 0 7px; cursor:pointer; font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted);"><span>{{tEnvSec}}</span><span style="font-size:12px;">{{envArrow}}</span></button>
+      <sc-if value="{{envOpen}}" hint-placeholder-val="{{true}}">
+      <div>
       <div onMouseEnter="{{windEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; gap:14px; align-items:center; margin-top:13px;">
         <div ref="{{dialRef}}" onPointerDown="{{dialDown}}" onPointerMove="{{dialMove}}" onPointerUp="{{dialUp}}" style="position:relative; width:88px; height:88px; border-radius:50%; border:1px solid var(--border); flex:none; cursor:pointer; background:var(--panel3); touch-action:none;">
           <div style="position:absolute; top:4px; left:50%; transform:translateX(-50%); font-size:8px; letter-spacing:0.5px; color:var(--muted);">{{tTgtLbl}}</div>
@@ -305,6 +336,8 @@ html[data-theme="light"]{
           <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
         </div>
       </sc-for>
+      </div>
+      </sc-if>
     </div>
 
     <div style="margin-bottom:24px;">
@@ -334,9 +367,11 @@ html[data-theme="light"]{
 
     <div>
       <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:7px; border-bottom:1px solid var(--border2);">
-        <span style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted);">{{tDopeSec}}</span>
+        <span onClick="{{togDope}}" style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted); flex:1; display:flex; justify-content:space-between; align-items:center; cursor:pointer; margin-right:12px;"><span>{{tDopeSec}}</span><span style="font-size:12px;">{{dopeArrow}}</span></span>
         <button onClick="{{exportPdf}}" style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:1px; padding:3px 10px; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--muted);">{{tPdfBtn}}</button>
       </div>
+      <sc-if value="{{dopeOpen}}" hint-placeholder-val="{{true}}">
+      <div>
       <div style="display:grid; grid-template-columns:36px 46px 38px 46px 38px 42px 34px; font-size:8.5px; letter-spacing:0.5px; color:var(--dim); margin-top:10px; padding-bottom:5px; border-bottom:1px solid var(--row-border);">
         <span>{{tDRng}}</span><span>{{tDDrop}}</span><span>{{angU}}</span><span>{{tDDrift}}</span><span>{{angU}}</span><span>V m/s</span><span>{{tDTof}}</span>
       </div>
@@ -345,6 +380,8 @@ html[data-theme="light"]{
           <span>{{r.rng}}</span><span>{{r.drop}}</span><span>{{r.dropA}}</span><span>{{r.drift}}</span><span>{{r.driftA}}</span><span>{{r.vel}}</span><span>{{r.tof}}</span>
         </div>
       </sc-for>
+      </div>
+      </sc-if>
     </div>
 
   </div>
@@ -352,19 +389,19 @@ html[data-theme="light"]{
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;showDropLines&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scene&quot;},&quot;flightSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:4,&quot;min&quot;:1.5,&quot;max&quot;:10,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Fire animation&quot;},&quot;reticle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;mil-dot&quot;,&quot;duplex&quot;],&quot;default&quot;:&quot;mil-dot&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Scope view&quot;}}">
 const PRESETS = [
-  { name: '.22 LR', mv: 370, massGr: 40, bc: 0.138, cal: 5.7 },
-  { name: '9 mm', mv: 360, massGr: 124, bc: 0.15, cal: 9.0 },
-  { name: '5.56 NATO', mv: 940, massGr: 62, bc: 0.304, cal: 5.7 },
-  { name: '.308 Win', mv: 800, massGr: 168, bc: 0.462, cal: 7.8 },
-  { name: '6.5 Creedmoor', mv: 823, massGr: 140, bc: 0.58, cal: 6.7 },
-  { name: '.338 Lapua Mag', mv: 900, massGr: 250, bc: 0.675, cal: 8.6 },
+  { name: '.22 LR', mv: 370, massGr: 40, bc: 0.138, cal: 5.7, twist: 16, train: [50, 200] },
+  { name: '9 mm', mv: 360, massGr: 124, bc: 0.15, cal: 9.0, twist: 10, train: [50, 150] },
+  { name: '5.56 NATO', mv: 940, massGr: 62, bc: 0.304, cal: 5.7, twist: 7, train: [100, 500] },
+  { name: '.308 Win', mv: 800, massGr: 168, bc: 0.462, cal: 7.8, twist: 11, train: [150, 800] },
+  { name: '6.5 Creedmoor', mv: 823, massGr: 140, bc: 0.58, cal: 6.7, twist: 8, train: [200, 1000] },
+  { name: '.338 Lapua Mag', mv: 900, massGr: 250, bc: 0.675, cal: 8.6, twist: 9.5, train: [300, 1200] },
 ];
 const T = {
   EN: {
     title: 'VIRTUAL SHOOTING RANGE',
     legTraj: 'TRAJECTORY · BY VELOCITY', legLos: 'LINE OF SIGHT', legBore: 'BORE AXIS', legGhost: 'GHOST · PREVIOUS SHOT',
     modelBtn: 'MODEL ASSUMPTIONS', modelTitle: 'MODEL',
-    m: ['Point mass (3-DOF) — no yaw, no aerodynamic jump', 'Drag: G1 standard-projectile Cd(Mach), scaled by 1/BC', 'Air density ρ(T, P, RH) · speed of sound a(T)', 'Integration: RK4 at Δt = 2 ms', 'Zero angle solved on a flat range, applied to inclined shot', 'Spin drift: Litz approximation (SG ≈ 1.8, RH twist)', 'Coriolis: a = −2 Ω × v from latitude + azimuth', 'Scene exaggerates deviation from the LOS (scope is true scale)', 'Caliber affects display only — drag is carried by the BC'],
+    m: ['Point mass (3-DOF) — no yaw, no aerodynamic jump', 'Drag: G1 standard-projectile Cd(Mach), scaled by 1/BC', 'Air density ρ(T, P, RH) · speed of sound a(T)', 'Integration: RK4 at Δt = 2 ms', 'Zero angle solved on a flat range, applied to inclined shot', 'Spin drift: Litz approximation, SG from Miller twist rule', 'Coriolis: a = −2 Ω × v from latitude + azimuth', 'Scene exaggerates deviation from the LOS (scope is true scale)', 'Caliber affects display only — drag is carried by the BC'],
     mFoot: 'TRAINING VISUALIZATION — NOT A FIRING SOLUTION',
     atTarget: 'AT TARGET', dropL: 'DROP', driftL: 'DRIFT', velL: 'VELOCITY', energyL: 'ENERGY', tofL: 'TIME OF FLIGHT', zerosL: 'ZEROS', apexRo: 'APEX',
     targetFace: 'TARGET FACE', ringsNote: 'RINGS', noImpact: 'NO IMPACT',
@@ -377,12 +414,15 @@ const T = {
     cams: { side: 'SIDE', top: 'TOP', shooter: 'SHOOTER', scope: 'SCOPE', free: 'ORBIT' },
     ammo: 'AMMUNITION', rifle: 'RIFLE & OPTIC', shotSec: 'SHOT', envSec: 'ENVIRONMENT', advSec: 'ADVANCED', dopeSec: 'DOPE CARD',
     custom: 'Custom', tgtLbl: 'TGT', windLbl: 'WIND', tgtRow: 'TGT',
-    mvL: 'MUZZLE VELOCITY', massL: 'BULLET MASS', bcL: 'BALLISTIC COEFF · G1', calL: 'CALIBER',
+    mvL: 'MUZZLE VELOCITY', massL: 'BULLET MASS', bcL: 'BALLISTIC COEFF · G1', calL: 'CALIBER', barrelL: 'BARREL LENGTH',
     scopeHL: 'SCOPE HEIGHT OVER BORE', zeroL: 'ZERO DISTANCE', cantL: 'CANT ANGLE · + = RIGHT', elevL: 'ELEVATION ADJ', windAdjL: 'WINDAGE ADJ',
     railL: 'RAIL INCLINE (BASE)', mountL: 'MOUNT INCLINE (RINGS)',
     tgtDistL: 'TARGET DISTANCE', inclineL: 'INCLINE ANGLE',
     tempL: 'TEMPERATURE', pressL: 'PRESSURE', humL: 'HUMIDITY',
     spinLbl: 'SPIN DRIFT · RH TWIST (LITZ)', corLbl: 'CORIOLIS + EÖTVÖS', latL: 'LATITUDE', azL: 'SHOT AZIMUTH · 0=N',
+    twistL: 'BARREL TWIST', trainBtn: 'TRAINING MODE', trainTitle: 'TRAINING', roundL: 'ROUND', totalL: 'TOTAL', ptsL: 'PTS', nextBtn: 'NEXT ROUND ▸', exitBtn: 'EXIT',
+    trainHint: 'Conditions randomized — read the wind, range & temperature, dial your turrets, then FIRE.',
+    trainHit: (p) => '+' + p + ' PTS',
     dRng: 'RNG', dDrop: 'DROP cm', dDrift: 'DRF cm', dTof: 'TOF',
     calm: 'CALM', fromClock: (h) => 'FROM ' + h + " O'CLOCK", driftsL: 'DRIFTS LEFT', driftsR: 'DRIFTS RIGHT', headTail: 'HEAD/TAIL',
     groundWarn: (x) => '⚠ BULLET STRIKES GROUND AT ' + x + ' — SHORT OF TARGET',
@@ -395,6 +435,7 @@ const T = {
       massGr: ['BULLET MASS', 'Weight in grains (1 gr = 64.8 mg). Sets kinetic energy; the drag behaviour itself comes from the BC.'],
       bc: ['BALLISTIC COEFFICIENT (G1)', 'How well the bullet fights drag vs. the G1 standard projectile. Higher BC = flatter trajectory and less wind drift.'],
       cal: ['CALIBER', 'Bullet diameter. Cosmetic here — the BC already contains the aerodynamic effect.'],
+      barrelLen: ['BARREL LENGTH', 'Longer barrels burn more powder before the bullet exits, raising muzzle velocity (~6.1 m/s per inch here, relative to a 20" reference). Higher velocity = flatter arc, more energy, shorter flight. Linear approximation; it does not change the BC.'],
       scopeH: ['SCOPE HEIGHT', 'Vertical offset between bore axis and scope axis. It is why the bullet crosses the sight line twice (near and far zero).'],
       zeroDist: ['ZERO DISTANCE', 'Range where trajectory and line of sight are set to cross. Defines the upward bore tilt.'],
       railMoa: ['RAIL INCLINE', 'Fixed tilt machined into the base (e.g. 20 MOA). Not auto-compensated here: it lifts the impact until you dial elevation back down.'],
@@ -411,6 +452,7 @@ const T = {
       lat: ['LATITUDE', 'Where on Earth you shoot; scales the Coriolis deflection.'],
       az: ['SHOT AZIMUTH', 'Compass bearing of the shot (0 = north). Shooting east lifts the impact, west lowers it (Eötvös).'],
       spin: ['SPIN DRIFT', 'Gyroscopic drift from the spinning bullet — right-hand twist drifts right, growing with flight time.'],
+      twist: ['BARREL TWIST', 'Rifling pitch — one turn in n inches. Faster twist (smaller n) spins the bullet harder: higher gyroscopic stability (SG, Miller rule estimate) but slightly more spin drift. SG below 1.0 means the bullet is unstable.'],
       cor: ['CORIOLIS + EÖTVÖS', 'Earth-rotation effects: horizontal drift (Coriolis) and a vertical shift depending on azimuth (Eötvös).'],
       exag: ['VIEW MODE', 'TRUE shows the real geometry (1:1) — the arc is nearly invisible at range. ARC magnifies deviation from the sight line so the parabola is easy to read. All numbers stay true; scope view is always 1:1.'],
       sky: ['SKY LIGHT', 'Scene brightness only — no ballistic effect.'],
@@ -423,7 +465,7 @@ const T = {
     title: 'WIRTUALNA STRZELNICA',
     legTraj: 'TOR LOTU · WG PRĘDKOŚCI', legLos: 'LINIA CELOWANIA', legBore: 'OŚ LUFY', legGhost: 'DUCH · POPRZEDNI STRZAŁ',
     modelBtn: 'ZAŁOŻENIA MODELU', modelTitle: 'MODEL',
-    m: ['Punkt materialny (3-DOF) — bez myszkowania i skoku aerodyn.', 'Opór: G1 — Cd(Mach) pocisku wzorcowego, skalowany 1/BC', 'Gęstość powietrza ρ(T, P, RH) · prędkość dźwięku a(T)', 'Całkowanie: RK4, Δt = 2 ms', 'Kąt zerowania liczony na płaskim torze, stosowany do strzału z nachyleniem', 'Derywacja: przybliżenie Litza (SG ≈ 1,8, gwint prawy)', 'Coriolis: a = −2 Ω × v z szerokości geogr. i azymutu', 'Scena wyolbrzymia odchylenie od linii celowania (luneta: skala 1:1)', 'Kaliber wpływa tylko na wygląd — opór zawiera się w BC'],
+    m: ['Punkt materialny (3-DOF) — bez myszkowania i skoku aerodyn.', 'Opór: G1 — Cd(Mach) pocisku wzorcowego, skalowany 1/BC', 'Gęstość powietrza ρ(T, P, RH) · prędkość dźwięku a(T)', 'Całkowanie: RK4, Δt = 2 ms', 'Kąt zerowania liczony na płaskim torze, stosowany do strzału z nachyleniem', 'Derywacja: przybliżenie Litza, SG z reguły Millera', 'Coriolis: a = −2 Ω × v z szerokości geogr. i azymutu', 'Scena wyolbrzymia odchylenie od linii celowania (luneta: skala 1:1)', 'Kaliber wpływa tylko na wygląd — opór zawiera się w BC'],
     mFoot: 'WIZUALIZACJA SZKOLENIOWA — TO NIE JEST ROZWIĄZANIE OGNIOWE',
     atTarget: 'NA CELU', dropL: 'OPAD', driftL: 'ZNOS', velL: 'PRĘDKOŚĆ', energyL: 'ENERGIA', tofL: 'CZAS LOTU', zerosL: 'ZERA', apexRo: 'WIERZCHOŁEK',
     targetFace: 'TARCZA', ringsNote: 'PIERŚCIENIE', noImpact: 'BRAK TRAFIENIA',
@@ -436,12 +478,15 @@ const T = {
     cams: { side: 'BOK', top: 'GÓRA', shooter: 'STRZELEC', scope: 'LUNETA', free: 'ORBITA' },
     ammo: 'AMUNICJA', rifle: 'KARABIN I OPTYKA', shotSec: 'STRZAŁ', envSec: 'ŚRODOWISKO', advSec: 'ZAAWANSOWANE', dopeSec: 'TABELA POPRAWEK',
     custom: 'Własny', tgtLbl: 'CEL', windLbl: 'WIATR', tgtRow: 'CEL',
-    mvL: 'PRĘDKOŚĆ POCZĄTKOWA', massL: 'MASA POCISKU', bcL: 'WSP. BALISTYCZNY · G1', calL: 'KALIBER',
+    mvL: 'PRĘDKOŚĆ POCZĄTKOWA', massL: 'MASA POCISKU', bcL: 'WSP. BALISTYCZNY · G1', calL: 'KALIBER', barrelL: 'DŁUGOŚĆ LUFY',
     scopeHL: 'WYSOKOŚĆ LUNETY NAD LUFĄ', zeroL: 'ODLEGŁOŚĆ ZEROWANIA', cantL: 'PRZECHYŁ · + = W PRAWO', elevL: 'POPRAWKA PIONOWA', windAdjL: 'POPRAWKA POZIOMA',
     railL: 'NACHYLENIE SZYNY MONTAŻU', mountL: 'NACHYLENIE MONTAŻU',
     tgtDistL: 'ODLEGŁOŚĆ CELU', inclineL: 'KĄT NACHYLENIA',
     tempL: 'TEMPERATURA', pressL: 'CIŚNIENIE', humL: 'WILGOTNOŚĆ',
     spinLbl: 'DERYWACJA · GWINT PRAWY (LITZ)', corLbl: 'CORIOLIS + EÖTVÖS', latL: 'SZEROKOŚĆ GEOGR.', azL: 'AZYMUT STRZAŁU · 0=N',
+    twistL: 'SKOK GWINTU', trainBtn: 'TRYB TRENINGOWY', trainTitle: 'TRENING', roundL: 'RUNDA', totalL: 'ŁĄCZNIE', ptsL: 'PKT', nextBtn: 'NASTĘPNA RUNDA ▸', exitBtn: 'ZAKOŃCZ',
+    trainHint: 'Warunki wylosowane — odczytaj wiatr, dystans i temperaturę, ustaw wieżyczki i strzel.',
+    trainHit: (p) => '+' + p + ' PKT',
     dRng: 'ODL', dDrop: 'OPAD cm', dDrift: 'ZNS cm', dTof: 'CZAS',
     calm: 'BEZWIETRZNIE', fromClock: (h) => 'Z GODZ. ' + h, driftsL: 'ZNOS W LEWO', driftsR: 'ZNOS W PRAWO', headTail: 'CZOŁOWY/TYLNY',
     groundWarn: (x) => '⚠ POCISK UDERZA W ZIEMIĘ NA ' + x + ' — PRZED CELEM',
@@ -454,6 +499,7 @@ const T = {
       massGr: ['MASA POCISKU', 'Masa w granach (1 gr = 64,8 mg). Decyduje o energii; sam opór opisuje BC.'],
       bc: ['WSPÓŁCZYNNIK BALISTYCZNY (G1)', 'Jak dobrze pocisk pokonuje opór względem wzorca G1. Wyższy BC = płaski tor i mniejszy znos wiatrem.'],
       cal: ['KALIBER', 'Średnica pocisku. Tutaj tylko wizualna — efekt aerodynamiczny zawiera BC.'],
+      barrelLen: ['DŁUGOŚĆ LUFY', 'Dłuższa lufa spala więcej prochu przed opuszczeniem jej przez pocisk, zwiększając prędkość początkową (tu ~6,1 m/s na cal, względem lufy odniesienia 20"). Większa prędkość = bardziej płaski tor, więcej energii, krótszy czas lotu. Przybliżenie liniowe; nie zmienia BC.'],
       scopeH: ['WYSOKOŚĆ LUNETY', 'Odległość osi lunety od osi lufy. To przez nią tor przecina linię celowania dwa razy (bliskie i dalekie zero).'],
       zeroDist: ['ODLEGŁOŚĆ ZEROWANIA', 'Dystans, na którym tor przecina linię celowania. Wyznacza kąt podniesienia lufy.'],
       railMoa: ['NACHYLENIE SZYNY', 'Stałe pochylenie szyny (np. 20 MOA). Bez ponownego zerowania podnosi punkt trafienia — skompensuj poprawką pionową.'],
@@ -470,6 +516,7 @@ const T = {
       lat: ['SZEROKOŚĆ GEOGR.', 'Miejsce strzału na Ziemi; skaluje odchylenie Coriolisa.'],
       az: ['AZYMUT STRZAŁU', 'Kierunek strzału (0 = północ). Strzał na wschód podnosi trafienie, na zachód obniża (Eötvös).'],
       spin: ['DERYWACJA', 'Żyroskopowy znos wirującego pocisku — gwint prawy znosi w prawo, rośnie z czasem lotu.'],
+      twist: ['SKOK GWINTU', 'Skok bruzd — jeden obrót na n cali. Szybszy gwint (mniejsze n) mocniej zakręca pocisk: wyższa stabilność żyroskopowa (SG, oszacowanie regułą Millera), ale nieco większa derywacja. SG poniżej 1,0 = pocisk niestabilny.'],
       cor: ['CORIOLIS + EÖTVÖS', 'Efekty obrotu Ziemi: znos poziomy (Coriolis) i pionowy zależny od azymutu (Eötvös).'],
       exag: ['TRYB WIDOKU', 'REALNY pokazuje prawdziwą geometrię (1:1) — łuk jest wtedy prawie niewidoczny. ŁUK powiększa odchylenie od linii celowania, by parabola była czytelna. Liczby pozostają prawdziwe; luneta zawsze 1:1.'],
       sky: ['JASNOŚĆ NIEBA', 'Tylko oświetlenie sceny — bez wpływu na balistykę.'],
@@ -496,6 +543,7 @@ function airDensity(tC, pHpa, rh) {
   return (pd * 100) / (287.058 * T) + (pv * 100) / (461.495 * T);
 }
 const MOA = 2.908882e-4, MILR = 1e-3, GRAIN = 6.479891e-5, KD = 5.5844e-4, G = 9.80665, OMEGA = 7.292e-5, D2R = Math.PI / 180;
+const BARREL_REF = 20, DV_PER_IN = 6.1;
 
 function rk4step(r, v, dt, acc) {
   const k1 = acc(v[0], v[1], v[2]);
@@ -596,7 +644,7 @@ function simulate(p) {
     const s = rx * losU[0] + ry * losU[1];
     const lx = scope[0] + s * losU[0], ly = scope[1] + s * losU[1];
     let z = r[2];
-    if (p.spinOn) z += 0.09525 * Math.pow(Math.max(t, 0), 1.83);
+    if (p.spinOn) z += 0.03175 * ((p.sg || 1.8) + 1.2) * Math.pow(Math.max(t, 0), 1.83);
     const devV = (r[0] - lx) * vUp[0] + (r[1] - ly) * vUp[1];
     samples.push({ x: r[0], y: r[1], z, s, devV, devH: z, v: Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]), t });
     return s;
@@ -679,12 +727,15 @@ const SCN_LIGHT = {
 class Component extends DCLogic {
   state = {
     preset: '.22 LR', mv: 370, massGr: 40, bc: 0.138, cal: 5.7,
+    barrelLen: 20, twist: 16,
     scopeH: 4.5, zeroDist: 50, cant: 0, railMoa: 0, mountMoa: 0, adjUnit: 'MOA', adjElev: 0, adjWind: 0,
     targetDist: 100, incline: 0, tgtType: 'ring50', tgtDiam: 50,
     windSpeed: 3, windDir: 90, temp: 15, pressure: 1013, humidity: 50,
     advOpen: false, spinOn: false, corOn: false, lat: 45, az: 90,
+    ammoOpen: true, rifleOpen: true, shotOpen: true, envOpen: true, dopeOpen: true,
     exag: 8, viewMode: 'arc', cam: 'side', modelOpen: false, firing: false,
     lang: 'EN', skyBright: 15, distUnit: 'm', infoMode: false, infoKey: null, theme: loadTheme(), sceneTheme: loadScene(),
+    trainOn: false, trainRound: 1, trainTotal: 0, trainLast: 0, trainRevealed: false,
   };
   canvasRef = React.createRef();
   timerRef = React.createRef();
@@ -693,10 +744,24 @@ class Component extends DCLogic {
   orbit = { yaw: Math.PI / 2 + 0.35, pitch: 0.24, dist: 260 };
   _h = {};
 
+  effMv() {
+    return Math.max(80, this.state.mv + (this.state.barrelLen - BARREL_REF) * DV_PER_IN);
+  }
+  stabilitySG() {
+    const s = this.state;
+    const dIn = s.cal / 25.4;
+    const dM = s.cal / 1000;
+    const Lm = (s.massGr * GRAIN) / (10900 * 0.74 * Math.PI / 4 * dM * dM);
+    const l = Math.max(1.1, Math.min(7, Lm / dM));
+    const tCal = s.twist / dIn;
+    let sg = 30 * s.massGr / (tCal * tCal * Math.pow(dIn, 3) * l * (1 + l * l));
+    sg *= Math.max(0.85, Math.min(1.15, Math.pow(this.effMv() / 853.4, 1 / 3)));
+    return sg;
+  }
   getParams() {
     const s = this.state;
     return {
-      mv: s.mv, massGr: s.massGr, bc: s.bc, cal: s.cal,
+      mv: this.effMv(), massGr: s.massGr, bc: s.bc, cal: s.cal,
       scopeH: s.scopeH / 100, zeroDist: s.zeroDist, cant: s.cant * D2R,
       rail: s.railMoa * MOA, mount: s.mountMoa * MOA,
       adjElev: s.adjElev * MOA, adjWind: s.adjWind * MOA,
@@ -704,6 +769,7 @@ class Component extends DCLogic {
       windSpeed: s.windSpeed, windDir: s.windDir * D2R,
       temp: s.temp, pressure: s.pressure, humidity: s.humidity,
       spinOn: s.spinOn, corOn: s.corOn, lat: s.lat * D2R, az: s.az * D2R,
+      sg: s.spinOn ? Math.min(3.5, this.stabilitySG()) : 1.8,
     };
   }
   getTraj() {
@@ -748,6 +814,7 @@ class Component extends DCLogic {
     const tr = this.getTraj();
     const st = this.state;
     if (!tr || !tr.samples || !tr.samples.length) return;
+    if (st.trainOn && !st.trainRevealed) return;
     const L = T[st.lang] || T.EN;
     const isMil = st.adjUnit === 'MIL', unit = st.adjUnit;
     const isYd = st.distUnit === 'yd', YDf = 0.9144, dU = isYd ? 'yd' : 'm';
@@ -831,7 +898,7 @@ class Component extends DCLogic {
   }
   onPreset = (e) => {
     const pr = PRESETS.find((x) => x.name === e.target.value);
-    if (pr) this.setState({ preset: pr.name, mv: pr.mv, massGr: pr.massGr, bc: pr.bc, cal: pr.cal });
+    if (pr) this.setState({ preset: pr.name, mv: pr.mv, massGr: pr.massGr, bc: pr.bc, cal: pr.cal, twist: pr.twist });
     else this.setState({ preset: 'Custom' });
   };
   presetOrbit(cam) {
@@ -871,7 +938,7 @@ class Component extends DCLogic {
       if (o) this.orbit = { ...o };
       this.setState({ cam: 'free' });
     }
-    this.orbit.dist = Math.max(6, Math.min(6000, this.orbit.dist * Math.exp(e.deltaY * 0.0012)));
+    this.orbit.dist = Math.max(1.2, Math.min(6000, this.orbit.dist * Math.exp(e.deltaY * 0.0012)));
   };
   dialSet = (e) => {
     const el = this.dialRef.current;
@@ -890,9 +957,54 @@ class Component extends DCLogic {
     if (!tr) return;
     this.ghostTraj = { samples: tr.samples, losU: tr.losU, vUp: tr.vUp, scope: tr.scope, impact: tr.impact };
     this.fireStart = performance.now();
-    this.setState({ firing: true });
+    const st = this.state;
+    if (st.trainOn && !st.trainRevealed) {
+      const pts = this.trainPts(tr.impact);
+      this.setState({ firing: true, trainRevealed: true, trainLast: pts, trainTotal: st.trainTotal + pts });
+    } else this.setState({ firing: true });
   };
+  trainPts(imp) {
+    if (!imp) return 0;
+    const t = this.getTarget();
+    const x = imp.devH, y = imp.devV;
+    if (t.type === 'ipsc') {
+      const ax = Math.abs(x), ay = Math.abs(y);
+      if (ax <= 0.075 && ay <= 0.14) return 10;
+      if (ax <= 0.15 && ay <= 0.225) return 6;
+      if (ax <= t.w / 2 && ay <= t.h / 2) return 2;
+      return 0;
+    }
+    const r = Math.hypot(x, y);
+    if (r > t.R) return 0;
+    if (t.type === 'ring') return Math.max(1, Math.min(10, 11 - Math.ceil(Math.max(r, 1e-9) / t.step)));
+    return 10;
+  }
+  rnd(a, b, stp) { return Math.round((a + Math.random() * (b - a)) / stp) * stp; }
+  newRound() {
+    const pr = PRESETS.find((x) => x.name === this.state.preset);
+    let lo, hi;
+    if (pr) { lo = pr.train[0]; hi = pr.train[1]; }
+    else {
+      hi = Math.round(Math.min(1200, Math.max(150, this.effMv() * this.state.bc * 2.2)));
+      lo = hi > 400 ? 100 : 50;
+    }
+    const stp = (hi - lo) >= 200 ? 25 : 10;
+    return {
+      windSpeed: this.rnd(0, 12, 0.5), windDir: this.rnd(0, 355, 5),
+      targetDist: Math.max(lo, Math.min(hi, this.rnd(lo, hi, stp))), temp: this.rnd(-5, 35, 1),
+      adjElev: 0, adjWind: 0, trainRevealed: false, firing: false, trainLast: 0,
+    };
+  }
+  startTrain = () => { this.ghostTraj = null; this.setState({ trainOn: true, trainRound: 1, trainTotal: 0, ...this.newRound() }); };
+  nextRound = () => { this.ghostTraj = null; this.setState((s) => ({ trainRound: s.trainRound + 1, ...this.newRound() })); };
+  exitTrain = () => this.setState({ trainOn: false, trainRevealed: false });
+  toggleTrain = () => { if (this.state.trainOn) this.exitTrain(); else this.startTrain(); };
   toggleModel = () => this.setState((s) => ({ modelOpen: !s.modelOpen }));
+  togSec(key) {
+    const k = 'tog_' + key;
+    if (!this._h[k]) this._h[k] = () => this.setState((s) => ({ [key]: !s[key] }));
+    return this._h[k];
+  }
   toggleAdv = () => this.setState((s) => ({ advOpen: !s.advOpen }));
   toggleSpin = (e) => this.setState({ spinOn: e.target.checked });
   toggleCor = (e) => this.setState({ corOn: e.target.checked });
@@ -1010,6 +1122,7 @@ class Component extends DCLogic {
     const mono = "px 'IBM Plex Mono', monospace";
 
     const LT = T[st.lang] || T.EN;
+    const hidden = st.trainOn && !st.trainRevealed;
     const SC = st.sceneTheme === 'light' ? SCN_LIGHT : SCN_DARK;
     const uD = st.distUnit === 'yd' ? 0.9144 : 1;
     const dUn = uD === 1 ? ' m' : ' yd';
@@ -1173,7 +1286,7 @@ class Component extends DCLogic {
     }
     ctx.stroke(); ctx.setLineDash([]);
 
-    if ((this.props.showDropLines ?? true) && st.cam !== 'scope') {
+    if ((this.props.showDropLines ?? true) && st.cam !== 'scope' && !hidden) {
       ctx.beginPath(); ctx.strokeStyle = SC.drop; ctx.lineWidth = 1 * dpr;
       for (let x = 50 * uD; x < D; x += 50 * uD) {
         const sm = interpAt(tr.samples, x);
@@ -1184,8 +1297,8 @@ class Component extends DCLogic {
       ctx.stroke();
     }
 
-    const v0 = st.mv, sms = tr.samples;
-    for (let pass = 0; pass < 2; pass++) {
+    const v0 = this.effMv(), sms = tr.samples;
+    if (!hidden) for (let pass = 0; pass < 2; pass++) {
       ctx.lineWidth = pass ? 2.4 * dpr : 7 * dpr;
       for (let i = 1; i < sms.length; i++) {
         ctx.beginPath();
@@ -1210,15 +1323,15 @@ class Component extends DCLogic {
       ctx.fillText(label, lx, p[1] + dy * dpr);
     };
     const cz = tr.crossings;
-    if (cz[0] && cz[0] < D - 1) { const sm = interpAt(tr.samples, cz[0]); if (sm) markPt(dispOf(tr, sm), LT.near + ' ' + Math.round(cz[0] / uD) + dUn, SC.green, 22); }
-    if (cz[1] && cz[1] < D + 1) { const sm = interpAt(tr.samples, cz[1]); if (sm) markPt(dispOf(tr, sm), LT.far + ' ' + Math.round(cz[1] / uD) + dUn, SC.green, 22); }
-    if (tr.apex && tr.apex.devV > 0.003) markPt(dispOf(tr, tr.apex), LT.apex + ' +' + (tr.apex.devV * 100).toFixed(1) + ' cm', SC.gold, -14);
-    if (tr.transonic && tr.transonic.s < D) markPt(dispOf(tr, tr.transonic), LT.transonic, SC.orange, 22);
-    if (tr.hitGround) {
+    if (!hidden && cz[0] && cz[0] < D - 1) { const sm = interpAt(tr.samples, cz[0]); if (sm) markPt(dispOf(tr, sm), LT.near + ' ' + Math.round(cz[0] / uD) + dUn, SC.green, 22); }
+    if (!hidden && cz[1] && cz[1] < D + 1) { const sm = interpAt(tr.samples, cz[1]); if (sm) markPt(dispOf(tr, sm), LT.far + ' ' + Math.round(cz[1] / uD) + dUn, SC.green, 22); }
+    if (!hidden && tr.apex && tr.apex.devV > 0.003) markPt(dispOf(tr, tr.apex), LT.apex + ' +' + (tr.apex.devV * 100).toFixed(1) + ' cm', SC.gold, -14);
+    if (!hidden && tr.transonic && tr.transonic.s < D) markPt(dispOf(tr, tr.transonic), LT.transonic, SC.orange, 22);
+    if (!hidden && tr.hitGround) {
       const lastSm = tr.samples[tr.samples.length - 1];
       markPt(dispOf(tr, lastSm), LT.ground + ' ' + Math.round(lastSm.s / uD) + dUn, SC.red, -14);
     }
-    if (tr.impact && st.cam !== 'scope') {
+    if (!hidden && tr.impact && st.cam !== 'scope') {
       const p = this.pt2(cam, dispOf(tr, tr.impact));
       if (p) {
         ctx.strokeStyle = SC.red; ctx.lineWidth = 2 * dpr;
@@ -1267,7 +1380,7 @@ class Component extends DCLogic {
         this.setState({ firing: false }, () => { this._ending = false; });
       }
     }
-    if (this.timerRef.current) this.timerRef.current.textContent = timerVal.toFixed(3);
+    if (this.timerRef.current) this.timerRef.current.textContent = hidden ? '0.000' : timerVal.toFixed(3);
     this.drawInset(tr, LT);
 
     if (st.cam === 'scope') {
@@ -1323,7 +1436,7 @@ class Component extends DCLogic {
         ctx.moveTo(cx, cy - d6); ctx.lineTo(cx, cy - Rv);
         ctx.stroke();
       }
-      if (tr.impact) {
+      if (tr.impact && !hidden) {
         const dmil = -(tr.impact.devV / D) * 1000;
         const wmil = (tr.impact.devH / D) * 1000;
         const hx = cx + wmil * mpx, hy = cy + dmil * mpx;
@@ -1351,13 +1464,14 @@ class Component extends DCLogic {
     const W2 = cv.width, H2 = cv.height;
     c.fillStyle = '#0b1017';
     c.fillRect(0, 0, W2, H2);
+    const hidden = this.state.trainOn && !this.state.trainRevealed;
     const imp = tr.impact;
     const gi = this.ghostTraj && this.ghostTraj.impact;
     const tgt = this.getTarget();
     const tHalf = tgt.type === 'ipsc' ? tgt.h / 2 : tgt.R;
     let ext = Math.max(0.28, tHalf * 1.2);
-    if (imp) ext = Math.max(ext, Math.abs(imp.devV) * 1.3, Math.abs(imp.devH) * 1.3);
-    if (gi) ext = Math.max(ext, Math.abs(gi.devV) * 1.15, Math.abs(gi.devH) * 1.15);
+    if (imp && !hidden) ext = Math.max(ext, Math.abs(imp.devV) * 1.3, Math.abs(imp.devH) * 1.3);
+    if (gi && !hidden) ext = Math.max(ext, Math.abs(gi.devV) * 1.15, Math.abs(gi.devH) * 1.15);
     ext = Math.min(ext, 8);
     const cx = W2 / 2, cy = H2 / 2;
     const sc = (Math.min(W2, H2) / 2 - 10 * d) / ext;
@@ -1393,7 +1507,7 @@ class Component extends DCLogic {
     c.textAlign = 'left';
     c.fillText(tgt.label, 6 * d, H2 - 6 * d);
     const sc0 = this.score(imp, LT);
-    if (!sc0.none) {
+    if (!sc0.none && !hidden) {
       c.textAlign = 'right';
       c.fillStyle = sc0.hit ? '#7fd88f' : '#ff8080';
       c.fillText(LT.scoreL + ' ' + sc0.txt, W2 - 6 * d, H2 - 6 * d);
@@ -1409,8 +1523,13 @@ class Component extends DCLogic {
       c.moveTo(x + r, y - r); c.lineTo(x - r, y + r);
       c.stroke();
     };
-    if (gi) drawX(gi.devV, gi.devH, 'rgba(130,142,158,0.7)', 4 * d);
-    if (imp) drawX(imp.devV, imp.devH, '#ff4d4d', 5 * d);
+    if (gi && !hidden) drawX(gi.devV, gi.devH, 'rgba(130,142,158,0.7)', 4 * d);
+    if (hidden) {
+      c.fillStyle = '#ffd166';
+      c.textAlign = 'center';
+      c.font = 12 * d + "px 'IBM Plex Mono', monospace";
+      c.fillText('?', cx, cy - 10 * d);
+    } else if (imp) drawX(imp.devV, imp.devH, '#ff4d4d', 5 * d);
     else {
       c.fillStyle = '#ff8080';
       c.textAlign = 'center';
@@ -1443,6 +1562,16 @@ class Component extends DCLogic {
     const cz = tr.crossings || [];
     const tgtG = this.getTarget();
     const sc0 = this.score(imp, L);
+    const hidden = st.trainOn && !st.trainRevealed;
+    const mask = (v) => hidden ? '···' : v;
+    const sgv = this.stabilitySG();
+    const lockStyle = st.trainOn ? { marginBottom: '24px', opacity: 0.55, pointerEvents: 'none' } : { marginBottom: '24px' };
+    const trainMsg = st.trainOn ? (st.trainRevealed ? L.trainHit(st.trainLast) + ' · ' + sc0.txt : L.trainHint) : '';
+    const trainBtnStyle = {
+      width: '100%', marginTop: '4px', boxSizing: 'border-box', fontFamily: "'IBM Plex Mono', monospace", fontSize: '9.5px', letterSpacing: '1.5px', padding: '5px 0',
+      cursor: 'pointer', border: '1px solid ' + (st.trainOn ? 'var(--gold)' : 'var(--border)'),
+      background: st.trainOn ? 'var(--gold)' : 'transparent', color: st.trainOn ? 'var(--on-accent)' : 'var(--muted)',
+    };
 
     const adjDisp = (moa) => {
       if (isMil) { const m = moa * 0.290888; return (m >= 0 ? '+' : '') + m.toFixed(1) + ' MIL'; }
@@ -1469,7 +1598,10 @@ class Component extends DCLogic {
       this.sl('bc', L.bcL, 0.05, 1, 0.005, st.bc.toFixed(3)),
       this.sl('cal', L.calL, 4, 10, 0.1, st.cal.toFixed(1) + ' mm'),
     ];
+    const dvBarrel = (st.barrelLen - BARREL_REF) * DV_PER_IN;
+    const barrelDisp = st.barrelLen.toFixed(1) + '″ / ' + (st.barrelLen * 2.54).toFixed(0) + ' cm · ' + (dvBarrel >= 0 ? '+' : '') + dvBarrel.toFixed(0) + ' m/s';
     const rifleCtl = [
+      this.sl('barrelLen', L.barrelL, 10, 28, 0.5, barrelDisp),
       this.sl('scopeH', L.scopeHL, 2, 10, 0.1, st.scopeH.toFixed(1) + ' cm'),
       distCtl('zeroDist', L.zeroL, 25, 600, 5),
       isMil ? milCtl('railMoa', L.railL, 0, 17.5) : this.sl('railMoa', L.railL, 0, 60, 1, adjDisp(st.railMoa)),
@@ -1488,6 +1620,7 @@ class Component extends DCLogic {
       this.sl('humidity', L.humL, 0, 100, 5, st.humidity.toFixed(0) + ' %'),
     ];
     const advCtl = [
+      this.sl('twist', L.twistL, 5, 20, 0.5, '1:' + st.twist.toFixed(1) + '″ · SG ' + Math.min(9.9, sgv).toFixed(2) + (sgv < 1 ? ' ⚠' : '')),
       this.sl('lat', L.latL, -90, 90, 1, st.lat.toFixed(0) + '°'),
       this.sl('az', L.azL, 0, 360, 5, st.az.toFixed(0) + '°'),
     ];
@@ -1514,7 +1647,7 @@ class Component extends DCLogic {
       const step = ((D / (isYd ? YDf : 1)) <= 250 ? 50 : 100) * (isYd ? YDf : 1);
       const mkRow = (x, sm, hl) => ({
         rng: hl ? L.tgtRow : Math.round(x / (isYd ? YDf : 1)) + '', drop: (sm.devV * 100).toFixed(1), dropA: angNum(sm.devV, x),
-        drift: (sm.devH * 100).toFixed(1), driftA: angNum(sm.devH, x),
+        drift: hidden ? '···' : (sm.devH * 100).toFixed(1), driftA: hidden ? '' : angNum(sm.devH, x),
         vel: sm.v.toFixed(0), tof: sm.t.toFixed(2), style: rowStyle(hl),
       });
       for (let x = step; x < D; x += step) {
@@ -1522,7 +1655,7 @@ class Component extends DCLogic {
         if (!sm) break;
         dopeRows.push(mkRow(x, sm, false));
       }
-      if (imp) dopeRows.push(mkRow(D, imp, true));
+      if (imp && !hidden) dopeRows.push(mkRow(D, imp, true));
     }
 
     const h = Math.round(st.windDir / 30) === 0 ? 12 : Math.round(st.windDir / 30);
@@ -1569,14 +1702,14 @@ class Component extends DCLogic {
         marginLeft: '-1px', background: 'linear-gradient(to top, var(--accent-fade), var(--accent))',
         transformOrigin: '50% 100%', transform: 'rotate(' + st.windDir + 'deg)',
       },
-      roDrop: imp ? cmF(imp.devV) + ' · ' + angOf(imp.devV, D) : '—',
-      roDrift: imp ? cmF(imp.devH) + ' · ' + angOf(imp.devH, D) : '—',
-      roVel: imp ? imp.v.toFixed(0) + ' m/s' : '—',
-      roEnergy: imp ? (0.5 * mass * imp.v * imp.v).toFixed(0) + ' J' : '—',
-      roTof: imp ? imp.t.toFixed(3) + ' s' : '—',
-      roZero: cz.length ? cz.slice(0, 2).map((s) => Math.round(s / (isYd ? YDf : 1))).join(' / ') + ' ' + dU : '—',
-      roApex: (tr.apex && tr.apex.devV > 0) ? '+' + (tr.apex.devV * 100).toFixed(1) + ' cm @ ' + fmtDist(tr.apex.s) : '—',
-      groundWarn: !!tr.hitGround,
+      roDrop: mask(imp ? cmF(imp.devV) + ' · ' + angOf(imp.devV, D) : '—'),
+      roDrift: mask(imp ? cmF(imp.devH) + ' · ' + angOf(imp.devH, D) : '—'),
+      roVel: mask(imp ? imp.v.toFixed(0) + ' m/s' : '—'),
+      roEnergy: mask(imp ? (0.5 * mass * imp.v * imp.v).toFixed(0) + ' J' : '—'),
+      roTof: mask(imp ? imp.t.toFixed(3) + ' s' : '—'),
+      roZero: mask(cz.length ? cz.slice(0, 2).map((s) => Math.round(s / (isYd ? YDf : 1))).join(' / ') + ' ' + dU : '—'),
+      roApex: mask((tr.apex && tr.apex.devV > 0) ? '+' + (tr.apex.devV * 100).toFixed(1) + ' cm @ ' + fmtDist(tr.apex.s) : '—'),
+      groundWarn: !!tr.hitGround && !hidden,
       groundTxt: tr.hitGround ? L.groundWarn(fmtDist(tr.groundS)) : '',
       tgtRef: this.tgtRef,
       tTgtSizeL: L.tgtSizeL, tgtTypeVal: st.tgtType, onTgtType: this.onTgtType,
@@ -1584,9 +1717,18 @@ class Component extends DCLogic {
       tgtCustom: st.tgtType === 'custom',
       tgtDiamVal: st.tgtDiam, tgtDiamInput: this.h('tgtDiam'), tgtDiamDisp: st.tgtDiam.toFixed(0) + ' cm',
       tgtDimTxt: tgtG.label, tgtSizeEnter: this.iE('tgtSize'),
-      tRoScoreL: L.scoreL, roScore: sc0.txt,
-      roScoreStyle: { color: sc0.none ? 'var(--muted)' : sc0.hit ? 'var(--green)' : 'var(--red-soft)' },
+      tRoScoreL: L.scoreL, roScore: hidden ? '?' : sc0.txt,
+      roScoreStyle: { color: (hidden || sc0.none) ? 'var(--muted)' : sc0.hit ? 'var(--green)' : 'var(--red-soft)' },
       exportPdf: this.exportPdf, tPdfBtn: L.pdfBtn,
+      toggleTrain: this.toggleTrain, nextRound: this.nextRound, exitTrain: this.exitTrain,
+      trainOn: st.trainOn, trainRevealed: st.trainRevealed, trainRound: st.trainRound, trainTotal: st.trainTotal,
+      trainMsg, trainBtnStyle, lockStyle,
+      togAmmo: this.togSec('ammoOpen'), ammoOpen: st.ammoOpen, ammoArrow: st.ammoOpen ? '−' : '+',
+      togRifle: this.togSec('rifleOpen'), rifleOpen: st.rifleOpen, rifleArrow: st.rifleOpen ? '−' : '+',
+      togShot: this.togSec('shotOpen'), shotOpen: st.shotOpen, shotArrow: st.shotOpen ? '−' : '+',
+      togEnv: this.togSec('envOpen'), envOpen: st.envOpen, envArrow: st.envOpen ? '−' : '+',
+      togDope: this.togSec('dopeOpen'), dopeOpen: st.dopeOpen, dopeArrow: st.dopeOpen ? '−' : '+',
+      tTrainBtn: L.trainBtn, tTrainTitle: L.trainTitle, tRoundL: L.roundL, tTotalL: L.totalL, tPtsL: L.ptsL, tNextBtn: L.nextBtn, tExitBtn: L.exitBtn,
       setEng: this.setEng, setPol: this.setPol,
       engStyle: unitBtn(st.lang === 'EN'), polStyle: unitBtn(st.lang === 'PL'),
       skyVal: st.skyBright, skyInput: this.h('skyBright'),
