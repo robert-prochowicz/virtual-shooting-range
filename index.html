@@ -51,19 +51,22 @@ html[data-theme="light"]{
 }
 </style>
 </helmet>
-<div style="display:flex; width:100vw; height:100vh; background:var(--bg); color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12px; user-select:none; -webkit-user-select:none;">
+<div style="position:relative; display:flex; width:100vw; height:100vh; background:var(--bg); color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12px; user-select:none; -webkit-user-select:none;">
 
   <div data-screen-label="3D Range View" style="position:relative; flex:1 1 auto; min-width:0; overflow:hidden; background:var(--bg);">
     <canvas ref="{{canvasRef}}" onPointerDown="{{vpDown}}" onPointerMove="{{vpMove}}" onPointerUp="{{vpUp}}" onWheel="{{vpWheel}}" style="position:absolute; inset:0; width:100%; height:100%; display:block; cursor:grab; touch-action:none;"></canvas>
 
     <div style="position:absolute; top:14px; left:14px; background:var(--panel-85); border:1px solid var(--border); padding:12px 14px; min-width:212px; backdrop-filter:blur(3px);">
       <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
-        <div style="font-family:'Chakra Petch',sans-serif; font-weight:700; font-size:13px; letter-spacing:2px; color:var(--text-bright); max-width:150px;">{{tTitle}}</div>
+        <div onClick="{{togLegend}}" style="font-family:'Chakra Petch',sans-serif; font-weight:700; font-size:13px; letter-spacing:2px; color:var(--text-bright); max-width:150px; cursor:pointer;">{{tTitle}}</div>
         <div style="display:flex; gap:2px; flex:none;">
           <button onClick="{{setEng}}" style="{{engStyle}}">ENG</button>
           <button onClick="{{setPol}}" style="{{polStyle}}">POL</button>
+          <button onClick="{{togLegend}}" style="{{legendTogStyle}}">{{legendArrow}}</button>
         </div>
       </div>
+      <sc-if value="{{legendOpen}}" hint-placeholder-val="{{true}}">
+      <div>
       <div style="font-size:9px; letter-spacing:1.5px; color:var(--muted); margin-top:3px;">POINT-MASS · G1 · RK4</div>
       <div style="display:flex; flex-direction:column; gap:7px; margin-top:13px;">
         <div style="display:flex; align-items:center; gap:9px;"><span style="width:22px; height:3px; background:linear-gradient(90deg,var(--text-bright),var(--gold),#ff8c42,var(--red)); flex:none;"></span><span style="font-size:9.5px; letter-spacing:1px; color:var(--text-soft);">{{tLegTraj}}</span></div>
@@ -77,6 +80,8 @@ html[data-theme="light"]{
         <button onClick="{{toggleInfo}}" style="{{infoBtnStyle}}">{{tInfoBtn}}</button>
       </div>
       <button onClick="{{toggleTrain}}" style="{{trainBtnStyle}}">{{tTrainBtn}}</button>
+      </div>
+      </sc-if>
     </div>
 
     <sc-if value="{{modelOpen}}" hint-placeholder-val="{{false}}">
@@ -123,9 +128,11 @@ html[data-theme="light"]{
       </div>
     </sc-if>
 
-    <div style="position:absolute; top:14px; right:14px; width:228px; display:flex; flex-direction:column; gap:10px;">
+    <div style="{{hudColStyle}}">
       <div style="background:var(--panel-85); border:1px solid var(--border); padding:12px 14px; backdrop-filter:blur(3px);">
-        <div style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2px; color:var(--muted);">{{tAtTarget}} · {{targetLabel}}</div>
+        <div onClick="{{togStats}}" style="display:flex; justify-content:space-between; align-items:baseline; cursor:pointer; font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2px; color:var(--muted);"><span>{{tAtTarget}} · {{targetLabel}}</span><span style="font-size:12px;">{{statsArrow}}</span></div>
+        <sc-if value="{{statsOpen}}" hint-placeholder-val="{{true}}">
+        <div>
         <div style="display:flex; flex-direction:column; gap:5px; margin-top:10px; font-size:10.5px;">
           <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--muted);">{{tRoDropL}}</span><span style="color:var(--text-bright);">{{roDrop}}</span></div>
           <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--muted);">{{tRoDriftL}}</span><span style="color:var(--text-bright);">{{roDrift}}</span></div>
@@ -138,13 +145,15 @@ html[data-theme="light"]{
           <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--muted);">{{tRoZerosL}}</span><span style="color:var(--green);">{{roZero}}</span></div>
           <div style="display:flex; justify-content:space-between; gap:8px;"><span style="color:var(--muted);">{{tRoApexL}}</span><span style="color:var(--gold);">{{roApex}}</span></div>
         </div>
+        </div>
+        </sc-if>
       </div>
       <div style="background:var(--panel-85); border:1px solid var(--border); padding:10px 12px; backdrop-filter:blur(3px);">
         <div style="display:flex; justify-content:space-between; align-items:baseline;">
-          <span style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2px; color:var(--muted);">{{tTargetFace}}</span>
-          <span style="font-size:9px; color:var(--dim);">{{targetLabel}}</span>
+          <span onClick="{{togFace}}" style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2px; color:var(--muted); cursor:pointer;">{{tTargetFace}}</span>
+          <span onClick="{{togFace}}" style="font-size:9px; color:var(--dim); cursor:pointer;">{{targetLabel}} <span style="font-size:12px;">{{faceArrow}}</span></span>
         </div>
-        <canvas ref="{{tgtRef}}" style="display:block; width:100%; height:150px; margin-top:8px;"></canvas>
+        <canvas ref="{{tgtRef}}" style="{{faceCvStyle}}"></canvas>
       </div>
     </div>
 
@@ -163,7 +172,9 @@ html[data-theme="light"]{
         </sc-for>
       </div>
 
-      <div style="background:var(--panel-85); border:1px solid var(--border); padding:8px 12px; width:150px; pointer-events:auto;">
+      <div style="pointer-events:auto; display:flex; flex-direction:column; align-items:flex-end;">
+        <button onClick="{{togDisp}}" style="{{dispBtnStyle}}">{{tDispL}} {{dispArrow}}</button>
+        <div style="{{dispPanelStyle}}">
         <div onMouseEnter="{{exagEnter}}" onMouseLeave="{{infoLeave}}">
           <div style="font-size:9px; letter-spacing:1px; color:var(--muted);">{{tViewMode}}</div>
           <div style="display:flex; gap:2px; margin-top:5px;">
@@ -201,15 +212,25 @@ html[data-theme="light"]{
             <button onClick="{{setSceneLight}}" style="{{sceneLightStyle}}">{{tLightBtn}}</button>
           </div>
         </div>
+        </div>
       </div>
     </div>
 
     <sc-if value="{{groundWarn}}" hint-placeholder-val="{{false}}">
       <div style="position:absolute; bottom:66px; left:50%; transform:translateX(-50%); background:var(--warn-bg); border:1px solid var(--red); color:var(--red-soft); font-size:11px; letter-spacing:1.5px; padding:8px 16px;">{{groundTxt}}</div>
     </sc-if>
+    <sc-if value="{{drawer}}" hint-placeholder-val="{{false}}">
+      <button onClick="{{openParams}}" style="position:absolute; top:14px; right:14px; z-index:7; font-family:'Chakra Petch',sans-serif; font-weight:600; font-size:10px; letter-spacing:2px; padding:9px 14px; cursor:pointer; border:1px solid var(--accent); background:var(--panel-92); color:var(--accent); backdrop-filter:blur(3px);">☰ {{tParamsBtn}}</button>
+    </sc-if>
+    <sc-if value="{{scrimOn}}" hint-placeholder-val="{{false}}">
+      <div onClick="{{closeParams}}" style="position:absolute; inset:0; z-index:8; background:rgba(0,0,0,0.4);"></div>
+    </sc-if>
   </div>
 
-  <div data-screen-label="Parameters Panel" style="width:332px; flex:none; background:var(--panel2); border-left:1px solid var(--border2); overflow-y:auto; padding:18px 16px 26px; box-sizing:border-box;">
+  <div data-screen-label="Parameters Panel" style="{{paramsStyle}}">
+    <sc-if value="{{drawer}}" hint-placeholder-val="{{false}}">
+      <button onClick="{{closeParams}}" style="display:flex; justify-content:space-between; align-items:center; width:100%; background:transparent; border:1px solid var(--border); color:var(--muted); font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2px; padding:7px 10px; margin:0 0 16px; cursor:pointer; box-sizing:border-box;"><span>{{tParamsBtn}}</span><span>✕</span></button>
+    </sc-if>
 
     <div style="{{lockStyle}}">
       <button onClick="{{togAmmo}}" style="display:flex; justify-content:space-between; align-items:center; width:100%; background:transparent; border:none; border-bottom:1px solid var(--border2); padding:0 0 7px; cursor:pointer; font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted);"><span>{{tAmmo}}</span><span style="font-size:12px;">{{ammoArrow}}</span></button>
@@ -409,6 +430,7 @@ const T = {
     tgtOpts: { ring50: 'RING TARGET · Ø 50 cm', ring100: 'RING TARGET · Ø 100 cm', gong30: 'STEEL GONG · Ø 30 cm', ipsc: 'IPSC PAPER · 45 × 57.5 cm', custom: 'CUSTOM PLATE · Ø' },
     pdfBtn: '⎙ PDF', pdfPrinted: 'GENERATED',
     fire: 'FIRE', devScale: 'ARC MAGNIFICATION', skyLbl: 'SKY LIGHT',
+    paramsL: 'PARAMETERS', dispL: 'DISPLAY',
     viewMode: 'VIEW MODE', trueBtn: 'TRUE', arcBtn: 'ARC', trueNote: 'TRUE GEOMETRY · 1:1',
     uiTheme: 'PANELS', sceneTheme: 'SCENE', darkBtn: 'DARK', lightBtn: 'LIGHT',
     cams: { side: 'SIDE', top: 'TOP', shooter: 'SHOOTER', scope: 'SCOPE', free: 'ORBIT' },
@@ -473,6 +495,7 @@ const T = {
     tgtOpts: { ring50: 'PIERŚCIENIOWA · Ø 50 cm', ring100: 'PIERŚCIENIOWA · Ø 100 cm', gong30: 'GONG STALOWY · Ø 30 cm', ipsc: 'PAPIEROWA IPSC · 45 × 57,5 cm', custom: 'WŁASNA PŁYTA · Ø' },
     pdfBtn: '⎙ PDF', pdfPrinted: 'WYGENEROWANO',
     fire: 'OGNIA', devScale: 'POWIĘKSZENIE ŁUKU', skyLbl: 'JASNOŚĆ NIEBA',
+    paramsL: 'PARAMETRY', dispL: 'EKRAN',
     viewMode: 'TRYB WIDOKU', trueBtn: 'REALNY', arcBtn: 'ŁUK', trueNote: 'GEOMETRIA RZECZYWISTA · 1:1',
     uiTheme: 'PANELE', sceneTheme: 'SCENA', darkBtn: 'CIEMNY', lightBtn: 'JASNY',
     cams: { side: 'BOK', top: 'GÓRA', shooter: 'STRZELEC', scope: 'LUNETA', free: 'ORBITA' },
@@ -736,6 +759,7 @@ class Component extends DCLogic {
     exag: 8, viewMode: 'arc', cam: 'side', modelOpen: false, firing: false,
     lang: 'EN', skyBright: 15, distUnit: 'm', infoMode: false, infoKey: null, theme: loadTheme(), sceneTheme: loadScene(),
     trainOn: false, trainRound: 1, trainTotal: 0, trainLast: 0, trainRevealed: false,
+    vw: window.innerWidth, legendOpen: null, statsOpen: true, faceOpen: null, dispOpen: null, paramsOpen: false,
   };
   canvasRef = React.createRef();
   timerRef = React.createRef();
@@ -1006,6 +1030,13 @@ class Component extends DCLogic {
     return this._h[k];
   }
   toggleAdv = () => this.setState((s) => ({ advOpen: !s.advOpen }));
+  togOvr(key) {
+    const k = 'ovr_' + key;
+    if (!this._h[k]) this._h[k] = () => this.setState((s) => ({ [key]: !(s[key] == null ? window.innerWidth >= 1300 : s[key]) }));
+    return this._h[k];
+  }
+  openParams = () => this.setState({ paramsOpen: true });
+  closeParams = () => this.setState({ paramsOpen: false });
   toggleSpin = (e) => this.setState({ spinOn: e.target.checked });
   toggleCor = (e) => this.setState({ corOn: e.target.checked });
   setMoa = () => this.setState({ adjUnit: 'MOA' });
@@ -1039,6 +1070,8 @@ class Component extends DCLogic {
 
   componentDidMount() {
     document.documentElement.setAttribute('data-theme', this.state.theme);
+    this._onRz = () => this.setState({ vw: window.innerWidth });
+    window.addEventListener('resize', this._onRz);
     const cv = this.canvasRef.current;
     this._ro = new ResizeObserver(() => {
       const p = cv.parentElement, r = p.getBoundingClientRect();
@@ -1057,6 +1090,7 @@ class Component extends DCLogic {
   componentWillUnmount() {
     cancelAnimationFrame(this._raf);
     if (this._ro) this._ro.disconnect();
+    window.removeEventListener('resize', this._onRz);
   }
 
   camera(tr, W, H) {
@@ -1667,7 +1701,34 @@ class Component extends DCLogic {
       background: on ? 'var(--accent)' : 'transparent', color: on ? 'var(--on-accent)' : 'var(--muted)',
     });
 
+    const vw = st.vw || 1600;
+    const compact = vw < 1300, drawer = vw < 980;
+    const ovr = (v) => v == null ? !compact : v;
+    const legendOpen = ovr(st.legendOpen), faceOpen = ovr(st.faceOpen), dispOpen = ovr(st.dispOpen);
+    const respVals = {
+      drawer, scrimOn: drawer && st.paramsOpen,
+      openParams: this.openParams, closeParams: this.closeParams,
+      tParamsBtn: L.paramsL, tDispL: L.dispL,
+      legendOpen, legendArrow: legendOpen ? '−' : '+', togLegend: this.togOvr('legendOpen'),
+      legendTogStyle: { fontFamily: "'IBM Plex Mono', monospace", fontSize: '9px', letterSpacing: '1px', padding: '3px 8px', cursor: 'pointer', border: '1px solid var(--border)', background: 'transparent', color: 'var(--muted)' },
+      statsOpen: st.statsOpen, statsArrow: st.statsOpen ? '−' : '+', togStats: this.togSec('statsOpen'),
+      faceOpen, faceArrow: faceOpen ? '−' : '+', togFace: this.togOvr('faceOpen'),
+      faceCvStyle: { display: faceOpen ? 'block' : 'none', width: '100%', height: '150px', marginTop: '8px' },
+      dispOpen, dispArrow: dispOpen ? '−' : '+', togDisp: this.togOvr('dispOpen'),
+      dispBtnStyle: { fontFamily: "'Chakra Petch', sans-serif", fontWeight: 600, fontSize: '9.5px', letterSpacing: '1.5px', padding: '7px 11px', cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--panel-88)', color: 'var(--muted2)' },
+      dispPanelStyle: { display: dispOpen ? 'block' : 'none', background: 'var(--panel-85)', border: '1px solid var(--border)', padding: '8px 12px', width: '150px', marginTop: '4px', boxSizing: 'border-box', backdropFilter: 'blur(3px)' },
+      hudColStyle: { position: 'absolute', top: drawer ? '60px' : '14px', right: '14px', width: compact ? '206px' : '228px', display: 'flex', flexDirection: 'column', gap: '10px' },
+      paramsStyle: drawer ? {
+        position: 'absolute', top: 0, right: 0, bottom: 0, width: 'min(332px, 88vw)', zIndex: 30,
+        background: 'var(--panel2)', borderLeft: '1px solid var(--border2)', overflowY: 'auto',
+        padding: '14px 16px 26px', boxSizing: 'border-box',
+        transform: st.paramsOpen ? 'translateX(0)' : 'translateX(102%)', transition: 'transform 0.25s ease',
+        boxShadow: st.paramsOpen ? '-20px 0 40px rgba(0,0,0,0.45)' : 'none',
+      } : { width: '332px', flex: 'none', background: 'var(--panel2)', borderLeft: '1px solid var(--border2)', overflowY: 'auto', padding: '18px 16px 26px', boxSizing: 'border-box' },
+    };
+
     return {
+      ...respVals,
       canvasRef: this.canvasRef, timerRef: this.timerRef, dialRef: this.dialRef,
       vpDown: this.vpDown, vpMove: this.vpMove, vpUp: this.vpUp, vpWheel: this.vpWheel,
       dialDown: this.dialDown, dialMove: this.dialMove, dialUp: this.dialUp,
