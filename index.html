@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<script src="./langs-a.js"></script>
+<script src="./langs-b.js"></script>
+<script src="./langs-c.js"></script>
+<script src="./langs-d.js"></script>
+<script src="./langs-e.js"></script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -60,8 +65,9 @@ html[data-theme="light"]{
       <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
         <div onClick="{{togLegend}}" style="font-family:'Chakra Petch',sans-serif; font-weight:700; font-size:13px; letter-spacing:2px; color:var(--text-bright); max-width:150px; cursor:pointer;">{{tTitle}}</div>
         <div style="display:flex; gap:2px; flex:none;">
-          <button onClick="{{setEng}}" style="{{engStyle}}">ENG</button>
-          <button onClick="{{setPol}}" style="{{polStyle}}">POL</button>
+          <select onChange="{{setLang}}" value="{{lang}}" style="{{langSelStyle}}">
+            <option value="EN">English</option><option value="PL">Polski</option><option value="DE">Deutsch</option><option value="FR">Français</option><option value="ES">Español</option><option value="IT">Italiano</option><option value="PT">Português</option><option value="NL">Nederlands</option><option value="SV">Svenska</option><option value="DA">Dansk</option><option value="CS">Čeština</option><option value="RU">Русский</option><option value="UK">Українська</option><option value="ZH">中文</option><option value="JA">日本語</option><option value="KO">한국어</option><option value="AR">العربية</option>
+          </select>
           <button onClick="{{togLegend}}" style="{{legendTogStyle}}">{{legendArrow}}</button>
         </div>
       </div>
@@ -80,6 +86,7 @@ html[data-theme="light"]{
         <button onClick="{{toggleInfo}}" style="{{infoBtnStyle}}">{{tInfoBtn}}</button>
       </div>
       <button onClick="{{toggleTrain}}" style="{{trainBtnStyle}}">{{tTrainBtn}}</button>
+      <a href="https://buymeacoffee.com/r.proch" target="_blank" rel="noopener" title="{{supportTxt}}" style="{{coffeeBtnStyle}}">☕ {{supportBtn}}</a>
       </div>
       </sc-if>
     </div>
@@ -102,6 +109,10 @@ html[data-theme="light"]{
           · {{m9}}
         </div>
         <div style="margin-top:9px; font-size:9px; letter-spacing:1px; color:var(--amber);">{{mFoot}}</div>
+        <div style="margin-top:11px; padding-top:10px; border-top:1px solid var(--border);">
+          <div style="font-size:10px; line-height:1.55; color:var(--text-soft);">{{supportTxt}}</div>
+          <a href="https://buymeacoffee.com/r.proch" target="_blank" rel="noopener" style="display:inline-block; margin-top:8px; font-family:'Chakra Petch',sans-serif; font-weight:600; font-size:9.5px; letter-spacing:1.5px; padding:7px 12px; border:1px solid var(--amber); color:var(--amber); text-decoration:none;">☕ {{supportBtn}}</a>
+        </div>
       </div>
     </sc-if>
 
@@ -424,6 +435,8 @@ const T = {
     modelBtn: 'MODEL ASSUMPTIONS', modelTitle: 'MODEL',
     m: ['Point mass (3-DOF) — no yaw, no aerodynamic jump', 'Drag: G1 standard-projectile Cd(Mach), scaled by 1/BC', 'Air density ρ(T, P, RH) · speed of sound a(T)', 'Integration: RK4 at Δt = 2 ms', 'Zero angle solved on a flat range, applied to inclined shot', 'Spin drift: Litz approximation, SG from Miller twist rule', 'Coriolis: a = −2 Ω × v from latitude + azimuth', 'Scene exaggerates deviation from the LOS (scope is true scale)', 'Caliber affects display only — drag is carried by the BC'],
     mFoot: 'TRAINING VISUALIZATION — NOT A FIRING SOLUTION',
+    supportTxt: 'You can\u2019t be sleepy on the range — buy me a coffee so I don\u2019t doze off on the firing line. Every cup supports development.',
+    supportBtn: 'BUY ME A COFFEE',
     atTarget: 'AT TARGET', dropL: 'DROP', driftL: 'DRIFT', velL: 'VELOCITY', energyL: 'ENERGY', tofL: 'TIME OF FLIGHT', zerosL: 'ZEROS', apexRo: 'APEX',
     targetFace: 'TARGET FACE', ringsNote: 'RINGS', noImpact: 'NO IMPACT',
     tgtSizeL: 'TARGET TYPE', scoreL: 'SCORE', hitTxt: 'HIT', missTxt: 'MISS', zoneTxt: (z) => 'ZONE ' + z,
@@ -433,7 +446,7 @@ const T = {
     paramsL: 'PARAMETERS', dispL: 'DISPLAY',
     viewMode: 'VIEW MODE', trueBtn: 'TRUE', arcBtn: 'ARC', trueNote: 'TRUE GEOMETRY · 1:1',
     uiTheme: 'PANELS', sceneTheme: 'SCENE', darkBtn: 'DARK', lightBtn: 'LIGHT',
-    cams: { side: 'SIDE', top: 'TOP', shooter: 'SHOOTER', scope: 'SCOPE', free: 'ORBIT' },
+    cams: { side: 'SIDE', top: 'TOP', shooter: 'SHOOTER', rifle: 'RIFLE', scope: 'SCOPE', free: 'ORBIT' },
     ammo: 'AMMUNITION', rifle: 'RIFLE & OPTIC', shotSec: 'SHOT', envSec: 'ENVIRONMENT', advSec: 'ADVANCED', dopeSec: 'DOPE CARD',
     custom: 'Custom', tgtLbl: 'TGT', windLbl: 'WIND', tgtRow: 'TGT',
     mvL: 'MUZZLE VELOCITY', massL: 'BULLET MASS', bcL: 'BALLISTIC COEFF · G1', calL: 'CALIBER', barrelL: 'BARREL LENGTH',
@@ -489,6 +502,8 @@ const T = {
     modelBtn: 'ZAŁOŻENIA MODELU', modelTitle: 'MODEL',
     m: ['Punkt materialny (3-DOF) — bez myszkowania i skoku aerodyn.', 'Opór: G1 — Cd(Mach) pocisku wzorcowego, skalowany 1/BC', 'Gęstość powietrza ρ(T, P, RH) · prędkość dźwięku a(T)', 'Całkowanie: RK4, Δt = 2 ms', 'Kąt zerowania liczony na płaskim torze, stosowany do strzału z nachyleniem', 'Derywacja: przybliżenie Litza, SG z reguły Millera', 'Coriolis: a = −2 Ω × v z szerokości geogr. i azymutu', 'Scena wyolbrzymia odchylenie od linii celowania (luneta: skala 1:1)', 'Kaliber wpływa tylko na wygląd — opór zawiera się w BC'],
     mFoot: 'WIZUALIZACJA SZKOLENIOWA — TO NIE JEST ROZWIĄZANIE OGNIOWE',
+    supportTxt: 'Na strzelnicy nie można być śpiącym — kup mi kawę, żebym nie zasnął na osi. Każda filiżanka wspiera rozwój aplikacji.',
+    supportBtn: 'POSTAW MI KAWĘ',
     atTarget: 'NA CELU', dropL: 'OPAD', driftL: 'ZNOS', velL: 'PRĘDKOŚĆ', energyL: 'ENERGIA', tofL: 'CZAS LOTU', zerosL: 'ZERA', apexRo: 'WIERZCHOŁEK',
     targetFace: 'TARCZA', ringsNote: 'PIERŚCIENIE', noImpact: 'BRAK TRAFIENIA',
     tgtSizeL: 'RODZAJ TARCZY', scoreL: 'WYNIK', hitTxt: 'TRAFIONY', missTxt: 'PUDŁO', zoneTxt: (z) => 'STREFA ' + z,
@@ -498,7 +513,7 @@ const T = {
     paramsL: 'PARAMETRY', dispL: 'EKRAN',
     viewMode: 'TRYB WIDOKU', trueBtn: 'REALNY', arcBtn: 'ŁUK', trueNote: 'GEOMETRIA RZECZYWISTA · 1:1',
     uiTheme: 'PANELE', sceneTheme: 'SCENA', darkBtn: 'CIEMNY', lightBtn: 'JASNY',
-    cams: { side: 'BOK', top: 'GÓRA', shooter: 'STRZELEC', scope: 'LUNETA', free: 'ORBITA' },
+    cams: { side: 'BOK', top: 'GÓRA', shooter: 'STRZELEC', rifle: 'KARABIN', scope: 'LUNETA', free: 'ORBITA' },
     ammo: 'AMUNICJA', rifle: 'KARABIN I OPTYKA', shotSec: 'STRZAŁ', envSec: 'ŚRODOWISKO', advSec: 'ZAAWANSOWANE', dopeSec: 'TABELA POPRAWEK',
     custom: 'Własny', tgtLbl: 'CEL', windLbl: 'WIATR', tgtRow: 'CEL',
     mvL: 'PRĘDKOŚĆ POCZĄTKOWA', massL: 'MASA POCISKU', bcL: 'WSP. BALISTYCZNY · G1', calL: 'KALIBER', barrelL: 'DŁUGOŚĆ LUFY',
@@ -549,6 +564,20 @@ const T = {
     },
   },
 };
+const LOCALES = { EN: 'en-GB', PL: 'pl-PL', DE: 'de-DE', FR: 'fr-FR', ES: 'es-ES', IT: 'it-IT', PT: 'pt-PT', NL: 'nl-NL', SV: 'sv-SE', DA: 'da-DK', CS: 'cs-CZ', RU: 'ru-RU', UK: 'uk-UA', ZH: 'zh-CN', JA: 'ja-JP', KO: 'ko-KR', AR: 'ar-SA' };
+function getL(lang) {
+  if (T[lang]) return T[lang];
+  const x = (window.VSR_LANGS || {})[lang];
+  if (!x) return T.EN;
+  if (!x._merged) {
+    x._merged = true;
+    x.info = Object.assign({}, T.EN.info, x.info || {});
+    x.tgtOpts = Object.assign({}, T.EN.tgtOpts, x.tgtOpts || {});
+    x.cams = Object.assign({}, T.EN.cams, x.cams || {});
+    Object.keys(T.EN).forEach(function (k) { if (!(k in x)) x[k] = T.EN[k]; });
+  }
+  return x;
+}
 const G1M = [0, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975, 1.0, 1.025, 1.05, 1.1, 1.15, 1.2, 1.3, 1.4, 1.5, 1.6, 1.8, 2.0, 2.2, 2.5, 3.0, 3.5, 4.0];
 const G1CD = [0.263, 0.210, 0.203, 0.203, 0.217, 0.231, 0.255, 0.290, 0.314, 0.342, 0.373, 0.408, 0.445, 0.481, 0.514, 0.543, 0.588, 0.619, 0.639, 0.659, 0.663, 0.657, 0.647, 0.621, 0.593, 0.569, 0.540, 0.513, 0.504, 0.501];
 function g1cd(M) {
@@ -725,10 +754,10 @@ const cross3 = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], 
 const len3 = (a) => Math.sqrt(dot3(a, a));
 const norm3 = (a) => { const l = len3(a) || 1e-9; return [a[0] / l, a[1] / l, a[2] / l]; };
 function loadTheme() { try { return localStorage.getItem('vsr-theme') || 'dark'; } catch (e) { return 'dark'; } }
-function loadScene() { try { return localStorage.getItem('vsr-scene') || 'dark'; } catch (e) { return 'dark'; } }
+function loadScene() { try { return localStorage.getItem('vsr-scene') || 'light'; } catch (e) { return 'light'; } }
 const SCN_DARK = {
   sky0: [11, 16, 25], sky1: [110, 152, 196], hor0: [13, 19, 29], hor1: [172, 198, 220], gnd0: [11, 15, 22], gnd1: [52, 66, 82],
-  horLine: '#1d2a3c', gridZ: '#151d29', gridMinor: '#1a2433', gridMajor: '#263850', fireLine: '#3b4f6b', tickMinor: '#2a3a50',
+  horLine: '#2a3a50', gridZ: '#233043', gridMinor: '#2a3a50', gridMajor: '#3d5573', fireLine: '#3b4f6b', tickMinor: '#2a3a50',
   lblMajor: '#8fa2b8', lblMinor: '#5c6b7e', wind: 'rgba(255,209,102,0.7)', post: '#33445c', barrel: '#9fb2c8',
   boardFill: 'rgba(18,24,33,0.92)', boardEdge: '#31435c', boardRings: '#2b3c52',
   los: '#45d6ff', losGlow: 'rgba(69,214,255,0.18)', bore: '#b48cff', ghost: 'rgba(130,142,158,0.5)', ghostX: 'rgba(130,142,158,0.7)',
@@ -757,7 +786,7 @@ class Component extends DCLogic {
     advOpen: false, spinOn: false, corOn: false, lat: 45, az: 90,
     ammoOpen: true, rifleOpen: true, shotOpen: true, envOpen: true, dopeOpen: true,
     exag: 8, viewMode: 'arc', cam: 'side', modelOpen: false, firing: false,
-    lang: 'EN', skyBright: 15, distUnit: 'm', infoMode: false, infoKey: null, theme: loadTheme(), sceneTheme: loadScene(),
+    lang: (function () { try { return localStorage.getItem('vsr_lang') || 'EN'; } catch (e) { return 'EN'; } })(), skyBright: 15, distUnit: 'm', infoMode: false, infoKey: null, theme: loadTheme(), sceneTheme: loadScene(),
     trainOn: false, trainRound: 1, trainTotal: 0, trainLast: 0, trainRevealed: false,
     vw: window.innerWidth, legendOpen: null, statsOpen: true, faceOpen: null, dispOpen: null, paramsOpen: false,
   };
@@ -839,7 +868,7 @@ class Component extends DCLogic {
     const st = this.state;
     if (!tr || !tr.samples || !tr.samples.length) return;
     if (st.trainOn && !st.trainRevealed) return;
-    const L = T[st.lang] || T.EN;
+    const L = getL(st.lang);
     const isMil = st.adjUnit === 'MIL', unit = st.adjUnit;
     const isYd = st.distUnit === 'yd', YDf = 0.9144, dU = isYd ? 'yd' : 'm';
     const D = st.targetDist;
@@ -884,7 +913,7 @@ class Component extends DCLogic {
       + '.foot{margin-top:14px;font-size:8.5px;letter-spacing:1px;color:#777;}'
       + '</style></head><body>'
       + '<h1>' + L.dopeSec + '</h1>'
-      + '<div class="sub">' + L.title + ' · ' + L.pdfPrinted + ' ' + now.toLocaleString(st.lang === 'PL' ? 'pl-PL' : 'en-GB') + '</div>'
+      + '<div class="sub">' + L.title + ' · ' + L.pdfPrinted + ' ' + now.toLocaleString(LOCALES[st.lang] || 'en-GB') + '</div>'
       + meta
       + '<table><thead><tr><th>' + L.dRng + ' ' + dU + '</th><th>' + L.dDrop + '</th><th>' + unit + '</th><th>' + L.dDrift + '</th><th>' + unit + '</th><th>V m/s</th><th>E J</th><th>' + L.dTof + ' s</th></tr></thead><tbody>'
       + rows.join('') + '</tbody></table>'
@@ -939,8 +968,17 @@ class Component extends DCLogic {
     };
     return this._h[key];
   }
+  rifOrb() {
+    if (!this.rifleOrbit) this.rifleOrbit = { yaw: 0.85, pitch: 0.2, dist: 2.1 };
+    return this.rifleOrbit;
+  }
   vpDown = (e) => {
     e.currentTarget.setPointerCapture(e.pointerId);
+    if (this.state.cam === 'rifle') {
+      const o = this.rifOrb();
+      this._drag = { x: e.clientX, y: e.clientY, yaw: o.yaw, pitch: o.pitch, rifle: true };
+      return;
+    }
     if (this.state.cam !== 'free') {
       const o = this.presetOrbit(this.state.cam);
       if (o) this.orbit = { ...o };
@@ -950,13 +988,19 @@ class Component extends DCLogic {
   };
   vpMove = (e) => {
     if (!this._drag) return;
-    this.orbit.yaw = this._drag.yaw + (e.clientX - this._drag.x) * 0.005;
-    this.orbit.pitch = Math.max(-0.05, Math.min(1.52, this._drag.pitch + (e.clientY - this._drag.y) * 0.005));
+    const ob = this._drag.rifle ? this.rifOrb() : this.orbit;
+    ob.yaw = this._drag.yaw + (e.clientX - this._drag.x) * 0.005;
+    ob.pitch = Math.max(this._drag.rifle ? -0.9 : -0.05, Math.min(1.52, this._drag.pitch + (e.clientY - this._drag.y) * 0.005));
   };
   vpUp = () => { this._drag = null; };
   vpWheel = (e) => {
     const c = this.state.cam;
     if (c === 'scope' || c === 'shooter') return;
+    if (c === 'rifle') {
+      const o = this.rifOrb();
+      o.dist = Math.max(0.7, Math.min(7, o.dist * Math.exp(e.deltaY * 0.0012)));
+      return;
+    }
     if (c !== 'free') {
       const o = this.presetOrbit(c);
       if (o) this.orbit = { ...o };
@@ -1043,6 +1087,7 @@ class Component extends DCLogic {
   setMil = () => this.setState({ adjUnit: 'MIL' });
   setEng = () => this.setState({ lang: 'EN' });
   setPol = () => this.setState({ lang: 'PL' });
+  setLang = (e) => { const v = e.target.value; try { localStorage.setItem('vsr_lang', v); } catch (_) {} this.setState({ lang: v }); };
   setM = () => this.setState({ distUnit: 'm' });
   setYd = () => this.setState({ distUnit: 'yd' });
   toggleInfo = () => this.setState((s) => ({ infoMode: !s.infoMode, infoKey: null }));
@@ -1098,6 +1143,12 @@ class Component extends DCLogic {
     const aim = [tr.scope[0] + tr.losU[0] * D, tr.scope[1] + tr.losU[1] * D, 0];
     let eye, look, fov = 50;
     if (st.cam === 'shooter') { eye = [-2.6, 0.6, 1.0]; look = aim; fov = 42; }
+    else if (st.cam === 'rifle') {
+      const o = this.rifOrb();
+      const c0 = [tr.muzzle[0] - 0.45 * tr.dir[0], tr.muzzle[1] - 0.45 * tr.dir[1] + 0.03, tr.muzzle[2]];
+      eye = [c0[0] + o.dist * Math.cos(o.pitch) * Math.cos(o.yaw), c0[1] + o.dist * Math.sin(o.pitch), c0[2] + o.dist * Math.cos(o.pitch) * Math.sin(o.yaw)];
+      look = c0; fov = 36;
+    }
     else if (st.cam === 'scope') { eye = [tr.scope[0], tr.scope[1], 0]; look = aim; fov = 2.0; }
     else {
       const o = (st.cam === 'free') ? this.orbit : (this.presetOrbit(st.cam) || this.orbit);
@@ -1155,7 +1206,7 @@ class Component extends DCLogic {
     const gy = tr.groundY;
     const mono = "px 'IBM Plex Mono', monospace";
 
-    const LT = T[st.lang] || T.EN;
+    const LT = getL(st.lang);
     const hidden = st.trainOn && !st.trainRevealed;
     const SC = st.sceneTheme === 'light' ? SCN_LIGHT : SCN_DARK;
     const uD = st.distUnit === 'yd' ? 0.9144 : 1;
@@ -1231,7 +1282,7 @@ class Component extends DCLogic {
 
     const mz = tr.muzzle || [0, 0, 0];
     this.line(ctx, cam, [mz[0], gy, mz[2]], mz, SC.post, 1.5 * dpr);
-    this.line(ctx, cam, [mz[0] - 0.7 * tr.dir[0], mz[1] - 0.7 * tr.dir[1], mz[2] - 0.7 * tr.dir[2]], [mz[0] + 0.9 * tr.dir[0], mz[1] + 0.9 * tr.dir[1], mz[2] + 0.9 * tr.dir[2]], SC.barrel, 3 * dpr);
+    if (st.cam !== 'rifle') this.line(ctx, cam, [mz[0] - 0.7 * tr.dir[0], mz[1] - 0.7 * tr.dir[1], mz[2] - 0.7 * tr.dir[2]], [mz[0] + 0.9 * tr.dir[0], mz[1] + 0.9 * tr.dir[1], mz[2] + 0.9 * tr.dir[2]], SC.barrel, 3 * dpr);
 
     const aim = cam.aim;
     const tgt3 = this.getTarget();
@@ -1415,6 +1466,7 @@ class Component extends DCLogic {
       }
     }
     if (this.timerRef.current) this.timerRef.current.textContent = hidden ? '0.000' : timerVal.toFixed(3);
+    if (st.cam === 'rifle') this.drawRifle(ctx, cam, tr, st, SC, dpr, mono, LT);
     this.drawInset(tr, LT);
 
     if (st.cam === 'scope') {
@@ -1484,6 +1536,119 @@ class Component extends DCLogic {
         const lbl = LT.impact + ' · ' + Math.abs(dmil).toFixed(1) + ' MIL ' + (dmil >= 0 ? LT.low : LT.high) + (Math.abs(wmil) > 0.05 ? ' · ' + Math.abs(wmil).toFixed(1) + ' ' + (wmil >= 0 ? LT.rr : LT.ll) : '');
         ctx.fillText(lbl, hx + 10 * dpr, hy + 3 * dpr);
       }
+
+      // anti-cant bubble level
+      const cant = st.cant || 0;
+      const bw = Rv * 0.42, bh = 10 * dpr, by = cy + Rv * 0.86, br = bh / 2;
+      ctx.save();
+      ctx.fillStyle = 'rgba(8,14,20,0.85)';
+      ctx.strokeStyle = '#2a3a4c'; ctx.lineWidth = 1.2 * dpr;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(cx - bw, by - bh / 2, bw * 2, bh, br);
+      else ctx.rect(cx - bw, by - bh / 2, bw * 2, bh);
+      ctx.fill(); ctx.stroke();
+      // center gate marks
+      const gate = 7 * dpr;
+      ctx.strokeStyle = SC.reticle; ctx.lineWidth = 1.1 * dpr;
+      ctx.beginPath();
+      ctx.moveTo(cx - gate, by - bh / 2 - 3 * dpr); ctx.lineTo(cx - gate, by + bh / 2 + 3 * dpr);
+      ctx.moveTo(cx + gate, by - bh / 2 - 3 * dpr); ctx.lineTo(cx + gate, by + bh / 2 + 3 * dpr);
+      ctx.stroke();
+      // bubble: drifts opposite to cant direction (like a real level), clamped to tube
+      const maxDeg = 5;
+      const frac = Math.max(-1, Math.min(1, -cant / maxDeg));
+      const bx = cx + frac * (bw - bh * 0.9);
+      const level = Math.abs(cant) < 0.05;
+      const bubCol = level ? '#7fd67f' : (Math.abs(cant) > 2 ? '#e06a5a' : '#e0c46a');
+      ctx.fillStyle = bubCol;
+      ctx.beginPath(); ctx.ellipse(bx, by, bh * 0.72, bh * 0.38, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.beginPath(); ctx.ellipse(bx - bh * 0.18, by - bh * 0.1, bh * 0.22, bh * 0.1, -0.5, 0, 7); ctx.fill();
+      if (!level) {
+        ctx.font = 9 * dpr + mono; ctx.fillStyle = bubCol; ctx.textAlign = 'center';
+        ctx.fillText((cant > 0 ? '→ ' : '← ') + Math.abs(cant).toFixed(1) + '°', cx, by + bh / 2 + 12 * dpr);
+      }
+      ctx.restore();
+    }
+  }
+
+  drawRifle(ctx, cam, tr, st, SC, dpr, mono, LT) {
+    const cant = st.cant * Math.PI / 180;
+    const vU = tr.vUp, fwd = tr.dir, losU = tr.losU, mz = tr.muzzle, sc0 = tr.scope;
+    const rUp = [vU[0] * Math.cos(cant), vU[1] * Math.cos(cant), Math.sin(cant)];
+    const rRt = [-vU[0] * Math.sin(cant), -vU[1] * Math.sin(cant), Math.cos(cant)];
+    const P = (a, b, c) => [mz[0] + fwd[0] * a + rUp[0] * b + rRt[0] * c, mz[1] + fwd[1] * a + rUp[1] * b + rRt[1] * c, mz[2] + fwd[2] * a + rUp[2] * b + rRt[2] * c];
+    const SP = (s, b, c) => [sc0[0] + losU[0] * s + rUp[0] * b + rRt[0] * c, sc0[1] + losU[1] * s + rUp[1] * b + rRt[1] * c, sc0[2] + rUp[2] * b + rRt[2] * c];
+    const bl = Math.max(0.35, st.barrelLen * 0.0254);
+    const body = SC.barrel, met = SC.lblMajor;
+    const ln = (A, B, col, w, dash) => { this.line(ctx, cam, A, B, col, w, dash); ctx.setLineDash([]); };
+    const poly = (pts, col, w, close) => {
+      ctx.beginPath(); ctx.strokeStyle = col; ctx.lineWidth = w;
+      let pv = null;
+      const arr = close ? pts.concat([pts[0]]) : pts;
+      for (const q of arr) {
+        const p = this.pt2(cam, q);
+        if (!p) { pv = null; continue; }
+        if (pv) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]);
+        pv = p;
+      }
+      ctx.stroke();
+    };
+    const ringB = (a, r, col, w) => { const pts = []; for (let i = 0; i < 18; i++) { const t = i / 18 * 2 * Math.PI; pts.push(P(a, r * Math.cos(t), r * Math.sin(t))); } poly(pts, col, w, true); };
+    const ringS = (s, r, col, w) => { const pts = []; for (let i = 0; i < 18; i++) { const t = i / 18 * 2 * Math.PI; pts.push(SP(s, r * Math.cos(t), r * Math.sin(t))); } poly(pts, col, w, true); };
+    // barrel: muzzle at trajectory origin, receiver behind
+    ringB(0, 0.013, met, 1.4 * dpr); ringB(0.001, 0.006, met, 1 * dpr); ringB(-bl, 0.019, met, 1.4 * dpr);
+    for (const t of [0.8, 2.4, 3.9, 5.5]) { const cA = Math.cos(t), sA = Math.sin(t); ln(P(0, 0.013 * cA, 0.013 * sA), P(-bl, 0.019 * cA, 0.019 * sA), body, 1.3 * dpr); }
+    // receiver
+    const r0 = -bl, r1 = -bl - 0.26, hh2 = 0.032, hw2 = 0.02;
+    for (const [b, c] of [[hh2, hw2], [hh2, -hw2], [-hh2, hw2], [-hh2, -hw2]]) ln(P(r0, b, c), P(r1, b, c), body, 1.4 * dpr);
+    for (const a of [r0, r1]) poly([P(a, hh2, hw2), P(a, hh2, -hw2), P(a, -hh2, -hw2), P(a, -hh2, hw2)], body, 1.4 * dpr, true);
+    // picatinny rail
+    const railB = hh2 + 0.01;
+    for (const c of [0.011, -0.011]) ln(P(r0 - 0.01, railB, c), P(r1 + 0.01, railB, c), met, 1.3 * dpr);
+    for (let i = 0; i <= 6; i++) { const a = r0 - 0.02 - i * 0.035; ln(P(a, railB, 0.011), P(a, railB, -0.011), met, 1 * dpr); }
+    // stock
+    const prof = [[0, 0.03], [-0.30, 0.045], [-0.34, 0.04], [-0.33, -0.075], [-0.08, -0.062], [-0.02, -0.032], [0, -hh2]];
+    for (const c of [0.016, -0.016]) poly(prof.map(([da, b]) => P(r1 + da, b, c)), body, 1.3 * dpr, false);
+    for (const [da, b] of [[-0.30, 0.045], [-0.34, 0.04], [-0.33, -0.075]]) ln(P(r1 + da, b, 0.016), P(r1 + da, b, -0.016), body, 1.2 * dpr);
+    // trigger guard
+    poly([P(r1 + 0.09, -hh2, 0), P(r1 + 0.09, -hh2 - 0.024, 0), P(r1 + 0.15, -hh2 - 0.024, 0), P(r1 + 0.15, -hh2, 0)], met, 1.1 * dpr, false);
+    // scope tube — axis lies on the line of sight
+    const o0 = -(bl + 0.30), o1 = -(bl + 0.19), t1 = -(bl + 0.02), b0 = -(bl - 0.02), b1 = -(bl - 0.14);
+    ringS(o0, 0.023, met, 1.5 * dpr); ringS(o1, 0.023, met, 1.2 * dpr); ringS(o1 + 0.005, 0.016, met, 1 * dpr); ringS(t1, 0.016, met, 1.2 * dpr); ringS(b0, 0.027, met, 1.2 * dpr); ringS(b1, 0.027, met, 1.5 * dpr);
+    for (const t of [0.8, 2.4, 3.9, 5.5]) {
+      const cA = Math.cos(t), sA = Math.sin(t);
+      ln(SP(o0, 0.023 * cA, 0.023 * sA), SP(o1, 0.023 * cA, 0.023 * sA), body, 1.2 * dpr);
+      ln(SP(o1 + 0.005, 0.016 * cA, 0.016 * sA), SP(t1, 0.016 * cA, 0.016 * sA), body, 1.2 * dpr);
+      ln(SP(b0, 0.027 * cA, 0.027 * sA), SP(b1, 0.027 * cA, 0.027 * sA), body, 1.2 * dpr);
+    }
+    // turrets (elevation up, windage right)
+    const ts = -(bl + 0.105);
+    ln(SP(ts, 0.016, 0), SP(ts, 0.042, 0), met, 2.2 * dpr);
+    ln(SP(ts, 0.042, -0.01), SP(ts, 0.042, 0.01), met, 2 * dpr);
+    ln(SP(ts, 0, 0.016), SP(ts, 0, 0.038), met, 2.2 * dpr);
+    // scope mounts down to the rail
+    for (const s of [-(bl + 0.24), -(bl + 0.05)]) ln(SP(s, -0.014, 0), P(s, railB, 0), met, 2.2 * dpr);
+    // exaggerated bore-axis ray (zero + turrets + rail + mount vs LOS)
+    const eps = dot3(fwd, rUp), aw = dot3(fwd, rRt), EX = 15;
+    const dx = norm3([losU[0] + EX * (eps * rUp[0] + aw * rRt[0]), losU[1] + EX * (eps * rUp[1] + aw * rRt[1]), EX * (eps * rUp[2] + aw * rRt[2])]);
+    ln(mz, [mz[0] + dx[0] * 2.6, mz[1] + dx[1] * 2.6, mz[2] + dx[2] * 2.6], SC.bore, 1.5 * dpr, [6 * dpr, 5 * dpr]);
+    ctx.font = 9 * dpr + mono; ctx.textAlign = 'left';
+    const pb = this.pt2(cam, [mz[0] + dx[0] * 2.7, mz[1] + dx[1] * 2.7, mz[2] + dx[2] * 2.7]);
+    if (pb) { ctx.fillStyle = SC.bore; ctx.fillText(LT.legBore + ' · ∠ ×' + EX, pb[0] + 5 * dpr, pb[1]); }
+    // rail + mount incline callout
+    const railVal = (st.railMoa || 0) + (st.mountMoa || 0);
+    if (railVal > 0) {
+      const pr = this.pt2(cam, P(r1 - 0.02, railB + 0.02, 0));
+      if (pr) { ctx.fillStyle = met; ctx.fillText('∠ ' + railVal.toFixed(1) + ' ' + st.adjUnit + ' ↗', pr[0], pr[1] - 4 * dpr); }
+    }
+    // cant indicator: true vertical vs rifle-up
+    if (Math.abs(st.cant) >= 0.5) {
+      const base = SP(-(bl + 0.36), 0, 0);
+      ln(base, [base[0], base[1] + 0.24, base[2]], SC.post, 1.2 * dpr, [4 * dpr, 4 * dpr]);
+      ln(base, [base[0] + rUp[0] * 0.24, base[1] + rUp[1] * 0.24, base[2] + rUp[2] * 0.24], '#e0784a', 1.6 * dpr);
+      const pc = this.pt2(cam, [base[0] + rUp[0] * 0.27, base[1] + rUp[1] * 0.27, base[2] + rUp[2] * 0.27]);
+      if (pc) { ctx.fillStyle = '#e0784a'; ctx.fillText((st.cant > 0 ? '+' : '') + st.cant.toFixed(0) + '° ' + LT.cantL.split(' ')[0], pc[0] + 4 * dpr, pc[1]); }
     }
   }
 
@@ -1578,7 +1743,7 @@ class Component extends DCLogic {
     const isMil = st.adjUnit === 'MIL';
     const unit = st.adjUnit;
     const D = st.targetDist;
-    const L = T[st.lang] || T.EN;
+    const L = getL(st.lang);
     const inf = st.infoKey ? L.info[st.infoKey] : null;
     const angOf = (dev, s) => {
       if (!s) return '—';
@@ -1659,7 +1824,7 @@ class Component extends DCLogic {
       this.sl('az', L.azL, 0, 360, 5, st.az.toFixed(0) + '°'),
     ];
 
-    const cams = [['side', L.cams.side], ['top', L.cams.top], ['shooter', L.cams.shooter], ['scope', L.cams.scope], ['free', L.cams.free]];
+    const cams = [['side', L.cams.side], ['top', L.cams.top], ['shooter', L.cams.shooter], ['rifle', L.cams.rifle], ['scope', L.cams.scope], ['free', L.cams.free]];
     const btnBase = {
       fontFamily: "'Chakra Petch', sans-serif", fontWeight: 600, fontSize: '9.5px', letterSpacing: '1.5px',
       padding: '7px 11px', cursor: 'pointer', border: '1px solid var(--border)',
@@ -1784,14 +1949,19 @@ class Component extends DCLogic {
       toggleTrain: this.toggleTrain, nextRound: this.nextRound, exitTrain: this.exitTrain,
       trainOn: st.trainOn, trainRevealed: st.trainRevealed, trainRound: st.trainRound, trainTotal: st.trainTotal,
       trainMsg, trainBtnStyle, lockStyle,
+      coffeeBtnStyle: {
+        display: 'block', width: '100%', marginTop: '5px', boxSizing: 'border-box', textAlign: 'center', textDecoration: 'none',
+        fontFamily: "'IBM Plex Mono', monospace", fontSize: '9.5px', letterSpacing: '1.5px', padding: '5px 0',
+        cursor: 'pointer', border: '1px solid #ffdd00', background: '#ffdd00', color: '#1a1300', fontWeight: 700,
+      },
       togAmmo: this.togSec('ammoOpen'), ammoOpen: st.ammoOpen, ammoArrow: st.ammoOpen ? '−' : '+',
       togRifle: this.togSec('rifleOpen'), rifleOpen: st.rifleOpen, rifleArrow: st.rifleOpen ? '−' : '+',
       togShot: this.togSec('shotOpen'), shotOpen: st.shotOpen, shotArrow: st.shotOpen ? '−' : '+',
       togEnv: this.togSec('envOpen'), envOpen: st.envOpen, envArrow: st.envOpen ? '−' : '+',
       togDope: this.togSec('dopeOpen'), dopeOpen: st.dopeOpen, dopeArrow: st.dopeOpen ? '−' : '+',
       tTrainBtn: L.trainBtn, tTrainTitle: L.trainTitle, tRoundL: L.roundL, tTotalL: L.totalL, tPtsL: L.ptsL, tNextBtn: L.nextBtn, tExitBtn: L.exitBtn,
-      setEng: this.setEng, setPol: this.setPol,
-      engStyle: unitBtn(st.lang === 'EN'), polStyle: unitBtn(st.lang === 'PL'),
+      lang: st.lang, setLang: this.setLang,
+      langSelStyle: { fontFamily: "'IBM Plex Mono', monospace", fontSize: '9px', padding: '2px 3px', cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--panel2)', color: 'var(--text-soft)', maxWidth: '84px' },
       skyVal: st.skyBright, skyInput: this.h('skyBright'),
       setM: this.setM, setYd: this.setYd, mStyle: unitBtn(!isYd), ydStyle: unitBtn(isYd),
       toggleInfo: this.toggleInfo, infoLeave: this.infoLeave, infoMode: st.infoMode,
@@ -1809,6 +1979,7 @@ class Component extends DCLogic {
       tModelBtn: L.modelBtn, tModelTitle: L.modelTitle,
       m1: L.m[0], m2: L.m[1], m3: L.m[2], m4: L.m[3], m5: L.m[4], m6: L.m[5], m7: L.m[6], m8: L.m[7], m9: L.m[8],
       mFoot: L.mFoot,
+      supportTxt: L.supportTxt, supportBtn: L.supportBtn,
       tAtTarget: L.atTarget, tRoDropL: L.dropL, tRoDriftL: L.driftL, tRoVelL: L.velL, tRoEnergyL: L.energyL, tRoTofL: L.tofL, tRoZerosL: L.zerosL, tRoApexL: L.apexRo,
       tTargetFace: L.targetFace,
       tFire: L.fire, tTofLabel: L.tofL, tDevScale: L.devScale, tSky: L.skyLbl,
