@@ -417,6 +417,27 @@ html[data-theme="light"]{
       </sc-if>
     </div>
 
+    <div>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:7px; border-bottom:1px solid var(--border2);">
+        <span onClick="{{togSdf}}" style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted); flex:1; display:flex; justify-content:space-between; align-items:center; cursor:pointer; margin-right:12px;"><span>{{tSdfSec}}</span><span style="font-size:12px;">{{sdfArrow}}</span></span>
+        <button onClick="{{exportSdfPdf}}" style="font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:1px; padding:3px 10px; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--muted);">{{tPdfBtn}}</button>
+      </div>
+      <sc-if value="{{sdfOpen}}" hint-placeholder-val="{{true}}">
+      <div>
+        <div style="font-size:9px; line-height:1.55; color:var(--amber); margin-top:9px;">{{sdfNote}}</div>
+        <div style="display:grid; grid-template-columns:40px 52px 52px 52px; font-size:8.5px; letter-spacing:0.5px; color:var(--dim); margin-top:9px; padding-bottom:5px; border-bottom:1px solid var(--row-border);">
+          <span>{{tDRng}}</span><span>{{tSdHold}}</span><span>{{tSdTrue}}</span><span>{{tSdErr}}</span>
+        </div>
+        <sc-for list="{{sdfRows}}" as="r" hint-placeholder-count="5">
+          <div style="{{r.style}}">
+            <span>{{r.rng}}</span><span>{{r.hold}}</span><span>{{r.true}}</span><span>{{r.err}}</span>
+          </div>
+        </sc-for>
+        <div style="font-size:8.5px; letter-spacing:0.5px; color:var(--dim); margin-top:6px;">mil · RANGE/100 = HOLD · TRUE = come-up from 100 m zero</div>
+      </div>
+      </sc-if>
+    </div>
+
   </div>
 </div>
 </x-dc>
@@ -460,6 +481,10 @@ const T = {
     trainHint: 'Conditions randomized — read the wind, range & temperature, dial your turrets, then FIRE.',
     trainHit: (p) => '+' + p + ' PTS',
     dRng: 'RNG', dDrop: 'DROP cm', dDrift: 'DRF cm', dTof: 'TOF',
+    sdfSec: 'SPEED DROP', sdHold: 'HOLD', sdTrue: 'TRUE', sdErr: 'ERR',
+    sdfNote: (sdf, err, to) => 'Mil reticle. Zero at 100 m, then dial ' + sdf + ' mil BELOW zero (Speed-Drop Factor). From then on just hold RANGE\u2044100 mil (300 m \u2192 3.0 mil). Elevation error \u2264 \u00b1' + err + ' mil out to ' + to + ' m \u2014 focus on the wind.',
+    sdfNoData: 'This load is too slow for the speed-drop method at these ranges.',
+    sdfBelow: 'below 100 m zero',
     calm: 'CALM', fromClock: (h) => 'FROM ' + h + " O'CLOCK", driftsL: 'DRIFTS LEFT', driftsR: 'DRIFTS RIGHT', headTail: 'HEAD/TAIL',
     groundWarn: (x) => '⚠ BULLET STRIKES GROUND AT ' + x + ' — SHORT OF TARGET',
     scaleNote: (n) => 'DEVIATION FROM LOS SHOWN ×' + n, scopeNote: 'SCOPE VIEW · TRUE SCALE',
@@ -527,6 +552,10 @@ const T = {
     trainHint: 'Warunki wylosowane — odczytaj wiatr, dystans i temperaturę, ustaw wieżyczki i strzel.',
     trainHit: (p) => '+' + p + ' PKT',
     dRng: 'ODL', dDrop: 'OPAD cm', dDrift: 'ZNS cm', dTof: 'CZAS',
+    sdfSec: 'SPEED DROP', sdHold: 'TRZYM', sdTrue: 'FAKT', sdErr: 'BŁĄD',
+    sdfNote: (sdf, err, to) => 'Luneta w milach. Wyzeruj na 100 m, potem ustaw ' + sdf + ' mila PONIŻEJ zera (Speed-Drop Faktor). Dalej trzymasz po prostu DYSTANS\u2044100 mila (300 m \u2192 3,0 mila). Błąd elewacji \u2264 \u00b1' + err + ' mila do ' + to + ' m \u2014 skup się na wietrze.',
+    sdfNoData: 'Ten nabój jest zbyt wolny dla metody speed-drop na tych dystansach.',
+    sdfBelow: 'poniżej zera 100 m',
     calm: 'BEZWIETRZNIE', fromClock: (h) => 'Z GODZ. ' + h, driftsL: 'ZNOS W LEWO', driftsR: 'ZNOS W PRAWO', headTail: 'CZOŁOWY/TYLNY',
     groundWarn: (x) => '⚠ POCISK UDERZA W ZIEMIĘ NA ' + x + ' — PRZED CELEM',
     scaleNote: (n) => 'ODCHYLENIE OD LINII CELOWANIA ×' + n, scopeNote: 'WIDOK LUNETY · SKALA 1:1',
@@ -901,7 +930,7 @@ class Component extends DCLogic {
     targetDist: 100, incline: 0, tgtType: 'ring50', tgtDiam: 50,
     windSpeed: 3, windDir: 90, temp: 15, pressure: 1013, humidity: 50,
     advOpen: false, spinOn: false, corOn: false, lat: 45, az: 90,
-    ammoOpen: true, rifleOpen: true, shotOpen: true, envOpen: true, dopeOpen: true,
+    ammoOpen: true, rifleOpen: true, shotOpen: true, envOpen: true, dopeOpen: true, sdfOpen: true,
     exag: 8, viewMode: 'arc', cam: 'side', modelOpen: false, firing: false,
     lang: (function () { try { return localStorage.getItem('vsr_lang') || 'EN'; } catch (e) { return 'EN'; } })(), skyBright: 15, distUnit: 'm', infoMode: false, infoKey: null, theme: loadTheme(), sceneTheme: loadScene(),
     trainOn: false, trainRound: 1, trainTotal: 0, trainLast: 0, trainRevealed: false,
@@ -1044,6 +1073,68 @@ class Component extends DCLogic {
     w.document.close();
   };
 
+  exportSdfPdf = () => {
+    const st = this.state;
+    if (st.trainOn && !st.trainRevealed) return;
+    const L = getL(st.lang);
+    let data = [], sdfVal = null, maxErr = 0, to = 0;
+    try {
+      const sp = { ...this.getParams(), zeroDist: 100, incline: 0, adjElev: 0, adjWind: 0, rail: 0, mount: 0, cant: 0, targetDist: 520 };
+      const str = simulate(sp);
+      for (let R = 150; R <= 500; R += 50) {
+        const sm = interpAt(str.samples, R);
+        if (!sm) break;
+        const trueMil = Math.atan2(-sm.devV, R) / MILR;
+        data.push({ R, trueMil, hold: R / 100, off: trueMil - R / 100 });
+      }
+    } catch (e) {}
+    if (data.length < 2) { alert(L.sdfNoData || 'Load too slow for the speed-drop method.'); return; }
+    sdfVal = data.reduce((a, d) => a + d.off, 0) / data.length;
+    maxErr = Math.max(...data.map((d) => Math.abs(sdfVal - d.off)));
+    to = data[data.length - 1].R;
+    const noteFn = L.sdfNote || ((sdf, err, t) => 'Mil reticle. Zero at 100 m, dial ' + sdf + ' mil below zero (SDF), then hold RANGE/100 mil. Error \u00b1' + err + ' mil to ' + t + ' m.');
+    const note = noteFn(Math.abs(sdfVal).toFixed(1), maxErr.toFixed(2), to);
+    const rows = data.map((d) => { const err = sdfVal - d.off; return '<tr><td>' + d.R + '</td><td>' + d.hold.toFixed(2) + '</td><td>' + d.trueMil.toFixed(2) + '</td><td>' + (err >= 0 ? '+' : '') + err.toFixed(2) + '</td></tr>'; }).join('');
+    const wDir = Math.round(st.windDir / 30) === 0 ? 12 : Math.round(st.windDir / 30);
+    const meta = [
+      [L.ammo, st.preset + ' \u00b7 ' + st.mv.toFixed(0) + ' m/s \u00b7 ' + st.massGr.toFixed(0) + ' gr \u00b7 BC ' + st.bc.toFixed(3) + ' (G1)'],
+      [L.rifle, L.barrelL + ' ' + st.barrelLen.toFixed(1) + '\u2033 \u00b7 ' + L.scopeHL + ' ' + st.scopeH.toFixed(1) + ' cm'],
+      [L.envSec, L.tempL + ' ' + st.temp.toFixed(0) + ' \u00b0C \u00b7 ' + st.pressure.toFixed(0) + ' hPa \u00b7 RH ' + st.humidity.toFixed(0) + ' %'],
+      ['SDF', (sdfVal >= 0 ? '' : '') + Math.abs(sdfVal).toFixed(1) + ' mil ' + (L.sdfBelow || 'below 100 m zero') + ' \u00b7 MAX ERR \u00b1' + maxErr.toFixed(2) + ' mil \u00b7 \u2192 ' + to + ' m'],
+    ].map((kv) => '<div class="meta"><span>' + kv[0] + '</span><b>' + kv[1] + '</b></div>').join('');
+    const now = new Date();
+    const sTag = '<scr' + 'ipt>', sEnd = '</scr' + 'ipt>';
+    const title = (L.sdfSec || 'SPEED DROP') + ' \u2014 ' + st.preset;
+    const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + title + '</title><style>'
+      + '@page{size:A4;margin:14mm;}'
+      + 'body{font-family:"Courier New",monospace;color:#111;margin:0;font-size:11px;}'
+      + 'h1{font-family:Helvetica,Arial,sans-serif;font-size:15px;letter-spacing:3px;margin:0 0 2px;}'
+      + '.sub{font-size:9px;letter-spacing:1px;color:#555;margin-bottom:12px;}'
+      + '.note{font-size:10px;line-height:1.5;color:#333;border:1px solid #ccc;padding:8px 10px;margin:10px 0 4px;}'
+      + '.meta{display:flex;gap:10px;border-bottom:1px solid #ddd;padding:4px 0;font-size:10px;}'
+      + '.meta span{width:150px;flex:none;color:#666;letter-spacing:1px;}'
+      + '.meta b{font-weight:normal;}'
+      + 'table{border-collapse:collapse;width:100%;margin-top:14px;}'
+      + 'th{font-family:Helvetica,Arial,sans-serif;font-size:9px;letter-spacing:1px;text-align:right;border-bottom:1.5px solid #111;padding:4px 6px;}'
+      + 'td{text-align:right;padding:3.5px 6px;border-bottom:1px solid #e4e4e4;font-size:10.5px;}'
+      + 'th:first-child,td:first-child{text-align:left;}'
+      + '.foot{margin-top:14px;font-size:8.5px;letter-spacing:1px;color:#777;}'
+      + '</style></head><body>'
+      + '<h1>' + (L.sdfSec || 'SPEED DROP') + '</h1>'
+      + '<div class="sub">' + L.title + ' \u00b7 ' + L.pdfPrinted + ' ' + now.toLocaleString(LOCALES[st.lang] || 'en-GB') + '</div>'
+      + meta
+      + '<div class="note">' + note + '</div>'
+      + '<table><thead><tr><th>' + (L.dRng || 'RNG') + ' m</th><th>' + (L.sdHold || 'HOLD') + ' mil</th><th>' + (L.sdTrue || 'TRUE') + ' mil</th><th>' + (L.sdErr || 'ERR') + ' mil</th></tr></thead><tbody>'
+      + rows + '</tbody></table>'
+      + '<div class="foot">' + L.mFoot + '</div>'
+      + sTag + 'window.onload=function(){setTimeout(function(){window.print();},250);};' + sEnd
+      + '</body></html>';
+    const w = window.open('', '_blank');
+    if (!w) return;
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+  };
   h(key) {
     if (!this._h[key]) this._h[key] = (e) => {
       const v = parseFloat(e.target.value);
@@ -2002,6 +2093,39 @@ class Component extends DCLogic {
       if (imp && !hidden) dopeRows.push(mkRow(D, imp, true));
     }
 
+    const sdfRowStyle = () => ({
+      display: 'grid', gridTemplateColumns: '40px 52px 52px 52px',
+      fontSize: '9.5px', padding: '4px 0', borderBottom: '1px solid var(--row-border2)', color: 'var(--text-soft)',
+    });
+    const sdfRows = [];
+    let sdfVal = null, sdfMaxErr = 0, sdfTo = 0;
+    try {
+      const sp = { ...this.getParams(), zeroDist: 100, incline: 0, adjElev: 0, adjWind: 0, rail: 0, mount: 0, cant: 0, targetDist: 520 };
+      const str = simulate(sp);
+      const data = [];
+      for (let R = 150; R <= 500; R += 50) {
+        const sm = interpAt(str.samples, R);
+        if (!sm) break;
+        const trueMil = Math.atan2(-sm.devV, R) / MILR;
+        const hold = R / 100;
+        data.push({ R, trueMil, hold, off: trueMil - hold });
+      }
+      if (data.length >= 2) {
+        sdfVal = data.reduce((a, d) => a + d.off, 0) / data.length;
+        sdfMaxErr = Math.max(...data.map((d) => Math.abs(sdfVal - d.off)));
+        sdfTo = data[data.length - 1].R;
+        for (const d of data) {
+          const err = sdfVal - d.off;
+          sdfRows.push({
+            rng: d.R + '', hold: d.hold.toFixed(2), true: d.trueMil.toFixed(2),
+            err: (err >= 0 ? '+' : '') + err.toFixed(2), style: sdfRowStyle(),
+          });
+        }
+      }
+    } catch (e) {}
+    const sdfNoteFn = L.sdfNote || ((sdf, err, to) => 'Mil reticle. Zero at 100 m, dial ' + sdf + ' mil below zero (SDF), then hold RANGE/100 mil. Error \u00b1' + err + ' mil to ' + to + ' m.');
+    const sdfNote = sdfVal == null ? (L.sdfNoData || 'Load too slow for speed-drop.') : sdfNoteFn(Math.abs(sdfVal).toFixed(1), sdfMaxErr.toFixed(2), sdfTo);
+
     const h = Math.round(st.windDir / 30) === 0 ? 12 : Math.round(st.windDir / 30);
     const sw = Math.sin(st.windDir * D2R);
     const windFromTxt = st.windSpeed < 0.3 ? L.calm : L.fromClock(h) + ' · ' + (sw > 0.25 ? L.driftsL : sw < -0.25 ? L.driftsR : L.headTail);
@@ -2050,7 +2174,7 @@ class Component extends DCLogic {
       presetVal: st.preset, modelOpen: st.modelOpen, advOpen: st.advOpen,
       advArrow: st.advOpen ? '−' : '+',
       spinOn: st.spinOn, corOn: st.corOn,
-      ammoCtl, rifleCtl, shotCtl, envCtl, advCtl, camBtns, dopeRows,
+      ammoCtl, rifleCtl, shotCtl, envCtl, advCtl, camBtns, dopeRows, sdfRows, sdfNote,
       angU: unit,
       targetLabel: fmtDist(D),
       scaleNote: st.cam === 'scope' ? L.scopeNote : (st.viewMode === 'true' ? L.trueNote : L.scaleNote(st.exag)),
@@ -2104,6 +2228,8 @@ class Component extends DCLogic {
       togShot: this.togSec('shotOpen'), shotOpen: st.shotOpen, shotArrow: st.shotOpen ? '−' : '+',
       togEnv: this.togSec('envOpen'), envOpen: st.envOpen, envArrow: st.envOpen ? '−' : '+',
       togDope: this.togSec('dopeOpen'), dopeOpen: st.dopeOpen, dopeArrow: st.dopeOpen ? '−' : '+',
+      togSdf: this.togSec('sdfOpen'), sdfOpen: st.sdfOpen, sdfArrow: st.sdfOpen ? '−' : '+', exportSdfPdf: this.exportSdfPdf,
+      tSdfSec: L.sdfSec || 'SPEED DROP', tSdHold: L.sdHold || 'HOLD', tSdTrue: L.sdTrue || 'TRUE', tSdErr: L.sdErr || 'ERR',
       tTrainBtn: L.trainBtn, tTrainTitle: L.trainTitle, tRoundL: L.roundL, tTotalL: L.totalL, tPtsL: L.ptsL, tNextBtn: L.nextBtn, tExitBtn: L.exitBtn,
       lang: st.lang, setLang: this.setLang,
       langSelStyle: { fontFamily: "'IBM Plex Mono', monospace", fontSize: '9px', padding: '2px 3px', cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--panel2)', color: 'var(--text-soft)', maxWidth: '84px' },
