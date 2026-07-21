@@ -1947,7 +1947,7 @@ class Component extends DCLogic {
     const rifleCtl = [
       this.sl('barrelLen', L.barrelL, 10, 28, 0.5, barrelDisp),
       this.sl('scopeH', L.scopeHL, 2, 10, 0.1, st.scopeH.toFixed(1) + ' cm'),
-      distCtl('zeroDist', L.zeroL, 25, 600, 5),
+      distCtl('zeroDist', L.zeroL, 10, 600, 5),
       isMil ? milCtl('railMoa', L.railL, 0, 17.5) : this.sl('railMoa', L.railL, 0, 60, 1, adjDisp(st.railMoa)),
       isMil ? milCtl('mountMoa', L.mountL, 0, 20) : this.sl('mountMoa', L.mountL, 0, 70, 1, adjDisp(st.mountMoa)),
       this.sl('cant', L.cantL, -60, 60, 1, (st.cant >= 0 ? '+' : '') + st.cant.toFixed(0) + '°'),
