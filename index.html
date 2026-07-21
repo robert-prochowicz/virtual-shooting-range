@@ -56,7 +56,7 @@ html[data-theme="light"]{
 }
 </style>
 </helmet>
-<div style="position:relative; display:flex; width:100vw; height:100vh; background:var(--bg); color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12px; user-select:none; -webkit-user-select:none;">
+<div style="position:relative; display:flex; width:100vw; height:100vh; height:100dvh; background:var(--bg); color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12px; user-select:none; -webkit-user-select:none;">
 
   <div data-screen-label="3D Range View" style="position:relative; flex:1 1 auto; min-width:0; overflow:hidden; background:var(--bg);">
     <canvas ref="{{canvasRef}}" onPointerDown="{{vpDown}}" onPointerMove="{{vpMove}}" onPointerUp="{{vpUp}}" onWheel="{{vpWheel}}" style="position:absolute; inset:0; width:100%; height:100%; display:block; cursor:grab; touch-action:none;"></canvas>
@@ -781,7 +781,7 @@ const SND = {
   ctx: null, master: null, windGain: null, windTarget: 3,
   muted: (function () { try { return localStorage.getItem('vsr_snd') === 'off'; } catch (e) { return false; } })(),
   init() {
-    if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
+    if (this.ctx) { if (this.ctx.state !== 'running') this.ctx.resume(); return; }
     try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
     const c = this.ctx;
     this.master = c.createGain(); this.master.gain.value = 0.6; this.master.connect(c.destination);
@@ -790,7 +790,14 @@ const SND = {
     this.windGain = c.createGain(); this.windGain.gain.value = 0;
     src.connect(lp); lp.connect(this.windGain); this.windGain.connect(this.master);
     src.start();
+    this.unlock();
     this.setWind(this.windTarget, true);
+  },
+  unlock() {
+    const c = this.ctx; if (!c) return;
+    if (c.state !== 'running') c.resume();
+    const b = c.createBufferSource(); b.buffer = this.noiseBuf(0.01);
+    b.connect(c.destination); b.start(0);
   },
   noiseBuf(sec) {
     const c = this.ctx, n = Math.floor(c.sampleRate * sec), b = c.createBuffer(1, n, c.sampleRate), d = b.getChannelData(0);
@@ -814,6 +821,7 @@ const SND = {
     if (this.muted) return;
     this.init();
     if (!this.ctx) return;
+    if (this.ctx.state !== 'running') this.ctx.resume();
     try { fn(this.ctx, this.ctx.currentTime + (delay || 0)); } catch (e) {}
   },
   shot(E) {
@@ -1245,7 +1253,8 @@ class Component extends DCLogic {
     this._onRz = () => this.setState({ vw: window.innerWidth });
     window.addEventListener('resize', this._onRz);
     this._sndInit = () => { SND.init(); SND.setWind(this.state.windSpeed, true); };
-    window.addEventListener('pointerdown', this._sndInit, { once: true });
+    window.addEventListener('pointerdown', this._sndInit);
+    window.addEventListener('touchend', this._sndInit);
     const cv = this.canvasRef.current;
     this._ro = new ResizeObserver(() => {
       const p = cv.parentElement, r = p.getBoundingClientRect();
@@ -1266,6 +1275,7 @@ class Component extends DCLogic {
     if (this._ro) this._ro.disconnect();
     window.removeEventListener('resize', this._onRz);
     window.removeEventListener('pointerdown', this._sndInit);
+    window.removeEventListener('touchend', this._sndInit);
   }
 
   camera(tr, W, H) {
@@ -1335,6 +1345,7 @@ class Component extends DCLogic {
     const cam = this.camera(tr, W, H);
     const gy = tr.groundY;
     const mono = "px 'IBM Plex Mono', monospace";
+    const gyAt = () => gy;
 
     const LT = getL(st.lang);
     const hidden = st.trainOn && !st.trainRevealed;
@@ -1371,22 +1382,24 @@ class Component extends DCLogic {
     }
 
     const maxD = D + 60;
+    const zline = (z, x0, x1) => this.seg(ctx, cam, [x0, gy, z], [x1, gy, z]);
     ctx.lineWidth = 1 * dpr;
     ctx.beginPath(); ctx.strokeStyle = SC.gridZ;
-    for (let z = -25; z <= 25; z += 5) this.seg(ctx, cam, [-20, gy, z], [maxD, gy, z]);
+    for (let z = -25; z <= 25; z += 5) zline(z, -20, maxD);
     ctx.stroke();
     ctx.beginPath(); ctx.strokeStyle = SC.gridMinor;
-    for (let k = 25; k * uD <= maxD; k += 25) if (k % 100) this.seg(ctx, cam, [k * uD, gy, -25], [k * uD, gy, 25]);
+    for (let k = 25; k * uD <= maxD; k += 25) if (k % 100) this.seg(ctx, cam, [k * uD, gyAt(k * uD), -25], [k * uD, gyAt(k * uD), 25]);
     ctx.stroke();
     ctx.beginPath(); ctx.strokeStyle = SC.gridMajor; ctx.lineWidth = 1.4 * dpr;
-    for (let k = 0; k * uD <= maxD; k += 100) this.seg(ctx, cam, [k * uD, gy, -25], [k * uD, gy, 25]);
+    for (let k = 0; k * uD <= maxD; k += 100) this.seg(ctx, cam, [k * uD, gyAt(k * uD), -25], [k * uD, gyAt(k * uD), 25]);
     ctx.stroke();
-    this.line(ctx, cam, [0, gy, -25], [0, gy, 25], SC.fireLine, 2 * dpr);
+    this.line(ctx, cam, [0, gyAt(0), -25], [0, gyAt(0), 25], SC.fireLine, 2 * dpr);
     for (let k = 50; k * uD <= maxD - 40; k += 50) {
       const x = k * uD;
+      const gyx = gyAt(x);
       const major = k % 100 === 0;
-      this.line(ctx, cam, [x, gy, -13], [x, gy + (major ? 0.9 : 0.5), -13], major ? SC.fireLine : SC.tickMinor, 1.5 * dpr);
-      const p = this.pt2(cam, [x, gy + (major ? 1.4 : 0.95), -13]);
+      this.line(ctx, cam, [x, gyx, -13], [x, gyx + (major ? 0.9 : 0.5), -13], major ? SC.fireLine : SC.tickMinor, 1.5 * dpr);
+      const p = this.pt2(cam, [x, gyx + (major ? 1.4 : 0.95), -13]);
       if (p) {
         ctx.font = (major ? 11 : 9) * dpr + mono;
         ctx.fillStyle = major ? SC.lblMajor : SC.lblMinor;
@@ -1402,11 +1415,12 @@ class Component extends DCLogic {
       const wx = -Math.cos(wd), wz = -Math.sin(wd);
       const L = 4 + st.windSpeed * 1.2, bx = D * 0.5, bz = 16;
       const wc = SC.wind;
-      const b = [bx + wx * L, gy + 0.05, bz + wz * L];
-      this.line(ctx, cam, [bx, gy + 0.05, bz], b, wc, 1.6 * dpr);
+      const wy = gyAt(bx);
+      const b = [bx + wx * L, wy + 0.05, bz + wz * L];
+      this.line(ctx, cam, [bx, wy + 0.05, bz], b, wc, 1.6 * dpr);
       this.line(ctx, cam, b, [b[0] + (-wx - wz * 0.5) * 1.4, b[1], b[2] + (-wz + wx * 0.5) * 1.4], wc, 1.6 * dpr);
       this.line(ctx, cam, b, [b[0] + (-wx + wz * 0.5) * 1.4, b[1], b[2] + (-wz - wx * 0.5) * 1.4], wc, 1.6 * dpr);
-      const p = this.pt2(cam, [bx, gy + 0.7, bz]);
+      const p = this.pt2(cam, [bx, wy + 0.7, bz]);
       if (p) { ctx.font = 9 * dpr + mono; ctx.fillStyle = wc; ctx.textAlign = 'center'; ctx.fillText(LT.wind + ' ' + st.windSpeed.toFixed(1) + ' m/s', p[0], p[1]); }
     }
 
@@ -1457,7 +1471,8 @@ class Component extends DCLogic {
     if (pdim) { ctx.font = 9 * dpr + mono; ctx.fillStyle = SC.lblMajor; ctx.textAlign = 'center'; ctx.fillText(tgt3.label, pdim[0], pdim[1]); }
     const pbull = this.pt2(cam, aim);
     if (pbull) { ctx.fillStyle = SC.los; ctx.beginPath(); ctx.arc(pbull[0], pbull[1], 2.5 * dpr, 0, 7); ctx.fill(); }
-    if (aim[1] - bh / 2 > gy) this.line(ctx, cam, [aim[0], aim[1] - bh / 2, 0], [aim[0], gy, 0], SC.boardEdge, 1.4 * dpr);
+    const gyt = gyAt(aim[0]);
+    if (aim[1] - bh / 2 > gyt) this.line(ctx, cam, [aim[0], aim[1] - bh / 2, 0], [aim[0], gyt, 0], SC.boardEdge, 1.4 * dpr);
 
     const dispOf = (fr, sm) => [
       fr.scope[0] + sm.s * fr.losU[0] + fr.vUp[0] * sm.devV * ex,
@@ -1507,7 +1522,7 @@ class Component extends DCLogic {
         const sm = interpAt(tr.samples, x);
         if (!sm) continue;
         const dp = dispOf(tr, sm);
-        this.seg(ctx, cam, dp, [dp[0], gy, dp[2]]);
+        this.seg(ctx, cam, dp, [dp[0], gyAt(dp[0]), dp[2]]);
       }
       ctx.stroke();
     }
@@ -1940,7 +1955,7 @@ class Component extends DCLogic {
       isMil ? milCtl('adjWind', L.windAdjL, -4.5, 4.5) : this.sl('adjWind', L.windAdjL, -15, 15, 0.25, adjDisp(st.adjWind)),
     ];
     const shotCtl = [
-      distCtl('targetDist', L.tgtDistL, 50, 1500, 10),
+      distCtl('targetDist', L.tgtDistL, 10, 2000, 10),
       this.sl('incline', L.inclineL, -45, 45, 1, (st.incline >= 0 ? '+' : '') + st.incline.toFixed(0) + '°'),
     ];
     const envCtl = [
