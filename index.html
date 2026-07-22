@@ -336,6 +336,7 @@ html[data-theme="light"]{
         <select value="{{tgtTypeVal}}" onChange="{{onTgtType}}" style="width:100%; margin-top:6px; background:var(--panel3); color:var(--text); border:1px solid var(--border); padding:6px 8px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; cursor:pointer;">
           <option value="ring50">{{tgtOptRing50}}</option>
           <option value="ring100">{{tgtOptRing100}}</option>
+          <option value="ts10">{{tgtOptTs10}}</option>
           <option value="gong30">{{tgtOptGong}}</option>
           <option value="ipsc">{{tgtOptIpsc}}</option>
           <option value="custom">{{tgtOptCustom}}</option>
@@ -478,7 +479,7 @@ const T = {
     atTarget: 'AT TARGET', dropL: 'DROP', driftL: 'DRIFT', velL: 'VELOCITY', energyL: 'ENERGY', tofL: 'TIME OF FLIGHT', zerosL: 'ZEROS', apexRo: 'APEX',
     targetFace: 'TARGET FACE', ringsNote: 'RINGS', noImpact: 'NO IMPACT',
     tgtSizeL: 'TARGET TYPE', scoreL: 'SCORE', hitTxt: 'HIT', missTxt: 'MISS', zoneTxt: (z) => 'ZONE ' + z,
-    tgtOpts: { ring50: 'RING TARGET · Ø 50 cm', ring100: 'RING TARGET · Ø 100 cm', gong30: 'STEEL GONG · Ø 30 cm', ipsc: 'IPSC PAPER · 45 × 57.5 cm', custom: 'CUSTOM PLATE · Ø' },
+    tgtOpts: { ring50: 'RING TARGET · Ø 50 cm', ring100: 'RING TARGET · Ø 100 cm', ts10: 'TS-10 FR · 45 × 70 cm', gong30: 'STEEL GONG · Ø 30 cm', ipsc: 'IPSC PAPER · 45 × 57.5 cm', custom: 'CUSTOM PLATE · Ø' },
     pdfBtn: '⎙ PDF', pdfPrinted: 'GENERATED',
     fire: 'FIRE', devScale: 'ARC MAGNIFICATION', skyLbl: 'SKY LIGHT',
     paramsL: 'PARAMETERS', dispL: 'DISPLAY',
@@ -549,7 +550,7 @@ const T = {
     atTarget: 'NA CELU', dropL: 'OPAD', driftL: 'ZNOS', velL: 'PRĘDKOŚĆ', energyL: 'ENERGIA', tofL: 'CZAS LOTU', zerosL: 'ZERA', apexRo: 'WIERZCHOŁEK',
     targetFace: 'TARCZA', ringsNote: 'PIERŚCIENIE', noImpact: 'BRAK TRAFIENIA',
     tgtSizeL: 'RODZAJ TARCZY', scoreL: 'WYNIK', hitTxt: 'TRAFIONY', missTxt: 'PUDŁO', zoneTxt: (z) => 'STREFA ' + z,
-    tgtOpts: { ring50: 'PIERŚCIENIOWA · Ø 50 cm', ring100: 'PIERŚCIENIOWA · Ø 100 cm', gong30: 'GONG STALOWY · Ø 30 cm', ipsc: 'PAPIEROWA IPSC · 45 × 57,5 cm', custom: 'WŁASNA PŁYTA · Ø' },
+    tgtOpts: { ring50: 'PIERŚCIENIOWA · Ø 50 cm', ring100: 'PIERŚCIENIOWA · Ø 100 cm', ts10: 'TS-10 FR · 45 × 70 cm', gong30: 'GONG STALOWY · Ø 30 cm', ipsc: 'PAPIEROWA IPSC · 45 × 57,5 cm', custom: 'WŁASNA PŁYTA · Ø' },
     pdfBtn: '⎙ PDF', pdfPrinted: 'WYGENEROWANO',
     fire: 'OGNIA', devScale: 'POWIĘKSZENIE ŁUKU', skyLbl: 'JASNOŚĆ NIEBA',
     paramsL: 'PARAMETRY', dispL: 'EKRAN',
@@ -611,6 +612,16 @@ const T = {
   },
 };
 const LOCALES = { EN: 'en-GB', PL: 'pl-PL', DE: 'de-DE', FR: 'fr-FR', ES: 'es-ES', IT: 'it-IT', PT: 'pt-PT', NL: 'nl-NL', SV: 'sv-SE', DA: 'da-DK', CS: 'cs-CZ', RU: 'ru-RU', UK: 'uk-UA', ZH: 'zh-CN', JA: 'ja-JP', KO: 'ko-KR', AR: 'ar-SA' };
+const TS10_HALF = [[0, 0.345], [0.052, 0.34], [0.058, 0.29], [0.117, 0.283], [0.122, 0.262], [0.07, 0.252], [0.063, 0.175], [0.052, 0.152], [0.135, 0.112], [0.195, 0.07], [0.218, 0.015], [0.225, -0.07], [0.212, -0.21], [0.202, -0.355]];
+const TS10_PTS = (function () { const p = TS10_HALF.slice(); for (let i = TS10_HALF.length - 1; i >= 0; i--) p.push([-TS10_HALF[i][0], TS10_HALF[i][1]]); return p; })();
+function inTs10(x, y) {
+  let inside = false;
+  for (let i = 0, j = TS10_PTS.length - 1; i < TS10_PTS.length; j = i++) {
+    const xi = TS10_PTS[i][0], yi = TS10_PTS[i][1], xj = TS10_PTS[j][0], yj = TS10_PTS[j][1];
+    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
 function getL(lang) {
   if (T[lang]) return T[lang];
   const x = (window.VSR_LANGS || {})[lang];
@@ -1000,6 +1011,7 @@ class Component extends DCLogic {
     const st = this.state;
     const t = st.tgtType;
     if (t === 'ring100') return { id: t, type: 'ring', R: 0.5, step: 0.05, w: 1.1, h: 1.1, label: 'Ø 100 cm' };
+    if (t === 'ts10') return { id: t, type: 'sil', w: 0.55, h: 0.82, label: 'TS-10 · 45 × 70 cm' };
     if (t === 'gong30') return { id: t, type: 'plate', R: 0.15, w: 0.36, h: 0.36, label: 'Ø 30 cm' };
     if (t === 'ipsc') return { id: t, type: 'ipsc', w: 0.45, h: 0.575, label: '45 × 57.5 cm' };
     if (t === 'custom') { const R = Math.max(0.05, st.tgtDiam / 200); return { id: t, type: 'plate', R, w: R * 2 + 0.06, h: R * 2 + 0.06, label: 'Ø ' + st.tgtDiam.toFixed(0) + ' cm' }; }
@@ -1016,6 +1028,7 @@ class Component extends DCLogic {
       if (ax <= t.w / 2 && ay <= t.h / 2) return { txt: L.zoneTxt('D'), hit: true };
       return { txt: L.missTxt, hit: false };
     }
+    if (t.type === 'sil') return inTs10(x, y) ? { txt: L.hitTxt, hit: true } : { txt: L.missTxt, hit: false };
     const r = Math.hypot(x, y);
     if (r > t.R + 1e-9) return { txt: L.missTxt, hit: false };
     if (t.type === 'ring') {
@@ -1298,6 +1311,7 @@ class Component extends DCLogic {
       if (ax <= t.w / 2 && ay <= t.h / 2) return 2;
       return 0;
     }
+    if (t.type === 'sil') return inTs10(x, y) ? 10 : 0;
     const r = Math.hypot(x, y);
     if (r > t.R) return 0;
     if (t.type === 'ring') return Math.max(1, Math.min(10, 11 - Math.ceil(Math.max(r, 1e-9) / t.step)));
@@ -1586,11 +1600,33 @@ class Component extends DCLogic {
       for (let i = 1; i < 4; i++) ctx.lineTo(q[i][0], q[i][1]);
       ctx.closePath(); ctx.strokeStyle = SC.boardRings; ctx.lineWidth = 1 * dpr; ctx.stroke();
     };
+    const circ3fill = (rr, col) => {
+      ctx.beginPath(); ctx.fillStyle = col;
+      let first = true;
+      for (let a = 0; a <= Math.PI * 2 + 0.05; a += Math.PI / 16) {
+        const p = this.pt2(cam, [aim[0], aim[1] + rr * Math.sin(a), aim[2] + rr * Math.cos(a)]);
+        if (!p) { first = true; continue; }
+        if (first) { ctx.moveTo(p[0], p[1]); first = false; } else ctx.lineTo(p[0], p[1]);
+      }
+      ctx.closePath(); ctx.fill();
+    };
     if (tgt3.type === 'ring') {
-      for (let rr = tgt3.step * 2; rr < tgt3.R - 1e-6; rr += tgt3.step * 2) circ3(rr, SC.boardRings, 1 * dpr);
+      if (tgt3.black) circ3fill(tgt3.black, '#0d0f12');
+      for (let rr = tgt3.step * 2; rr < tgt3.R - 1e-6; rr += tgt3.step * 2) circ3(rr, (tgt3.black && rr <= tgt3.black + 1e-6) ? 'rgba(235,240,248,0.55)' : SC.boardRings, 1 * dpr);
       circ3(tgt3.R, SC.boardEdge, 1.3 * dpr);
     } else if (tgt3.type === 'plate') {
       circ3(tgt3.R, SC.boardEdge, 1.3 * dpr);
+    } else if (tgt3.type === 'sil') {
+      ctx.beginPath();
+      let f1 = true;
+      for (let i = 0; i < TS10_PTS.length; i++) {
+        const p = this.pt2(cam, [aim[0], aim[1] + TS10_PTS[i][1], aim[2] + TS10_PTS[i][0]]);
+        if (!p) { f1 = true; continue; }
+        if (f1) { ctx.moveTo(p[0], p[1]); f1 = false; } else ctx.lineTo(p[0], p[1]);
+      }
+      ctx.closePath();
+      ctx.fillStyle = '#0d0f12'; ctx.fill();
+      ctx.strokeStyle = 'rgba(235,240,248,0.55)'; ctx.lineWidth = 1 * dpr; ctx.stroke();
     } else {
       rect3(0.075, 0.14);
       rect3(0.15, 0.225);
@@ -1940,7 +1976,7 @@ class Component extends DCLogic {
     const imp = tr.impact;
     const gi = this.ghostTraj && this.ghostTraj.impact;
     const tgt = this.getTarget();
-    const tHalf = tgt.type === 'ipsc' ? tgt.h / 2 : tgt.R;
+    const tHalf = (tgt.type === 'ipsc' || tgt.type === 'sil') ? tgt.h / 2 : tgt.R;
     let ext = Math.max(0.28, tHalf * 1.2);
     if (imp && !hidden) ext = Math.max(ext, Math.abs(imp.devV) * 1.3, Math.abs(imp.devH) * 1.3);
     if (gi && !hidden) ext = Math.max(ext, Math.abs(gi.devV) * 1.15, Math.abs(gi.devH) * 1.15);
@@ -1956,14 +1992,28 @@ class Component extends DCLogic {
       rect(tgt.w / 2, tgt.h / 2, '#54657a', 1.4 * d, 'rgba(255,255,255,0.03)');
       rect(0.15, 0.225, '#31435c', 1 * d);
       rect(0.075, 0.14, '#3d5878', 1 * d, 'rgba(69,214,255,0.05)');
+    } else if (tgt.type === 'sil') {
+      c.fillStyle = 'rgba(255,255,255,0.05)';
+      c.fillRect(cx - (tgt.w / 2) * sc, cy - (tgt.h / 2) * sc, tgt.w * sc, tgt.h * sc);
+      c.strokeStyle = '#54657a'; c.lineWidth = 1.4 * d;
+      c.strokeRect(cx - (tgt.w / 2) * sc, cy - (tgt.h / 2) * sc, tgt.w * sc, tgt.h * sc);
+      c.beginPath();
+      TS10_PTS.forEach(function (q, i) { const X = cx + q[0] * sc, Y = cy - q[1] * sc; if (i) c.lineTo(X, Y); else c.moveTo(X, Y); });
+      c.closePath();
+      c.fillStyle = '#0d0f12'; c.fill();
+      c.strokeStyle = 'rgba(235,240,248,0.55)'; c.lineWidth = 1 * d; c.stroke();
+      c.strokeStyle = 'rgba(235,240,248,0.35)'; c.lineWidth = 1 * d;
+      c.beginPath(); c.arc(cx, cy + 0.03 * sc * -1, 0.05 * sc, 0, 7); c.stroke();
+      c.fillStyle = 'rgba(235,240,248,0.35)';
+      c.beginPath(); c.arc(cx, cy - 0.03 * sc, 0.013 * sc, 0, 7); c.fill();
     } else {
       c.fillStyle = 'rgba(255,255,255,0.03)';
       c.beginPath(); c.arc(cx, cy, tgt.R * sc, 0, 7); c.fill();
       if (tgt.type === 'ring') {
-        c.strokeStyle = '#2b3c52'; c.lineWidth = 1 * d;
-        for (let r = tgt.step; r < tgt.R - 1e-6; r += tgt.step) { c.beginPath(); c.arc(cx, cy, r * sc, 0, 7); c.stroke(); }
-        c.fillStyle = 'rgba(69,214,255,0.07)';
-        c.beginPath(); c.arc(cx, cy, tgt.step * 2 * sc, 0, 7); c.fill();
+        if (tgt.black) { c.fillStyle = '#0d0f12'; c.beginPath(); c.arc(cx, cy, tgt.black * sc, 0, 7); c.fill(); }
+        c.lineWidth = 1 * d;
+        for (let r = tgt.step; r < tgt.R - 1e-6; r += tgt.step) { c.strokeStyle = (tgt.black && r <= tgt.black + 1e-6) ? 'rgba(235,240,248,0.5)' : '#2b3c52'; c.beginPath(); c.arc(cx, cy, r * sc, 0, 7); c.stroke(); }
+        if (!tgt.black) { c.fillStyle = 'rgba(69,214,255,0.07)'; c.beginPath(); c.arc(cx, cy, tgt.step * 2 * sc, 0, 7); c.fill(); }
       }
       c.strokeStyle = '#54657a'; c.lineWidth = 1.4 * d;
       c.beginPath(); c.arc(cx, cy, tgt.R * sc, 0, 7); c.stroke();
@@ -2254,7 +2304,7 @@ class Component extends DCLogic {
       groundTxt: tr.hitGround ? L.groundWarn(fmtDist(tr.groundS)) : '',
       tgtRef: this.tgtRef,
       tTgtSizeL: L.tgtSizeL, tgtTypeVal: st.tgtType, onTgtType: this.onTgtType,
-      tgtOptRing50: L.tgtOpts.ring50, tgtOptRing100: L.tgtOpts.ring100, tgtOptGong: L.tgtOpts.gong30, tgtOptIpsc: L.tgtOpts.ipsc, tgtOptCustom: L.tgtOpts.custom,
+      tgtOptRing50: L.tgtOpts.ring50, tgtOptRing100: L.tgtOpts.ring100, tgtOptTs10: L.tgtOpts.ts10, tgtOptGong: L.tgtOpts.gong30, tgtOptIpsc: L.tgtOpts.ipsc, tgtOptCustom: L.tgtOpts.custom,
       tgtCustom: st.tgtType === 'custom',
       tgtDiamVal: st.tgtDiam, tgtDiamInput: this.h('tgtDiam'), tgtDiamDisp: st.tgtDiam.toFixed(0) + ' cm',
       tgtDimTxt: tgtG.label, tgtSizeEnter: this.iE('tgtSize'),
