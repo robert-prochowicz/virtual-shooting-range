@@ -2046,7 +2046,7 @@ class Component extends DCLogic {
       isMil ? milCtl('adjWind', L.windAdjL, -4.5, 4.5) : this.sl('adjWind', L.windAdjL, -15, 15, 0.25, adjDisp(st.adjWind)),
     ];
     const shotCtl = [
-      distCtl('targetDist', L.tgtDistL, 10, 2000, 10),
+      distCtl('targetDist', L.tgtDistL, 10, 2000, 5),
       this.sl('incline', L.inclineL, -45, 45, 1, (st.incline >= 0 ? '+' : '') + st.incline.toFixed(0) + '°'),
     ];
     const envCtl = [
