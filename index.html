@@ -1025,7 +1025,7 @@ class Component extends DCLogic {
     const stepDisp = (D / (isYd ? YDf : 1)) <= 400 ? 25 : 50;
     const stepM = stepDisp * (isYd ? YDf : 1);
     const rows = [];
-    const pushRow = (x, sm, hl) => rows.push('<tr' + (hl ? ' class="hl"' : '') + '><td>' + dispD(x) + (hl ? ' · ' + L.tgtRow : '') + '</td><td>' + cm(sm.devV) + '</td><td>' + ang(sm.devV, x) + '</td><td>' + cm(sm.devH) + '</td><td>' + ang(sm.devH, x) + '</td><td>' + sm.v.toFixed(0) + '</td><td>' + (0.5 * mass * sm.v * sm.v).toFixed(0) + '</td><td>' + sm.t.toFixed(2) + '</td></tr>');
+    const pushRow = (x, sm, hl) => { const dv = (!hl && Math.abs(x - st.zeroDist) < 0.5) ? 0 : sm.devV; rows.push('<tr' + (hl ? ' class="hl"' : '') + '><td>' + dispD(x) + (hl ? ' · ' + L.tgtRow : '') + '</td><td>' + cm(dv) + '</td><td>' + ang(dv, x) + '</td><td>' + cm(sm.devH) + '</td><td>' + ang(sm.devH, x) + '</td><td>' + sm.v.toFixed(0) + '</td><td>' + (0.5 * mass * sm.v * sm.v).toFixed(0) + '</td><td>' + sm.t.toFixed(2) + '</td></tr>'); };
     for (let x = stepM; x < D - 1e-6; x += stepM) {
       const sm = interpAt(tr.samples, x);
       if (!sm) break;
@@ -2081,7 +2081,7 @@ class Component extends DCLogic {
     if (tr.samples) {
       const step = ((D / (isYd ? YDf : 1)) <= 250 ? 50 : 100) * (isYd ? YDf : 1);
       const mkRow = (x, sm, hl) => ({
-        rng: hl ? L.tgtRow : Math.round(x / (isYd ? YDf : 1)) + '', drop: (sm.devV * 100).toFixed(1), dropA: angNum(sm.devV, x),
+        rng: hl ? L.tgtRow : Math.round(x / (isYd ? YDf : 1)) + '', drop: (((!hl && Math.abs(x - st.zeroDist) < 0.5) ? 0 : sm.devV) * 100).toFixed(1), dropA: angNum((!hl && Math.abs(x - st.zeroDist) < 0.5) ? 0 : sm.devV, x),
         drift: hidden ? '···' : (sm.devH * 100).toFixed(1), driftA: hidden ? '' : angNum(sm.devH, x),
         vel: sm.v.toFixed(0), tof: sm.t.toFixed(2), style: rowStyle(hl),
       });
