@@ -516,7 +516,7 @@ const T = {
       barrelLen: ['BARREL LENGTH', 'Longer barrels burn more powder before the bullet exits, raising muzzle velocity (~6.1 m/s per inch here, relative to a 20" reference). Higher velocity = flatter arc, more energy, shorter flight. Linear approximation; it does not change the BC.'],
       scopeH: ['SCOPE HEIGHT', 'Vertical offset between bore axis and scope axis. It is why the bullet crosses the sight line twice (near and far zero).'],
       zeroDist: ['ZERO DISTANCE', 'Range where trajectory and line of sight are set to cross. Defines the upward bore tilt.'],
-      railMoa: ['RAIL INCLINE', 'Fixed tilt machined into the base (e.g. 20 MOA). Not auto-compensated here: it lifts the impact until you dial elevation back down.'],
+      railMoa: ['RAIL INCLINE', 'Fixed tilt machined into the base (e.g. 20 MOA). Absorbed when zeroing: impact stays on the aim point; it only frees extra elevation travel for long range.'],
       mountMoa: ['MOUNT INCLINE', 'Additional tilt from adjustable rings, added on top of the rail.'],
       cant: ['CANT ANGLE', 'Rifle rolled around the sight line. Tilts the built-in elevation sideways: shots go low and toward the cant.'],
       adjElev: ['ELEVATION ADJUSTMENT', 'Scope turret elevation (MOA/MIL). Positive = barrel points higher = impact rises.'],
@@ -587,7 +587,7 @@ const T = {
       barrelLen: ['DŁUGOŚĆ LUFY', 'Dłuższa lufa spala więcej prochu przed opuszczeniem jej przez pocisk, zwiększając prędkość początkową (tu ~6,1 m/s na cal, względem lufy odniesienia 20"). Większa prędkość = bardziej płaski tor, więcej energii, krótszy czas lotu. Przybliżenie liniowe; nie zmienia BC.'],
       scopeH: ['WYSOKOŚĆ LUNETY', 'Odległość osi lunety od osi lufy. To przez nią tor przecina linię celowania dwa razy (bliskie i dalekie zero).'],
       zeroDist: ['ODLEGŁOŚĆ ZEROWANIA', 'Dystans, na którym tor przecina linię celowania. Wyznacza kąt podniesienia lufy.'],
-      railMoa: ['NACHYLENIE SZYNY', 'Stałe pochylenie szyny (np. 20 MOA). Bez ponownego zerowania podnosi punkt trafienia — skompensuj poprawką pionową.'],
+      railMoa: ['NACHYLENIE SZYNY', 'Stałe pochylenie szyny (np. 20 MOA). Kompensowane przy zerowaniu: punkt trafienia zostaje w punkcie celowania; daje tylko zapas regulacji pionowej na dalekie dystanse.'],
       mountMoa: ['NACHYLENIE MONTAŻU', 'Dodatkowe pochylenie z regulowanego montażu, sumuje się z szyną.'],
       cant: ['PRZECHYŁ', 'Obrót karabinu wokół linii celowania. Przechylona broń strzela nisko i w stronę przechyłu.'],
       adjElev: ['POPRAWKA PIONOWA', 'Nastawa pionowa wieżyczki (MOA/MIL). Dodatnia = trafienie wyżej.'],
@@ -724,7 +724,7 @@ function simulate(p) {
   const rUp = [vUp[0] * Math.cos(cant), vUp[1] * Math.cos(cant), Math.sin(cant)];
   const rRt = [-vUp[0] * Math.sin(cant), -vUp[1] * Math.sin(cant), Math.cos(cant)];
   const muzzle = [scope[0] - rUp[0] * p.scopeH, scope[1] - rUp[1] * p.scopeH, scope[2] - rUp[2] * p.scopeH];
-  const eps = zeroAngle + p.adjElev + (p.rail || 0) + (p.mount || 0), aw = p.adjWind;
+  const eps = zeroAngle + p.adjElev, aw = p.adjWind; // rail/mount incline is absorbed when zeroing (frees turret travel, does not shift POI)
   const dir = norm3([losU[0] + eps * rUp[0] + aw * rRt[0], losU[1] + eps * rUp[1] + aw * rRt[1], losU[2] + eps * rUp[2] + aw * rRt[2]]);
   const w = [-Math.cos(p.windDir) * p.windSpeed, 0, -Math.sin(p.windDir) * p.windSpeed];
   let Ox = 0, Oy = 0, Oz = 0;
