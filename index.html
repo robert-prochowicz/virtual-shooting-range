@@ -284,7 +284,15 @@ html[data-theme="light"]{
         <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
           <div style="display:flex; justify-content:space-between; align-items:baseline;">
             <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted);">{{c.label}}</span>
-            <span style="font-size:11px; color:var(--accent-soft);">{{c.display}}</span>
+            <sc-if value="{{c.edit}}" hint-placeholder-val="{{false}}">
+              <span style="display:flex; align-items:center; gap:4px;">
+                <input type="number" min="{{c.numMin}}" max="{{c.numMax}}" step="1" value="{{c.numVal}}" onInput="{{c.onNum}}" onBlur="{{c.onNumCommit}}" onKeyDown="{{c.onNumKey}}" style="width:60px; text-align:right; background:var(--panel3); color:var(--accent-soft); border:1px solid var(--border); border-radius:2px; padding:2px 5px; font-family:'IBM Plex Mono',monospace; font-size:11px;">
+                <span style="font-size:9px; color:var(--muted);">{{c.unit}}</span>
+              </span>
+            </sc-if>
+            <sc-if value="{{c.plain}}" hint-placeholder-val="{{true}}">
+              <span style="font-size:11px; color:var(--accent-soft);">{{c.display}}</span>
+            </sc-if>
           </div>
           <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
         </div>
@@ -307,7 +315,15 @@ html[data-theme="light"]{
         <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
           <div style="display:flex; justify-content:space-between; align-items:baseline;">
             <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted);">{{c.label}}</span>
-            <span style="font-size:11px; color:var(--accent-soft);">{{c.display}}</span>
+            <sc-if value="{{c.edit}}" hint-placeholder-val="{{false}}">
+              <span style="display:flex; align-items:center; gap:4px;">
+                <input type="number" min="{{c.numMin}}" max="{{c.numMax}}" step="1" value="{{c.numVal}}" onInput="{{c.onNum}}" onBlur="{{c.onNumCommit}}" onKeyDown="{{c.onNumKey}}" style="width:60px; text-align:right; background:var(--panel3); color:var(--accent-soft); border:1px solid var(--border); border-radius:2px; padding:2px 5px; font-family:'IBM Plex Mono',monospace; font-size:11px;">
+                <span style="font-size:9px; color:var(--muted);">{{c.unit}}</span>
+              </span>
+            </sc-if>
+            <sc-if value="{{c.plain}}" hint-placeholder-val="{{true}}">
+              <span style="font-size:11px; color:var(--accent-soft);">{{c.display}}</span>
+            </sc-if>
           </div>
           <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
         </div>
@@ -928,7 +944,7 @@ class Component extends DCLogic {
     barrelLen: 20, twist: 16,
     scopeH: 4.5, zeroDist: 50, cant: 0, railMoa: 0, mountMoa: 0, adjUnit: 'MOA', adjElev: 0, adjWind: 0,
     targetDist: 100, incline: 0, tgtType: 'ring50', tgtDiam: 50,
-    windSpeed: 3, windDir: 90, temp: 15, pressure: 1013, humidity: 50,
+    windSpeed: 3, windDir: 90, temp: 15, pressure: 1013, humidity: 50, distText: {},
     advOpen: false, spinOn: false, corOn: false, lat: 45, az: 90,
     ammoOpen: true, rifleOpen: true, shotOpen: true, envOpen: true, dopeOpen: true, sdfOpen: true,
     exag: 8, viewMode: 'arc', cam: 'side', modelOpen: false, firing: false,
@@ -1141,6 +1157,7 @@ class Component extends DCLogic {
       if (key === 'adjElev' || key === 'adjWind' || key === 'railMoa' || key === 'mountMoa') SND.click();
       if (key === 'windSpeed') SND.setWind(v);
       const patch = { [key]: v };
+      if (key === 'targetDist' || key === 'zeroDist') patch.distText = { ...this.state.distText, [key]: null };
       if (key === 'mv' || key === 'massGr' || key === 'bc' || key === 'cal') patch.preset = 'Custom';
       this.setState(patch);
     };
@@ -1151,9 +1168,29 @@ class Component extends DCLogic {
     if (!this._h[k]) this._h[k] = (e) => { if (key === 'adjElev' || key === 'adjWind' || key === 'railMoa' || key === 'mountMoa') SND.click(); this.setState({ [key]: parseFloat(e.target.value) / 0.290888 }); };
     return this._h[k];
   }
+  hDistInput(key) {
+    const k = 'numi_' + key;
+    if (!this._h[k]) this._h[k] = (e) => { const val = e.target.value; this.setState((s) => ({ distText: { ...s.distText, [key]: val } })); };
+    return this._h[k];
+  }
+  hDistKey = (e) => { if (e.key === 'Enter') e.target.blur(); };
+  hDistCommit(key, minM, maxM) {
+    const k = 'numc_' + key;
+    if (!this._h[k]) this._h[k] = () => {
+      const t = (this.state.distText || {})[key];
+      const clear = (s) => ({ distText: { ...s.distText, [key]: null } });
+      if (t == null || t === '') { this.setState(clear); return; }
+      let v = parseFloat(t);
+      if (isNaN(v)) { this.setState(clear); return; }
+      let m = this.state.distUnit === 'yd' ? v * 0.9144 : v;
+      m = Math.max(minM, Math.min(maxM, Math.round(m)));
+      this.setState((s) => ({ [key]: m, distText: { ...s.distText, [key]: null } }));
+    };
+    return this._h[k];
+  }
   hYd(key) {
     const k = 'yd_' + key;
-    if (!this._h[k]) this._h[k] = (e) => this.setState({ [key]: parseFloat(e.target.value) * 0.9144 });
+    if (!this._h[k]) this._h[k] = (e) => this.setState((s) => ({ [key]: parseFloat(e.target.value) * 0.9144, distText: { ...s.distText, [key]: null } }));
     return this._h[k];
   }
   sl(key, label, min, max, step, display) {
@@ -2026,6 +2063,15 @@ class Component extends DCLogic {
       value: Math.round(st[key] / YDf), display: Math.round(st[key] / YDf) + ' yd',
       onInput: this.hYd(key), onEnter: this.iE(key),
     } : this.sl(key, label, minM, maxM, stepV, st[key].toFixed(0) + ' m');
+    const distCtlE = (key, label, minM, maxM, stepV) => {
+      const base = distCtl(key, label, minM, maxM, stepV);
+      base.edit = true; base.plain = false; base.unit = dU;
+      base.onNum = this.hDistInput(key); base.onNumCommit = this.hDistCommit(key, minM, maxM); base.onNumKey = this.hDistKey;
+      base.numVal = (st.distText && st.distText[key] != null) ? st.distText[key] : (isYd ? Math.round(st[key] / YDf) : Math.round(st[key]));
+      base.numMin = isYd ? Math.round(minM / YDf) : minM;
+      base.numMax = isYd ? Math.round(maxM / YDf) : maxM;
+      return base;
+    };
 
     const ammoCtl = [
       this.sl('mv', L.mvL, 200, 1100, 5, st.mv.toFixed(0) + ' m/s'),
@@ -2036,19 +2082,19 @@ class Component extends DCLogic {
     const dvBarrel = (st.barrelLen - BARREL_REF) * DV_PER_IN;
     const barrelDisp = st.barrelLen.toFixed(1) + '″ / ' + (st.barrelLen * 2.54).toFixed(0) + ' cm · ' + (dvBarrel >= 0 ? '+' : '') + dvBarrel.toFixed(0) + ' m/s';
     const rifleCtl = [
+      distCtlE('zeroDist', L.zeroL, 10, 600, 5),
+      isMil ? milCtl('adjElev', L.elevL, -12, 12) : this.sl('adjElev', L.elevL, -40, 40, 0.25, adjDisp(st.adjElev)),
+      isMil ? milCtl('adjWind', L.windAdjL, -4.5, 4.5) : this.sl('adjWind', L.windAdjL, -15, 15, 0.25, adjDisp(st.adjWind)),
+      this.sl('cant', L.cantL, -60, 60, 1, (st.cant >= 0 ? '+' : '') + st.cant.toFixed(0) + '°'),
       this.sl('barrelLen', L.barrelL, 10, 28, 0.5, barrelDisp),
       this.sl('scopeH', L.scopeHL, 2, 10, 0.1, st.scopeH.toFixed(1) + ' cm'),
-      distCtl('zeroDist', L.zeroL, 10, 600, 5),
       isMil ? milCtl('railMoa', L.railL, 0, 17.5) : this.sl('railMoa', L.railL, 0, 60, 1, adjDisp(st.railMoa)),
       isMil ? milCtl('mountMoa', L.mountL, 0, 20) : this.sl('mountMoa', L.mountL, 0, 70, 1, adjDisp(st.mountMoa)),
-      this.sl('cant', L.cantL, -60, 60, 1, (st.cant >= 0 ? '+' : '') + st.cant.toFixed(0) + '°'),
-      isMil ? milCtl('adjElev', L.elevL, -6, 12) : this.sl('adjElev', L.elevL, -20, 40, 0.25, adjDisp(st.adjElev)),
-      isMil ? milCtl('adjWind', L.windAdjL, -4.5, 4.5) : this.sl('adjWind', L.windAdjL, -15, 15, 0.25, adjDisp(st.adjWind)),
-    ];
+    ].map((c) => ({ ...c, plain: !c.edit }));
     const shotCtl = [
-      distCtl('targetDist', L.tgtDistL, 10, 2000, 5),
+      distCtlE('targetDist', L.tgtDistL, 10, 2000, 5),
       this.sl('incline', L.inclineL, -45, 45, 1, (st.incline >= 0 ? '+' : '') + st.incline.toFixed(0) + '°'),
-    ];
+    ].map((c) => ({ ...c, plain: !c.edit }));
     const envCtl = [
       this.sl('temp', L.tempL, -20, 45, 1, st.temp.toFixed(0) + ' °C'),
       this.sl('pressure', L.pressL, 850, 1050, 1, st.pressure.toFixed(0) + ' hPa'),
