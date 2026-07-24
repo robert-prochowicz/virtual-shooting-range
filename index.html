@@ -247,6 +247,12 @@ html[data-theme="light"]{
       <button onClick="{{closeParams}}" style="display:flex; justify-content:space-between; align-items:center; width:100%; background:transparent; border:1px solid var(--border); color:var(--muted); font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2px; padding:7px 10px; margin:0 0 16px; cursor:pointer; box-sizing:border-box;"><span>{{tParamsBtn}}</span><span>✕</span></button>
     </sc-if>
 
+    <div style="display:flex; gap:6px; margin-bottom:18px;">
+      <button onClick="{{saveConfig}}" title="{{tCfgSaveTip}}" style="flex:1; font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:1px; padding:7px 8px; cursor:pointer; border:1px solid var(--border); background:var(--panel3); color:var(--text-soft);" style-hover="border-color:var(--hover-border);">↓ {{tCfgSave}}</button>
+      <button onClick="{{loadConfigClick}}" title="{{tCfgLoadTip}}" style="flex:1; font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:1px; padding:7px 8px; cursor:pointer; border:1px solid var(--border); background:var(--panel3); color:var(--text-soft);" style-hover="border-color:var(--hover-border);">↑ {{tCfgLoad}}</button>
+      <input ref="{{cfgRef}}" type="file" accept=".txt,.json,application/json,text/plain" onChange="{{onConfigFile}}" style="display:none;">
+    </div>
+
     <div style="{{lockStyle}}">
       <button onClick="{{togAmmo}}" style="display:flex; justify-content:space-between; align-items:center; width:100%; background:transparent; border:none; border-bottom:1px solid var(--border2); padding:0 0 7px; cursor:pointer; font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted);"><span>{{tAmmo}}</span><span style="font-size:12px;">{{ammoArrow}}</span></button>
       <sc-if value="{{ammoOpen}}" hint-placeholder-val="{{true}}">
@@ -484,6 +490,7 @@ const T = {
     tgtSizeL: 'TARGET TYPE', scoreL: 'SCORE', hitTxt: 'HIT', missTxt: 'MISS', zoneTxt: (z) => 'ZONE ' + z,
     tgtOpts: { ring50: 'RING TARGET · Ø 50 cm', ring100: 'RING TARGET · Ø 100 cm', ts10: 'TS-10 FR · 45 × 70 cm', gong30: 'STEEL GONG · Ø 30 cm', ipsc: 'IPSC PAPER · 45 × 57.5 cm', custom: 'CUSTOM PLATE · Ø' },
     pdfBtn: '⎙ PDF', pdfPrinted: 'GENERATED',
+    cfgSave: 'SAVE', cfgLoad: 'LOAD', cfgSaveTip: 'Save all settings to a text file', cfgLoadTip: 'Load settings from a file', cfgSavePrompt: 'File name:', cfgLoadErr: 'Could not read this settings file.',
     fire: 'FIRE', devScale: 'ARC MAGNIFICATION', skyLbl: 'SKY LIGHT',
     paramsL: 'PARAMETERS', dispL: 'DISPLAY',
     viewMode: 'VIEW MODE', trueBtn: 'TRUE', arcBtn: 'ARC', trueNote: 'TRUE GEOMETRY · 1:1',
@@ -555,6 +562,7 @@ const T = {
     tgtSizeL: 'RODZAJ TARCZY', scoreL: 'WYNIK', hitTxt: 'TRAFIONY', missTxt: 'PUDŁO', zoneTxt: (z) => 'STREFA ' + z,
     tgtOpts: { ring50: 'PIERŚCIENIOWA · Ø 50 cm', ring100: 'PIERŚCIENIOWA · Ø 100 cm', ts10: 'TS-10 FR · 45 × 70 cm', gong30: 'GONG STALOWY · Ø 30 cm', ipsc: 'PAPIEROWA IPSC · 45 × 57,5 cm', custom: 'WŁASNA PŁYTA · Ø' },
     pdfBtn: '⎙ PDF', pdfPrinted: 'WYGENEROWANO',
+    cfgSave: 'ZAPISZ', cfgLoad: 'WCZYTAJ', cfgSaveTip: 'Zapisz wszystkie ustawienia do pliku tekstowego', cfgLoadTip: 'Wczytaj ustawienia z pliku', cfgSavePrompt: 'Nazwa pliku:', cfgLoadErr: 'Nie udało się odczytać tego pliku ustawień.',
     fire: 'OGNIA', devScale: 'POWIĘKSZENIE ŁUKU', skyLbl: 'JASNOŚĆ NIEBA',
     paramsL: 'PARAMETRY', dispL: 'EKRAN',
     viewMode: 'TRYB WIDOKU', trueBtn: 'REALNY', arcBtn: 'ŁUK', trueNote: 'GEOMETRIA RZECZYWISTA · 1:1',
@@ -1042,6 +1050,51 @@ class Component extends DCLogic {
   }
   onTgtType = (e) => this.setState({ tgtType: e.target.value });
   cycleZoom = () => this.setState((s) => ({ insetZoom: { 1: 2, 2: 4, 4: 8, 8: 1 }[s.insetZoom || 1] }));
+  cfgRef = React.createRef();
+  CFG_KEYS = ['preset', 'mv', 'massGr', 'bc', 'cal', 'barrelLen', 'twist', 'scopeH', 'zeroDist', 'cant', 'railMoa', 'mountMoa', 'adjUnit', 'adjElev', 'adjWind', 'targetDist', 'incline', 'tgtType', 'tgtDiam', 'windSpeed', 'windDir', 'temp', 'pressure', 'humidity', 'spinOn', 'corOn', 'lat', 'az', 'distUnit', 'skyBright'];
+  saveConfig = () => {
+    const st = this.state;
+    const L = getL(st.lang);
+    const cfg = {};
+    this.CFG_KEYS.forEach((k) => { cfg[k] = st[k]; });
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const stamp = now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate()) + '-' + pad(now.getHours()) + pad(now.getMinutes());
+    const dflt = 'VSR-' + String(st.preset).replace(/[^A-Za-z0-9._-]+/g, '_') + '-' + stamp;
+    let name = window.prompt(L.cfgSavePrompt || 'File name:', dflt);
+    if (name == null) return;
+    name = name.trim() || dflt;
+    if (!/\.(txt|json)$/i.test(name)) name += '.txt';
+    const body = { _app: 'Virtual Shooting Range', _version: 1, _saved: now.toISOString(), settings: cfg };
+    const blob = new Blob([JSON.stringify(body, null, 2)], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  };
+  loadConfigClick = () => { if (this.cfgRef.current) this.cfgRef.current.click(); };
+  onConfigFile = (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    const L = getL(this.state.lang);
+    const rd = new FileReader();
+    rd.onload = () => {
+      try {
+        const parsed = JSON.parse(rd.result);
+        const cfg = parsed && parsed.settings ? parsed.settings : parsed;
+        if (!cfg || typeof cfg !== 'object') throw 0;
+        const upd = {};
+        this.CFG_KEYS.forEach((k) => { if (cfg[k] !== undefined) upd[k] = cfg[k]; });
+        if (!Object.keys(upd).length) throw 0;
+        this.setState(upd);
+      } catch (_) {
+        window.alert(L.cfgLoadErr || 'Could not read this settings file.');
+      }
+    };
+    rd.readAsText(file);
+  };
   exportPdf = () => {
     const tr = this.getTraj();
     const st = this.state;
@@ -2331,6 +2384,9 @@ class Component extends DCLogic {
       tRoScoreL: L.scoreL, roScore: hidden ? '?' : sc0.txt,
       roScoreStyle: { color: (hidden || sc0.none) ? 'var(--muted)' : sc0.hit ? 'var(--green)' : 'var(--red-soft)' },
       exportPdf: this.exportPdf, tPdfBtn: L.pdfBtn,
+      saveConfig: this.saveConfig, loadConfigClick: this.loadConfigClick, onConfigFile: this.onConfigFile, cfgRef: this.cfgRef,
+      tCfgSave: L.cfgSave || 'SAVE', tCfgLoad: L.cfgLoad || 'LOAD',
+      tCfgSaveTip: L.cfgSaveTip || 'Save all settings to a text file', tCfgLoadTip: L.cfgLoadTip || 'Load settings from a file',
       toggleTrain: this.toggleTrain, nextRound: this.nextRound, exitTrain: this.exitTrain,
       trainOn: st.trainOn, trainRevealed: st.trainRevealed, trainRound: st.trainRound, trainTotal: st.trainTotal,
       trainMsg, trainBtnStyle, lockStyle,
