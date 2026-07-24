@@ -1051,7 +1051,20 @@ class Component extends DCLogic {
   onTgtType = (e) => this.setState({ tgtType: e.target.value });
   cycleZoom = () => this.setState((s) => ({ insetZoom: { 1: 2, 2: 4, 4: 8, 8: 1 }[s.insetZoom || 1] }));
   cfgRef = React.createRef();
-  CFG_KEYS = ['preset', 'mv', 'massGr', 'bc', 'cal', 'barrelLen', 'twist', 'scopeH', 'zeroDist', 'cant', 'railMoa', 'mountMoa', 'adjUnit', 'adjElev', 'adjWind', 'targetDist', 'incline', 'tgtType', 'tgtDiam', 'windSpeed', 'windDir', 'temp', 'pressure', 'humidity', 'spinOn', 'corOn', 'lat', 'az', 'distUnit', 'skyBright'];
+  CFG_SPEC = {
+    preset: { enum: ['.22 LR', '9 mm', '5.56 NATO', '.308 Win', '6.5 Creedmoor', '.338 Lapua Mag', 'Custom'] },
+    mv: { min: 80, max: 2000 }, massGr: { min: 10, max: 800 }, bc: { min: 0.01, max: 2 }, cal: { min: 3, max: 30 },
+    barrelLen: { min: 5, max: 32 }, twist: { min: 5, max: 30 }, scopeH: { min: 0, max: 20 }, zeroDist: { min: 5, max: 1000 },
+    cant: { min: -45, max: 45 }, railMoa: { min: 0, max: 100 }, mountMoa: { min: 0, max: 100 },
+    adjUnit: { enum: ['MOA', 'MIL'] }, adjElev: { min: -200, max: 200 }, adjWind: { min: -200, max: 200 },
+    targetDist: { min: 5, max: 2000 }, incline: { min: -60, max: 60 },
+    tgtType: { enum: ['ring50', 'ring100', 'ts10', 'gong30', 'ipsc', 'custom'] }, tgtDiam: { min: 10, max: 200 },
+    windSpeed: { min: 0, max: 30 }, windDir: { min: 0, max: 360 }, temp: { min: -50, max: 60 },
+    pressure: { min: 800, max: 1100 }, humidity: { min: 0, max: 100 },
+    spinOn: { bool: true }, corOn: { bool: true }, lat: { min: -90, max: 90 }, az: { min: 0, max: 360 },
+    distUnit: { enum: ['m', 'yd'] }, skyBright: { min: 0, max: 100 },
+  };
+  CFG_KEYS = Object.keys(this.CFG_SPEC);
   saveConfig = () => {
     const st = this.state;
     const L = getL(st.lang);
@@ -1086,7 +1099,15 @@ class Component extends DCLogic {
         const cfg = parsed && parsed.settings ? parsed.settings : parsed;
         if (!cfg || typeof cfg !== 'object') throw 0;
         const upd = {};
-        this.CFG_KEYS.forEach((k) => { if (cfg[k] !== undefined) upd[k] = cfg[k]; });
+        this.CFG_KEYS.forEach((k) => {
+          if (cfg[k] === undefined || cfg[k] === null) return;
+          const spec = this.CFG_SPEC[k], v = cfg[k];
+          if (spec.enum) { if (spec.enum.indexOf(v) !== -1) upd[k] = v; return; }
+          if (spec.bool) { upd[k] = !!v; return; }
+          const n = typeof v === 'number' ? v : parseFloat(v);
+          if (!isFinite(n)) return;
+          upd[k] = Math.min(spec.max, Math.max(spec.min, n));
+        });
         if (!Object.keys(upd).length) throw 0;
         this.setState(upd);
       } catch (_) {
@@ -2200,7 +2221,7 @@ class Component extends DCLogic {
       isMil ? milCtl('adjElev', L.elevL, -12, 12) : this.sl('adjElev', L.elevL, -40, 40, 0.25, adjDisp(st.adjElev)),
       isMil ? milCtl('adjWind', L.windAdjL, -4.5, 4.5) : this.sl('adjWind', L.windAdjL, -15, 15, 0.25, adjDisp(st.adjWind)),
       this.sl('cant', L.cantL, -60, 60, 1, (st.cant >= 0 ? '+' : '') + st.cant.toFixed(0) + '°'),
-      this.sl('barrelLen', L.barrelL, 10, 28, 0.5, barrelDisp),
+      this.sl('barrelLen', L.barrelL, 10, 32, 0.5, barrelDisp),
       this.sl('scopeH', L.scopeHL, 2, 10, 0.1, st.scopeH.toFixed(1) + ' cm'),
       isMil ? milCtl('railMoa', L.railL, 0, 17.5) : this.sl('railMoa', L.railL, 0, 60, 1, adjDisp(st.railMoa)),
       isMil ? milCtl('mountMoa', L.mountL, 0, 20) : this.sl('mountMoa', L.mountL, 0, 70, 1, adjDisp(st.mountMoa)),
