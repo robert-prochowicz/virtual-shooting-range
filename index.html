@@ -257,7 +257,7 @@ html[data-theme="light"]{
       <button onClick="{{togAmmo}}" style="display:flex; justify-content:space-between; align-items:center; width:100%; background:transparent; border:none; border-bottom:1px solid var(--border2); padding:0 0 7px; cursor:pointer; font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted);"><span>{{tAmmo}}</span><span style="font-size:12px;">{{ammoArrow}}</span></button>
       <sc-if value="{{ammoOpen}}" hint-placeholder-val="{{true}}">
       <div>
-      <select value="{{presetVal}}" onChange="{{onPreset}}" onMouseEnter="{{presetEnter}}" onMouseLeave="{{infoLeave}}" style="width:100%; margin-top:12px; background:var(--panel3); color:var(--text); border:1px solid var(--border); padding:7px 8px; font-family:'IBM Plex Mono',monospace; font-size:11px; cursor:pointer;">
+      <select value="{{presetVal}}" onChange="{{onPreset}}" onMouseEnter="{{presetEnter}}" onMouseLeave="{{infoLeave}}" disabled="{{isZeroed}}" style="width:100%; margin-top:12px; background:var(--panel3); color:var(--text); border:1px solid var(--border); padding:7px 8px; font-family:'IBM Plex Mono',monospace; font-size:11px; cursor:pointer; opacity:{{presetDim}}; pointer-events:{{presetPe}};">
         <option value=".22 LR">.22 LR</option>
         <option value="9 mm">9 mm Luger</option>
         <option value="5.56 NATO">5.56 NATO</option>
@@ -267,12 +267,12 @@ html[data-theme="light"]{
         <option value="Custom">{{tCustom}}</option>
       </select>
       <sc-for list="{{ammoCtl}}" as="c" hint-placeholder-count="4">
-        <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
+        <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px; opacity:{{c.dim}}; pointer-events:{{c.pe}};">
           <div style="display:flex; justify-content:space-between; align-items:baseline;">
             <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted);">{{c.label}}</span>
             <span style="font-size:11px; color:var(--accent-soft);">{{c.display}}</span>
           </div>
-          <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
+          <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" disabled="{{c.dis}}" style="width:100%;">
         </div>
       </sc-for>
       </div>
@@ -289,13 +289,22 @@ html[data-theme="light"]{
       </div>
       <sc-if value="{{rifleOpen}}" hint-placeholder-val="{{true}}">
       <div>
+      <div style="display:flex; gap:6px; margin-top:12px;">
+        <button onClick="{{doZero}}" disabled="{{isZeroed}}" style="{{zeroBtnStyle}}">⊕ {{tZeroBtn}}</button>
+        <sc-if value="{{isZeroed}}" hint-placeholder-val="{{false}}">
+          <button onClick="{{clearZero}}" style="{{clearZeroStyle}}">✕ {{tZeroClear}}</button>
+        </sc-if>
+      </div>
+      <sc-if value="{{isZeroed}}" hint-placeholder-val="{{false}}">
+        <div style="font-size:14px; letter-spacing:2px; color:var(--gold); font-weight:600; margin-top:8px;">{{zeroedMsg}}</div>
+      </sc-if>
       <sc-for list="{{rifleCtl}}" as="c" hint-placeholder-count="4">
-        <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
+        <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px; opacity:{{c.dim}}; pointer-events:{{c.pe}};">
           <div style="display:flex; justify-content:space-between; align-items:baseline;">
             <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted);">{{c.label}}</span>
             <sc-if value="{{c.edit}}" hint-placeholder-val="{{false}}">
               <span style="display:flex; align-items:center; gap:4px;">
-                <input type="number" min="{{c.numMin}}" max="{{c.numMax}}" step="1" value="{{c.numVal}}" onInput="{{c.onNum}}" onBlur="{{c.onNumCommit}}" onKeyDown="{{c.onNumKey}}" style="width:60px; text-align:right; background:var(--panel3); color:var(--accent-soft); border:1px solid var(--border); border-radius:2px; padding:2px 5px; font-family:'IBM Plex Mono',monospace; font-size:11px;">
+                <input type="number" min="{{c.numMin}}" max="{{c.numMax}}" step="1" value="{{c.numVal}}" onInput="{{c.onNum}}" onBlur="{{c.onNumCommit}}" onKeyDown="{{c.onNumKey}}" disabled="{{c.dis}}" style="width:60px; text-align:right; background:var(--panel3); color:var(--accent-soft); border:1px solid var(--border); border-radius:2px; padding:2px 5px; font-family:'IBM Plex Mono',monospace; font-size:11px; background:{{c.numBg}}; color:{{c.numFg}}; border-color:{{c.numBd}};">
                 <span style="font-size:9px; color:var(--muted);">{{c.unit}}</span>
               </span>
             </sc-if>
@@ -303,7 +312,7 @@ html[data-theme="light"]{
               <span style="font-size:11px; color:var(--accent-soft);">{{c.display}}</span>
             </sc-if>
           </div>
-          <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
+          <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" disabled="{{c.dis}}" style="width:100%;">
         </div>
       </sc-for>
       </div>
@@ -323,7 +332,7 @@ html[data-theme="light"]{
       <sc-for list="{{shotCtl}}" as="c" hint-placeholder-count="2">
         <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
           <div style="display:flex; justify-content:space-between; align-items:baseline;">
-            <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted);">{{c.label}}</span>
+            <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted); font-weight:{{c.lw}};">{{c.label}}</span>
             <sc-if value="{{c.edit}}" hint-placeholder-val="{{false}}">
               <span style="display:flex; align-items:center; gap:4px;">
                 <input type="number" min="{{c.numMin}}" max="{{c.numMax}}" step="1" value="{{c.numVal}}" onInput="{{c.onNum}}" onBlur="{{c.onNumCommit}}" onKeyDown="{{c.onNumKey}}" style="width:60px; text-align:right; background:var(--panel3); color:var(--accent-soft); border:1px solid var(--border); border-radius:2px; padding:2px 5px; font-family:'IBM Plex Mono',monospace; font-size:11px;">
@@ -412,12 +421,12 @@ html[data-theme="light"]{
             <input type="checkbox" checked="{{corOn}}" onChange="{{toggleCor}}" style="accent-color:var(--accent); margin:0;">{{tCorLbl}}
           </label>
           <sc-for list="{{advCtl}}" as="c" hint-placeholder-count="2">
-            <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
+            <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px; opacity:{{c.dim}}; pointer-events:{{c.pe}};">
               <div style="display:flex; justify-content:space-between; align-items:baseline;">
                 <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted);">{{c.label}}</span>
                 <span style="font-size:11px; color:var(--accent-soft);">{{c.display}}</span>
               </div>
-              <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" style="width:100%;">
+              <input type="range" min="{{c.min}}" max="{{c.max}}" step="{{c.step}}" value="{{c.value}}" onInput="{{c.onInput}}" disabled="{{c.dis}}" style="width:100%;">
             </div>
           </sc-for>
         </div>
@@ -491,6 +500,7 @@ const T = {
     tgtOpts: { ring50: 'RING TARGET · Ø 50 cm', ring100: 'RING TARGET · Ø 100 cm', ts10: 'TS-10 FR · 45 × 70 cm', gong30: 'STEEL GONG · Ø 30 cm', ipsc: 'IPSC PAPER · 45 × 57.5 cm', custom: 'CUSTOM PLATE · Ø' },
     pdfBtn: '⎙ PDF', pdfPrinted: 'GENERATED',
     cfgSave: 'SAVE', cfgLoad: 'LOAD', cfgSaveTip: 'Save all settings to a text file', cfgLoadTip: 'Load settings from a file', cfgSavePrompt: 'File name:', cfgLoadErr: 'Could not read this settings file.',
+    zeroBtn: 'ZERO SCOPE', zeroClear: 'RESET ZERO', zeroedTag: 'ZEROED',
     fire: 'FIRE', devScale: 'ARC MAGNIFICATION', skyLbl: 'SKY LIGHT',
     paramsL: 'PARAMETERS', dispL: 'DISPLAY',
     viewMode: 'VIEW MODE', trueBtn: 'TRUE', arcBtn: 'ARC', trueNote: 'TRUE GEOMETRY · 1:1',
@@ -563,6 +573,7 @@ const T = {
     tgtOpts: { ring50: 'PIERŚCIENIOWA · Ø 50 cm', ring100: 'PIERŚCIENIOWA · Ø 100 cm', ts10: 'TS-10 FR · 45 × 70 cm', gong30: 'GONG STALOWY · Ø 30 cm', ipsc: 'PAPIEROWA IPSC · 45 × 57,5 cm', custom: 'WŁASNA PŁYTA · Ø' },
     pdfBtn: '⎙ PDF', pdfPrinted: 'WYGENEROWANO',
     cfgSave: 'ZAPISZ', cfgLoad: 'WCZYTAJ', cfgSaveTip: 'Zapisz wszystkie ustawienia do pliku tekstowego', cfgLoadTip: 'Wczytaj ustawienia z pliku', cfgSavePrompt: 'Nazwa pliku:', cfgLoadErr: 'Nie udało się odczytać tego pliku ustawień.',
+    zeroBtn: 'ZERUJ', zeroClear: 'KASUJ ZEROWANIE', zeroedTag: 'WYZEROWANO',
     fire: 'OGNIA', devScale: 'POWIĘKSZENIE ŁUKU', skyLbl: 'JASNOŚĆ NIEBA',
     paramsL: 'PARAMETRY', dispL: 'EKRAN',
     viewMode: 'TRYB WIDOKU', trueBtn: 'REALNY', arcBtn: 'ŁUK', trueNote: 'GEOMETRIA RZECZYWISTA · 1:1',
@@ -726,7 +737,7 @@ function interpAt(samples, s) {
 function simulate(p) {
   const rho = airDensity(p.temp, p.pressure, p.humidity);
   const sos = 331.3 * Math.sqrt(1 + p.temp / 273.15);
-  const zeroAngle = solveZero(p, rho, sos);
+  const zeroAngle = (p.frozenZero != null) ? p.frozenZero : solveZero(p, rho, sos);
   const inc = p.incline;
   const losU = [Math.cos(inc), Math.sin(inc), 0];
   const vUp = [-Math.sin(inc), Math.cos(inc), 0];
@@ -971,7 +982,7 @@ class Component extends DCLogic {
     ammoOpen: true, rifleOpen: true, shotOpen: true, envOpen: true, dopeOpen: true, sdfOpen: true,
     exag: 8, viewMode: 'arc', cam: 'side', modelOpen: false, firing: false,
     lang: (function () { try { return localStorage.getItem('vsr_lang') || 'EN'; } catch (e) { return 'EN'; } })(), skyBright: 15, distUnit: 'm', infoMode: false, infoKey: null, theme: loadTheme(), sceneTheme: loadScene(),
-    trainOn: false, trainRound: 1, trainTotal: 0, trainLast: 0, trainRevealed: false,
+    trainOn: false, trainRound: 1, trainTotal: 0, trainLast: 0, trainRevealed: false, zeroedAngle: null, insetZoom: 1,
     vw: window.innerWidth, legendOpen: null, statsOpen: true, faceOpen: null, dispOpen: null, paramsOpen: false,
   };
   canvasRef = React.createRef();
@@ -999,13 +1010,14 @@ class Component extends DCLogic {
     const s = this.state;
     return {
       mv: this.effMv(), massGr: s.massGr, bc: s.bc, cal: s.cal,
-      scopeH: s.scopeH / 100, zeroDist: s.zeroDist, cant: s.cant * D2R,
+      scopeH: s.scopeH / 100, zeroDist: s.zeroedAngle != null ? s.zeroDist : s.targetDist, cant: s.cant * D2R,
       rail: s.railMoa * MOA, mount: s.mountMoa * MOA,
       adjElev: s.adjElev * MOA, adjWind: s.adjWind * MOA,
       targetDist: s.targetDist, incline: s.incline * D2R,
       windSpeed: s.windSpeed, windDir: s.windDir * D2R,
       temp: s.temp, pressure: s.pressure, humidity: s.humidity,
       spinOn: s.spinOn, corOn: s.corOn, lat: s.lat * D2R, az: s.az * D2R,
+      frozenZero: s.zeroedAngle,
       sg: s.spinOn ? Math.min(3.5, this.stabilitySG()) : 1.8,
     };
   }
@@ -1050,6 +1062,13 @@ class Component extends DCLogic {
   }
   onTgtType = (e) => this.setState({ tgtType: e.target.value });
   cycleZoom = () => this.setState((s) => ({ insetZoom: { 1: 2, 2: 4, 4: 8, 8: 1 }[s.insetZoom || 1] }));
+  doZero = () => {
+    const p = { ...this.getParams(), zeroDist: this.state.targetDist, frozenZero: null };
+    const rho = airDensity(p.temp, p.pressure, p.humidity);
+    const sos = 331.3 * Math.sqrt(1 + p.temp / 273.15);
+    this.setState({ zeroedAngle: solveZero(p, rho, sos), zeroDist: this.state.targetDist, adjElev: 0, adjWind: 0 });
+  };
+  clearZero = () => this.setState({ zeroedAngle: null });
   cfgRef = React.createRef();
   CFG_SPEC = {
     preset: { enum: ['.22 LR', '9 mm', '5.56 NATO', '.308 Win', '6.5 Creedmoor', '.338 Lapua Mag', 'Custom'] },
@@ -1063,6 +1082,7 @@ class Component extends DCLogic {
     pressure: { min: 800, max: 1100 }, humidity: { min: 0, max: 100 },
     spinOn: { bool: true }, corOn: { bool: true }, lat: { min: -90, max: 90 }, az: { min: 0, max: 360 },
     distUnit: { enum: ['m', 'yd'] }, skyBright: { min: 0, max: 100 },
+    zeroedAngle: { min: -0.15, max: 0.3, nullable: true },
   };
   CFG_KEYS = Object.keys(this.CFG_SPEC);
   saveConfig = () => {
@@ -1100,8 +1120,9 @@ class Component extends DCLogic {
         if (!cfg || typeof cfg !== 'object') throw 0;
         const upd = {};
         this.CFG_KEYS.forEach((k) => {
-          if (cfg[k] === undefined || cfg[k] === null) return;
+          if (cfg[k] === undefined) return;
           const spec = this.CFG_SPEC[k], v = cfg[k];
+          if (v === null) { if (spec.nullable) upd[k] = null; return; }
           if (spec.enum) { if (spec.enum.indexOf(v) !== -1) upd[k] = v; return; }
           if (spec.bool) { upd[k] = !!v; return; }
           const n = typeof v === 'number' ? v : parseFloat(v);
@@ -1186,7 +1207,7 @@ class Component extends DCLogic {
     const L = getL(st.lang);
     let data = [], sdfVal = null, maxErr = 0, to = 0;
     try {
-      const sp = { ...this.getParams(), zeroDist: 100, incline: 0, adjElev: 0, adjWind: 0, rail: 0, mount: 0, cant: 0, targetDist: 520 };
+      const sp = { ...this.getParams(), zeroDist: 100, incline: 0, adjElev: 0, adjWind: 0, rail: 0, mount: 0, cant: 0, targetDist: 520, frozenZero: null };
       const str = simulate(sp);
       for (let R = 150; R <= 500; R += 50) {
         const sm = interpAt(str.samples, R);
@@ -2208,16 +2229,22 @@ class Component extends DCLogic {
       return base;
     };
 
+    const zeroed = st.zeroedAngle != null;
+    const zeroLockKeys = { barrelLen: 1, scopeH: 1, railMoa: 1, mountMoa: 1, twist: 1, cal: 1 };
+    const lockCtl = (c) => {
+      if (!zeroed) return c;
+      if (zeroLockKeys[c.key]) return { ...c, dis: true, dim: 0.4, pe: 'none' };
+      return c;
+    };
     const ammoCtl = [
       this.sl('mv', L.mvL, 200, 1100, 5, st.mv.toFixed(0) + ' m/s'),
       this.sl('massGr', L.massL, 20, 300, 1, st.massGr.toFixed(0) + ' gr'),
       this.sl('bc', L.bcL, 0.05, 1, 0.005, st.bc.toFixed(3)),
       this.sl('cal', L.calL, 4, 10, 0.1, st.cal.toFixed(1) + ' mm'),
-    ];
+    ].map(lockCtl);
     const dvBarrel = (st.barrelLen - BARREL_REF) * DV_PER_IN;
     const barrelDisp = st.barrelLen.toFixed(1) + '″ / ' + (st.barrelLen * 2.54).toFixed(0) + ' cm · ' + (dvBarrel >= 0 ? '+' : '') + dvBarrel.toFixed(0) + ' m/s';
     const rifleCtl = [
-      distCtlE('zeroDist', L.zeroL, 10, 600, 5),
       isMil ? milCtl('adjElev', L.elevL, -12, 12) : this.sl('adjElev', L.elevL, -40, 40, 0.25, adjDisp(st.adjElev)),
       isMil ? milCtl('adjWind', L.windAdjL, -4.5, 4.5) : this.sl('adjWind', L.windAdjL, -15, 15, 0.25, adjDisp(st.adjWind)),
       this.sl('cant', L.cantL, -60, 60, 1, (st.cant >= 0 ? '+' : '') + st.cant.toFixed(0) + '°'),
@@ -2225,11 +2252,11 @@ class Component extends DCLogic {
       this.sl('scopeH', L.scopeHL, 2, 10, 0.1, st.scopeH.toFixed(1) + ' cm'),
       isMil ? milCtl('railMoa', L.railL, 0, 17.5) : this.sl('railMoa', L.railL, 0, 60, 1, adjDisp(st.railMoa)),
       isMil ? milCtl('mountMoa', L.mountL, 0, 20) : this.sl('mountMoa', L.mountL, 0, 70, 1, adjDisp(st.mountMoa)),
-    ].map((c) => ({ ...c, plain: !c.edit }));
+    ].map((c) => ({ ...c, plain: !c.edit })).map(lockCtl);
     const shotCtl = [
       distCtlE('targetDist', L.tgtDistL, 10, 2000, 5),
       this.sl('incline', L.inclineL, -45, 45, 1, (st.incline >= 0 ? '+' : '') + st.incline.toFixed(0) + '°'),
-    ].map((c) => ({ ...c, plain: !c.edit }));
+    ].map((c) => ({ ...c, plain: !c.edit })).map((c) => c.key === 'targetDist' ? { ...c, lw: 700 } : c);
     const envCtl = [
       this.sl('temp', L.tempL, -20, 45, 1, st.temp.toFixed(0) + ' °C'),
       this.sl('pressure', L.pressL, 850, 1050, 1, st.pressure.toFixed(0) + ' hPa'),
@@ -2239,7 +2266,7 @@ class Component extends DCLogic {
       this.sl('twist', L.twistL, 5, 20, 0.5, '1:' + st.twist.toFixed(1) + '″ · SG ' + Math.min(9.9, sgv).toFixed(2) + (sgv < 1 ? ' ⚠' : '')),
       this.sl('lat', L.latL, -90, 90, 1, st.lat.toFixed(0) + '°'),
       this.sl('az', L.azL, 0, 360, 5, st.az.toFixed(0) + '°'),
-    ];
+    ].map(lockCtl);
 
     const cams = [['side', L.cams.side], ['top', L.cams.top], ['shooter', L.cams.shooter], ['rifle', L.cams.rifle], ['scope', L.cams.scope], ['free', L.cams.free]];
     const btnBase = {
@@ -2281,7 +2308,7 @@ class Component extends DCLogic {
     const sdfRows = [];
     let sdfVal = null, sdfMaxErr = 0, sdfTo = 0;
     try {
-      const sp = { ...this.getParams(), zeroDist: 100, incline: 0, adjElev: 0, adjWind: 0, rail: 0, mount: 0, cant: 0, targetDist: 520 };
+      const sp = { ...this.getParams(), zeroDist: 100, incline: 0, adjElev: 0, adjWind: 0, rail: 0, mount: 0, cant: 0, targetDist: 520, frozenZero: null };
       const str = simulate(sp);
       const data = [];
       for (let R = 150; R <= 500; R += 50) {
@@ -2352,7 +2379,7 @@ class Component extends DCLogic {
       toggleSpin: this.toggleSpin, toggleCor: this.toggleCor,
       setMoa: this.setMoa, setMil: this.setMil,
       moaStyle: unitBtn(!isMil), milStyle: unitBtn(isMil),
-      presetVal: st.preset, modelOpen: st.modelOpen, advOpen: st.advOpen,
+      presetVal: st.preset, presetDim: zeroed ? 0.4 : undefined, presetPe: zeroed ? 'none' : undefined, modelOpen: st.modelOpen, advOpen: st.advOpen,
       advArrow: st.advOpen ? '−' : '+',
       spinOn: st.spinOn, corOn: st.corOn,
       ammoCtl, rifleCtl, shotCtl, envCtl, advCtl, camBtns, dopeRows, sdfRows, sdfNote,
@@ -2406,6 +2433,21 @@ class Component extends DCLogic {
       roScoreStyle: { color: (hidden || sc0.none) ? 'var(--muted)' : sc0.hit ? 'var(--green)' : 'var(--red-soft)' },
       exportPdf: this.exportPdf, tPdfBtn: L.pdfBtn,
       saveConfig: this.saveConfig, loadConfigClick: this.loadConfigClick, onConfigFile: this.onConfigFile, cfgRef: this.cfgRef,
+      isZeroed: zeroed, doZero: this.doZero, clearZero: this.clearZero,
+      tZeroBtn: L.zeroBtn || 'ZERO SCOPE', tZeroClear: L.zeroClear || 'RESET ZERO',
+      zeroedMsg: (L.zeroedTag || 'ZEROED') + ' @ ' + (st.distUnit === 'yd' ? Math.round(st.zeroDist / YDf) + ' yd' : st.zeroDist.toFixed(0) + ' m'),
+      zeroBtnStyle: {
+        flex: 1, fontFamily: "'IBM Plex Mono', monospace", fontSize: '9px', letterSpacing: '1.5px', padding: '7px 8px',
+        cursor: zeroed ? 'default' : 'pointer',
+        border: '1px solid ' + (zeroed ? 'var(--gold)' : 'var(--accent)'),
+        background: zeroed ? 'var(--gold)' : 'rgba(69,214,255,0.1)',
+        color: zeroed ? 'var(--on-accent)' : 'var(--accent)',
+        opacity: zeroed ? 0.85 : 1,
+      },
+      clearZeroStyle: {
+        flex: 1, fontFamily: "'IBM Plex Mono', monospace", fontSize: '9px', letterSpacing: '1.5px', padding: '7px 8px',
+        cursor: 'pointer', border: '1px solid var(--border)', background: 'transparent', color: 'var(--muted)',
+      },
       tCfgSave: L.cfgSave || 'SAVE', tCfgLoad: L.cfgLoad || 'LOAD',
       tCfgSaveTip: L.cfgSaveTip || 'Save all settings to a text file', tCfgLoadTip: L.cfgLoadTip || 'Load settings from a file',
       toggleTrain: this.toggleTrain, nextRound: this.nextRound, exitTrain: this.exitTrain,
