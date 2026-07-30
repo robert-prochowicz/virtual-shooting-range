@@ -320,7 +320,7 @@ html[data-theme="light"]{
             <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted);">{{c.label}}</span>
             <sc-if value="{{c.edit}}" hint-placeholder-val="{{false}}">
               <span style="display:flex; align-items:center; gap:4px;">
-                <input type="number" min="{{c.numMin}}" max="{{c.numMax}}" step="1" value="{{c.numVal}}" onInput="{{c.onNum}}" onBlur="{{c.onNumCommit}}" onKeyDown="{{c.onNumKey}}" disabled="{{c.dis}}" style="width:60px; text-align:right; background:var(--panel3); color:var(--accent-soft); border:1px solid var(--border); border-radius:2px; padding:2px 5px; font-family:'IBM Plex Mono',monospace; font-size:11px; background:{{c.numBg}}; color:{{c.numFg}}; border-color:{{c.numBd}};">
+                <input type="number" min="{{c.numMin}}" max="{{c.numMax}}" step="{{c.numStep}}" value="{{c.numVal}}" onInput="{{c.onNum}}" onBlur="{{c.onNumCommit}}" onKeyDown="{{c.onNumKey}}" disabled="{{c.dis}}" style="width:60px; text-align:right; background:var(--panel3); color:var(--accent-soft); border:1px solid var(--border); border-radius:2px; padding:2px 5px; font-family:'IBM Plex Mono',monospace; font-size:11px; background:{{c.numBg}}; color:{{c.numFg}}; border-color:{{c.numBd}};">
                 <span style="font-size:9px; color:var(--muted);">{{c.unit}}</span>
               </span>
             </sc-if>
@@ -351,7 +351,7 @@ html[data-theme="light"]{
             <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted); font-weight:{{c.lw}};">{{c.label}}</span>
             <sc-if value="{{c.edit}}" hint-placeholder-val="{{false}}">
               <span style="display:flex; align-items:center; gap:4px;">
-                <input type="number" min="{{c.numMin}}" max="{{c.numMax}}" step="1" value="{{c.numVal}}" onInput="{{c.onNum}}" onBlur="{{c.onNumCommit}}" onKeyDown="{{c.onNumKey}}" style="width:60px; text-align:right; background:var(--panel3); color:var(--accent-soft); border:1px solid var(--border); border-radius:2px; padding:2px 5px; font-family:'IBM Plex Mono',monospace; font-size:11px;">
+                <input type="number" min="{{c.numMin}}" max="{{c.numMax}}" step="{{c.numStep}}" value="{{c.numVal}}" onInput="{{c.onNum}}" onBlur="{{c.onNumCommit}}" onKeyDown="{{c.onNumKey}}" style="width:60px; text-align:right; background:var(--panel3); color:var(--accent-soft); border:1px solid var(--border); border-radius:2px; padding:2px 5px; font-family:'IBM Plex Mono',monospace; font-size:11px;">
                 <span style="font-size:9px; color:var(--muted);">{{c.unit}}</span>
               </span>
             </sc-if>
@@ -1340,6 +1340,23 @@ class Component extends DCLogic {
     if (!this._h[k]) this._h[k] = (e) => this.setState((s) => ({ [key]: parseFloat(e.target.value) * 0.9144, distText: { ...s.distText, [key]: null } }));
     return this._h[k];
   }
+  hAdjNum(key, mil, min, max) {
+    const k = 'adjn_' + key + (mil ? 'M' : 'A');
+    if (!this._h[k]) this._h[k] = (e) => {
+      const txt = e.target.value;
+      const v = parseFloat(txt);
+      const upd = (s) => ({ distText: { ...s.distText, [key]: txt } });
+      if (!isFinite(v)) { this.setState(upd); return; }
+      const cl = Math.max(min, Math.min(max, v));
+      this.setState((s) => ({ ...upd(s), [key]: mil ? cl / 0.290888 : cl }));
+    };
+    return this._h[k];
+  }
+  hAdjBlur(key) {
+    const k = 'adjb_' + key;
+    if (!this._h[k]) this._h[k] = () => this.setState((s) => ({ distText: { ...s.distText, [key]: null } }));
+    return this._h[k];
+  }
   sl(key, label, min, max, step, display) {
     return { key, label, min, max, step, value: this.state[key], display, onInput: this.h(key), onEnter: this.iE(key) };
   }
@@ -2257,6 +2274,7 @@ class Component extends DCLogic {
     const distCtlE = (key, label, minM, maxM, stepV) => {
       const base = distCtl(key, label, minM, maxM, stepV);
       base.edit = true; base.plain = false; base.unit = dU;
+      base.numStep = 1;
       base.onNum = this.hDistInput(key); base.onNumCommit = this.hDistCommit(key, minM, maxM); base.onNumKey = this.hDistKey;
       base.numVal = (st.distText && st.distText[key] != null) ? st.distText[key] : (isYd ? Math.round(st[key] / YDf) : Math.round(st[key]));
       base.numMin = isYd ? Math.round(minM / YDf) : minM;
@@ -2264,6 +2282,19 @@ class Component extends DCLogic {
       return base;
     };
 
+    const adjCtlE = (key, label, minMil, maxMil, minMoa, maxMoa) => {
+      const base = isMil ? milCtl(key, label, minMil, maxMil) : this.sl(key, label, minMoa, maxMoa, 0.25, adjDisp(st[key]));
+      base.edit = true; base.plain = false; base.unit = unit;
+      base.numStep = isMil ? 0.1 : 0.25;
+      base.numMin = isMil ? minMil : minMoa;
+      base.numMax = isMil ? maxMil : maxMoa;
+      base.onNum = this.hAdjNum(key, isMil, base.numMin, base.numMax);
+      base.onNumCommit = this.hAdjBlur(key);
+      base.onNumKey = this.hDistKey;
+      const raw = (st.distText || {})[key];
+      base.numVal = raw != null ? raw : (isMil ? (Math.round(st[key] * 0.290888 * 10) / 10) : (Math.round(st[key] * 4) / 4));
+      return base;
+    };
     const zeroed = st.zeroedAngle != null;
     const zeroLockKeys = { barrelLen: 1, scopeH: 1, railMoa: 1, mountMoa: 1, twist: 1, cal: 1 };
     const lockCtl = (c) => {
@@ -2280,8 +2311,8 @@ class Component extends DCLogic {
     const dvBarrel = (st.barrelLen - BARREL_REF) * DV_PER_IN;
     const barrelDisp = st.barrelLen.toFixed(1) + '″ / ' + (st.barrelLen * 2.54).toFixed(0) + ' cm · ' + (dvBarrel >= 0 ? '+' : '') + dvBarrel.toFixed(0) + ' m/s';
     const rifleCtl = [
-      isMil ? milCtl('adjElev', L.elevL, -12, 12) : this.sl('adjElev', L.elevL, -40, 40, 0.25, adjDisp(st.adjElev)),
-      isMil ? milCtl('adjWind', L.windAdjL, -4.5, 4.5) : this.sl('adjWind', L.windAdjL, -15, 15, 0.25, adjDisp(st.adjWind)),
+      adjCtlE('adjElev', L.elevL, -12, 12, -40, 40),
+      adjCtlE('adjWind', L.windAdjL, -4.5, 4.5, -15, 15),
       this.sl('cant', L.cantL, -60, 60, 1, (st.cant >= 0 ? '+' : '') + st.cant.toFixed(0) + '°'),
       this.sl('barrelLen', L.barrelL, 10, 32, 0.5, barrelDisp),
       this.sl('scopeH', L.scopeHL, 2, 10, 0.1, st.scopeH.toFixed(1) + ' cm'),
