@@ -356,6 +356,17 @@ html[data-theme="light"]{
       </div>
       <sc-if value="{{shotOpen}}" hint-placeholder-val="{{true}}">
       <div>
+      <div onMouseEnter="{{incCtl.onEnter}}" onMouseLeave="{{infoLeave}}" style="margin-top:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <span style="font-size:9.5px; letter-spacing:1px; color:var(--muted);">{{incCtl.label}}</span>
+          <span style="display:flex; align-items:center; gap:4px;">
+            <input type="number" min="{{incCtl.numMin}}" max="{{incCtl.numMax}}" step="{{incCtl.numStep}}" value="{{incCtl.numVal}}" onInput="{{incCtl.onNum}}" onBlur="{{incCtl.onNumCommit}}" onKeyDown="{{incCtl.onNumKey}}" style="width:64px; text-align:right; background:var(--panel3); color:var(--accent-soft); border:1px solid var(--border); border-radius:2px; padding:2px 5px; font-family:'IBM Plex Mono',monospace; font-size:11px;">
+            <span style="font-size:9px; color:var(--muted);">{{incCtl.unit}}</span>
+          </span>
+        </div>
+        <input type="range" min="{{incCtl.min}}" max="{{incCtl.max}}" step="{{incCtl.step}}" value="{{incCtl.value}}" onInput="{{incCtl.onInput}}" style="width:100%; margin-top:5px;">
+        <div style="font-size:9px; letter-spacing:1px; color:var(--muted); margin-top:3px;">{{tDhL}} {{incDh}}</div>
+      </div>
       <sc-for list="{{shotCtl}}" as="c" hint-placeholder-count="2">
         <div onMouseEnter="{{c.onEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; flex-direction:column; gap:3px; margin-top:11px;">
           <div style="display:flex; justify-content:space-between; align-items:baseline;">
@@ -541,6 +552,7 @@ const T = {
     scopeHL: 'SCOPE HEIGHT OVER BORE', zeroL: 'ZERO DISTANCE', cantL: 'CANT ANGLE · + = RIGHT', elevL: 'ELEVATION ADJ', windAdjL: 'WINDAGE ADJ',
     railL: 'RAIL INCLINE (BASE)', mountL: 'MOUNT INCLINE (RINGS)',
     tgtDistL: 'TARGET DISTANCE', inclineL: 'INCLINE ANGLE',
+    dhL: 'Δh', dhUp: 'TARGET ABOVE', dhDown: 'TARGET BELOW', dhLevel: 'LEVEL',
     tempL: 'TEMPERATURE', pressL: 'PRESSURE', humL: 'HUMIDITY',
     spinLbl: 'SPIN DRIFT · RH TWIST (LITZ)', corLbl: 'CORIOLIS + EÖTVÖS', latL: 'LATITUDE', azL: 'SHOT AZIMUTH · 0=N',
     twistL: 'BARREL TWIST', trainBtn: 'TRAINING MODE', trainTitle: 'TRAINING', roundL: 'ROUND', totalL: 'TOTAL', ptsL: 'PTS', nextBtn: 'NEXT ROUND ▸', exitBtn: 'EXIT',
@@ -623,6 +635,7 @@ const T = {
     scopeHL: 'WYSOKOŚĆ LUNETY NAD LUFĄ', zeroL: 'ODLEGŁOŚĆ ZEROWANIA', cantL: 'PRZECHYŁ · + = W PRAWO', elevL: 'POPRAWKA PIONOWA', windAdjL: 'POPRAWKA POZIOMA',
     railL: 'NACHYLENIE SZYNY MONTAŻU', mountL: 'NACHYLENIE MONTAŻU',
     tgtDistL: 'ODLEGŁOŚĆ CELU', inclineL: 'KĄT NACHYLENIA',
+    dhL: 'Δh', dhUp: 'CEL WYŻEJ', dhDown: 'CEL NIŻEJ', dhLevel: 'POZIOMO',
     tempL: 'TEMPERATURA', pressL: 'CIŚNIENIE', humL: 'WILGOTNOŚĆ',
     spinLbl: 'DERYWACJA · GWINT PRAWY (LITZ)', corLbl: 'CORIOLIS + EÖTVÖS', latL: 'SZEROKOŚĆ GEOGR.', azL: 'AZYMUT STRZAŁU · 0=N',
     twistL: 'SKOK GWINTU', trainBtn: 'TRYB TRENINGOWY', trainTitle: 'TRENING', roundL: 'RUNDA', totalL: 'ŁĄCZNIE', ptsL: 'PKT', nextBtn: 'NASTĘPNA RUNDA ▸', exitBtn: 'ZAKOŃCZ',
@@ -805,7 +818,7 @@ function simulate(p) {
     }
     return [ax, ay, az];
   };
-  const dt = 0.002, groundY = -1.5;
+  const dt = 0.002, groundY = -1.5, gTan = Math.tan(inc);
   let r = [muzzle[0], muzzle[1], muzzle[2]], v = [dir[0] * p.mv, dir[1] * p.mv, dir[2] * p.mv], t = 0;
   const samples = [];
   const rec = () => {
@@ -825,7 +838,7 @@ function simulate(p) {
     const st = rk4step(r, v, dt, acc); r = st[0]; v = st[1]; t += dt;
     const rx = r[0] - scope[0], ry = r[1] - scope[1];
     const s = rx * losU[0] + ry * losU[1];
-    if (r[1] < groundY) { rec(); hitGround = true; break; }
+    if (r[1] < groundY + r[0] * gTan) { rec(); hitGround = true; break; }
     if (s >= p.targetDist) { rec(); break; }
     if (s - lastS >= recEvery) lastS = rec();
     if (t > 9 || (v[0] * losU[0] + v[1] * losU[1]) < 0) break;
@@ -1106,7 +1119,13 @@ class Component extends DCLogic {
     const sos = 331.3 * Math.sqrt(1 + p.temp / 273.15);
     this.setState({ zeroedAngle: solveZero(p, rho, sos), zeroDist: this.state.targetDist, adjElev: 0, adjWind: 0 });
   };
-  clearZero = () => this.setState({ zeroedAngle: null, targetDist: 100, adjElev: 0, adjWind: 0 });
+  clearZero = () => this.setState({
+    zeroedAngle: null, targetDist: 100, incline: 0, adjElev: 0, adjWind: 0, cant: 0,
+    preset: '.22 LR', mv: 370, massGr: 40, bc: 0.138, cal: 5.7, twist: 16,
+    barrelLen: 20, scopeH: 4.5, railMoa: 0, mountMoa: 0,
+    windSpeed: 0, windDir: 90, temp: 15, pressure: 1013, humidity: 50,
+    spinOn: false, corOn: false, lat: 45, az: 90, distText: {},
+  });
   toggleHelp = () => this.setState((s) => ({ helpOpen: !s.helpOpen, modelOpen: false }));
   cfgRef = React.createRef();
   CFG_SPEC = {
@@ -1589,7 +1608,8 @@ class Component extends DCLogic {
     else if (st.cam === 'scope') { eye = [tr.scope[0], tr.scope[1], 0]; look = aim; fov = 2.0; }
     else {
       const o = (st.cam === 'free') ? this.orbit : (this.presetOrbit(st.cam) || this.orbit);
-      const c = [aim[0] * 0.52, Math.max(1.0, aim[1] * 0.5), 0];
+      const cy = aim[1] * 0.5;
+      const c = [aim[0] * 0.52, aim[1] >= 0 ? Math.max(1.0, cy) : cy, 0];
       eye = [c[0] + o.dist * Math.cos(o.pitch) * Math.cos(o.yaw), c[1] + o.dist * Math.sin(o.pitch), o.dist * Math.cos(o.pitch) * Math.sin(o.yaw)];
       look = c;
     }
@@ -1642,7 +1662,8 @@ class Component extends DCLogic {
     const cam = this.camera(tr, W, H);
     const gy = tr.groundY;
     const mono = "px 'IBM Plex Mono', monospace";
-    const gyAt = () => gy;
+    const gTan = Math.tan(st.incline * Math.PI / 180);
+    const gyAt = (x) => gy + (x || 0) * gTan;
 
     const LT = getL(st.lang);
     const hidden = st.trainOn && !st.trainRevealed;
@@ -1679,7 +1700,7 @@ class Component extends DCLogic {
     }
 
     const maxD = D + 60;
-    const zline = (z, x0, x1) => this.seg(ctx, cam, [x0, gy, z], [x1, gy, z]);
+    const zline = (z, x0, x1) => this.seg(ctx, cam, [x0, gyAt(x0), z], [x1, gyAt(x1), z]);
     ctx.lineWidth = 1 * dpr;
     ctx.beginPath(); ctx.strokeStyle = SC.gridZ;
     for (let z = -25; z <= 25; z += 5) zline(z, -20, maxD);
@@ -2323,9 +2344,19 @@ class Component extends DCLogic {
       isMil ? milCtl('railMoa', L.railL, 0, 17.5) : this.sl('railMoa', L.railL, 0, 60, 1, adjDisp(st.railMoa)),
       isMil ? milCtl('mountMoa', L.mountL, 0, 20) : this.sl('mountMoa', L.mountL, 0, 70, 1, adjDisp(st.mountMoa)),
     ].map((c) => ({ ...c, plain: !c.edit })).map(lockCtl);
-    const shotCtl = [
-      this.sl('incline', L.inclineL, -45, 45, 1, (st.incline >= 0 ? '+' : '') + st.incline.toFixed(0) + '°'),
-    ].map((c) => ({ ...c, plain: !c.edit }));
+    const shotCtl = [];
+    const incCtl = {
+      ...this.sl('incline', L.inclineL, -45, 45, 0.1, ''),
+      unit: '°', numStep: 0.1, numMin: -45, numMax: 45,
+      onNum: this.hAdjNum('incline', false, -45, 45),
+      onNumCommit: this.hAdjBlur('incline'),
+      onNumKey: this.hDistKey,
+      numVal: (st.distText || {}).incline != null ? st.distText.incline : (Math.round(st.incline * 10) / 10),
+    };
+    const dhM = Math.sin(st.incline * D2R) * D;
+    const EN = getL('EN');
+    const incDh = (dhM >= 0 ? '+' : '−') + Math.abs(isYd ? dhM / YDf : dhM).toFixed(1) + ' ' + dU + ' · '
+      + (Math.abs(dhM) < 0.05 ? (L.dhLevel || EN.dhLevel) : (dhM > 0 ? (L.dhUp || EN.dhUp) : (L.dhDown || EN.dhDown)));
     const envCtl = [
       this.sl('temp', L.tempL, -20, 45, 1, st.temp.toFixed(0) + ' °C'),
       this.sl('pressure', L.pressL, 850, 1050, 1, st.pressure.toFixed(0) + ' hPa'),
@@ -2451,7 +2482,7 @@ class Component extends DCLogic {
       presetVal: st.preset, presetDim: zeroed ? 0.4 : undefined, presetPe: zeroed ? 'none' : undefined, modelOpen: st.modelOpen, advOpen: st.advOpen,
       advArrow: st.advOpen ? '−' : '+',
       spinOn: st.spinOn, corOn: st.corOn,
-      ammoCtl, rifleCtl, shotCtl, envCtl, advCtl, camBtns, dopeRows, sdfRows, sdfNote,
+      ammoCtl, rifleCtl, shotCtl, envCtl, advCtl, camBtns, dopeRows, sdfRows, sdfNote, incCtl, incDh,
       tdCtl: distCtlE('targetDist', L.tgtDistL, 10, 2000, 5),
       angU: unit,
       targetLabel: fmtDist(D),
@@ -2562,6 +2593,7 @@ class Component extends DCLogic {
       tAtTarget: L.atTarget, tRoDropL: L.dropL, tRoDriftL: L.driftL, tRoVelL: L.velL, tRoEnergyL: L.energyL, tRoTofL: L.tofL, tRoZerosL: L.zerosL, tRoApexL: L.apexRo,
       tTargetFace: L.targetFace,
       tFire: L.fire, tTofLabel: L.tofL, tDevScale: L.devScale, tSky: L.skyLbl,
+      tDhL: L.dhL || 'Δh',
       tAmmo: L.ammo, tRifle: L.rifle, tShotSec: (L.shotSec || 'SHOT') + ' · ' + (L.envSec || 'ENVIRONMENT'), tEnvSec: L.envSec, tAdvSec: L.advSec, tDopeSec: L.dopeSec,
       tCustom: L.custom, tTgtLbl: L.tgtLbl, tWindLbl: L.windLbl, tSpinLbl: L.spinLbl, tCorLbl: L.corLbl,
       tDRng: L.dRng, tDDrop: L.dDrop, tDDrift: L.dDrift, tDTof: L.dTof,
