@@ -269,6 +269,17 @@ html[data-theme="light"]{
       <input ref="{{cfgRef}}" type="file" accept=".txt,.json,application/json,text/plain" onChange="{{onConfigFile}}" style="display:none;">
     </div>
 
+    <div onMouseEnter="{{tdCtl.onEnter}}" onMouseLeave="{{infoLeave}}" style="margin-bottom:20px; padding:11px 12px; border:1px solid var(--accent); background:rgba(69,214,255,0.06);">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+        <span style="font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:700; letter-spacing:2px; color:var(--accent);">{{tdCtl.label}}</span>
+        <span style="display:flex; align-items:center; gap:5px;">
+          <input type="number" min="{{tdCtl.numMin}}" max="{{tdCtl.numMax}}" step="{{tdCtl.numStep}}" value="{{tdCtl.numVal}}" onInput="{{tdCtl.onNum}}" onBlur="{{tdCtl.onNumCommit}}" onKeyDown="{{tdCtl.onNumKey}}" style="width:74px; text-align:right; background:var(--panel3); color:var(--text-bright); border:1px solid var(--border); border-radius:2px; padding:4px 6px; font-family:'IBM Plex Mono',monospace; font-size:17px; font-weight:600;">
+          <span style="font-size:11px; color:var(--accent-soft);">{{tdCtl.unit}}</span>
+        </span>
+      </div>
+      <input type="range" min="{{tdCtl.min}}" max="{{tdCtl.max}}" step="{{tdCtl.step}}" value="{{tdCtl.value}}" onInput="{{tdCtl.onInput}}" style="width:100%; margin-top:9px;">
+    </div>
+
     <div style="{{lockStyle}}">
       <button onClick="{{togAmmo}}" style="display:flex; justify-content:space-between; align-items:center; width:100%; background:transparent; border:none; border-bottom:1px solid var(--border2); padding:0 0 7px; cursor:pointer; font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted);"><span>{{tAmmo}}</span><span style="font-size:12px;">{{ammoArrow}}</span></button>
       <sc-if value="{{ammoOpen}}" hint-placeholder-val="{{true}}">
@@ -385,14 +396,7 @@ html[data-theme="light"]{
           </div>
         </sc-if>
       </div>
-      </div>
-      </sc-if>
-    </div>
 
-    <div style="{{lockStyle}}">
-      <button onClick="{{togEnv}}" style="display:flex; justify-content:space-between; align-items:center; width:100%; background:transparent; border:none; border-bottom:1px solid var(--border2); padding:0 0 7px; cursor:pointer; font-family:'Chakra Petch',sans-serif; font-size:10px; font-weight:600; letter-spacing:2.5px; color:var(--muted);"><span>{{tEnvSec}}</span><span style="font-size:12px;">{{envArrow}}</span></button>
-      <sc-if value="{{envOpen}}" hint-placeholder-val="{{true}}">
-      <div>
       <div onMouseEnter="{{windEnter}}" onMouseLeave="{{infoLeave}}" style="display:flex; gap:14px; align-items:center; margin-top:13px;">
         <div ref="{{dialRef}}" onPointerDown="{{dialDown}}" onPointerMove="{{dialMove}}" onPointerUp="{{dialUp}}" style="position:relative; width:88px; height:88px; border-radius:50%; border:1px solid var(--border); flex:none; cursor:pointer; background:var(--panel3); touch-action:none;">
           <div style="position:absolute; top:4px; left:50%; transform:translateX(-50%); font-size:8px; letter-spacing:0.5px; color:var(--muted);">{{tTgtLbl}}</div>
@@ -1102,7 +1106,7 @@ class Component extends DCLogic {
     const sos = 331.3 * Math.sqrt(1 + p.temp / 273.15);
     this.setState({ zeroedAngle: solveZero(p, rho, sos), zeroDist: this.state.targetDist, adjElev: 0, adjWind: 0 });
   };
-  clearZero = () => this.setState({ zeroedAngle: null });
+  clearZero = () => this.setState({ zeroedAngle: null, targetDist: 100, adjElev: 0, adjWind: 0 });
   toggleHelp = () => this.setState((s) => ({ helpOpen: !s.helpOpen, modelOpen: false }));
   cfgRef = React.createRef();
   CFG_SPEC = {
@@ -2320,9 +2324,8 @@ class Component extends DCLogic {
       isMil ? milCtl('mountMoa', L.mountL, 0, 20) : this.sl('mountMoa', L.mountL, 0, 70, 1, adjDisp(st.mountMoa)),
     ].map((c) => ({ ...c, plain: !c.edit })).map(lockCtl);
     const shotCtl = [
-      distCtlE('targetDist', L.tgtDistL, 10, 2000, 5),
       this.sl('incline', L.inclineL, -45, 45, 1, (st.incline >= 0 ? '+' : '') + st.incline.toFixed(0) + '°'),
-    ].map((c) => ({ ...c, plain: !c.edit })).map((c) => c.key === 'targetDist' ? { ...c, lw: 700 } : c);
+    ].map((c) => ({ ...c, plain: !c.edit }));
     const envCtl = [
       this.sl('temp', L.tempL, -20, 45, 1, st.temp.toFixed(0) + ' °C'),
       this.sl('pressure', L.pressL, 850, 1050, 1, st.pressure.toFixed(0) + ' hPa'),
@@ -2449,6 +2452,7 @@ class Component extends DCLogic {
       advArrow: st.advOpen ? '−' : '+',
       spinOn: st.spinOn, corOn: st.corOn,
       ammoCtl, rifleCtl, shotCtl, envCtl, advCtl, camBtns, dopeRows, sdfRows, sdfNote,
+      tdCtl: distCtlE('targetDist', L.tgtDistL, 10, 2000, 5),
       angU: unit,
       targetLabel: fmtDist(D),
       scaleNote: st.cam === 'scope' ? L.scopeNote : (st.viewMode === 'true' ? L.trueNote : L.scaleNote(st.exag)),
@@ -2558,7 +2562,7 @@ class Component extends DCLogic {
       tAtTarget: L.atTarget, tRoDropL: L.dropL, tRoDriftL: L.driftL, tRoVelL: L.velL, tRoEnergyL: L.energyL, tRoTofL: L.tofL, tRoZerosL: L.zerosL, tRoApexL: L.apexRo,
       tTargetFace: L.targetFace,
       tFire: L.fire, tTofLabel: L.tofL, tDevScale: L.devScale, tSky: L.skyLbl,
-      tAmmo: L.ammo, tRifle: L.rifle, tShotSec: L.shotSec, tEnvSec: L.envSec, tAdvSec: L.advSec, tDopeSec: L.dopeSec,
+      tAmmo: L.ammo, tRifle: L.rifle, tShotSec: (L.shotSec || 'SHOT') + ' · ' + (L.envSec || 'ENVIRONMENT'), tEnvSec: L.envSec, tAdvSec: L.advSec, tDopeSec: L.dopeSec,
       tCustom: L.custom, tTgtLbl: L.tgtLbl, tWindLbl: L.windLbl, tSpinLbl: L.spinLbl, tCorLbl: L.corLbl,
       tDRng: L.dRng, tDDrop: L.dDrop, tDDrift: L.dDrift, tDTof: L.dTof,
     };
