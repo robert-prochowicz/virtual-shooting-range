@@ -85,11 +85,27 @@ html[data-theme="light"]{
         <button onClick="{{toggleModel}}" style="flex:1; background:transparent; border:1px solid var(--border); color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:1.5px; padding:5px 0; cursor:pointer;" style-hover="border-color:var(--hover-border); color:var(--text-soft);">{{tModelBtn}}</button>
         <button onClick="{{toggleInfo}}" style="{{infoBtnStyle}}">{{tInfoBtn}}</button>
       </div>
+      <button onClick="{{toggleHelp}}" style="width:100%; margin-top:4px; box-sizing:border-box; background:transparent; border:1px solid var(--border); color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:1.5px; padding:5px 0; cursor:pointer;" style-hover="border-color:var(--hover-border); color:var(--text-soft);">? {{tHelpBtn}}</button>
       <button onClick="{{toggleTrain}}" style="{{trainBtnStyle}}">{{tTrainBtn}}</button>
       <a href="https://buymeacoffee.com/r.proch" target="_blank" rel="noopener" title="{{supportTxt}}" style="{{coffeeBtnStyle}}">☕ {{supportBtn}}</a>
       </div>
       </sc-if>
     </div>
+
+    <sc-if value="{{helpOpen}}" hint-placeholder-val="{{false}}">
+      <div style="position:absolute; top:14px; left:246px; width:360px; max-width:calc(100vw - 280px); max-height:calc(100% - 100px); overflow-y:auto; background:var(--panel-94); border:1px solid var(--border3); padding:14px 16px; z-index:5; backdrop-filter:blur(4px);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-family:'Chakra Petch',sans-serif; font-size:11px; font-weight:600; letter-spacing:2px; color:var(--text-bright);">{{tHelpTitle}}</span>
+          <button onClick="{{toggleHelp}}" style="background:transparent; border:none; color:var(--muted); font-size:13px; cursor:pointer; font-family:inherit;">✕</button>
+        </div>
+        <sc-for list="{{helpSecs}}" as="h" hint-placeholder-count="5">
+          <div style="margin-top:11px;">
+            <div style="font-family:'Chakra Petch',sans-serif; font-size:9.5px; font-weight:600; letter-spacing:1.5px; color:var(--accent);">{{h.t}}</div>
+            <div style="margin-top:4px; font-size:10px; line-height:1.7; color:var(--text-soft); white-space:pre-line;">{{h.b}}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
 
     <sc-if value="{{modelOpen}}" hint-placeholder-val="{{false}}">
       <div style="position:absolute; top:14px; left:246px; width:312px; background:var(--panel-94); border:1px solid var(--border3); padding:14px 16px; z-index:5; backdrop-filter:blur(4px);">
@@ -501,6 +517,15 @@ const T = {
     pdfBtn: '⎙ PDF', pdfPrinted: 'GENERATED',
     cfgSave: 'SAVE', cfgLoad: 'LOAD', cfgSaveTip: 'Save all settings to a text file', cfgLoadTip: 'Load settings from a file', cfgSavePrompt: 'File name:', cfgLoadErr: 'Could not read this settings file.',
     zeroBtn: 'ZERO SCOPE', zeroClear: 'RESET ZERO', zeroedTag: 'ZEROED',
+    helpBtn: 'GUIDE', helpTitle: 'USER GUIDE',
+    help: [
+      ['1 · SET UP', 'Pick your cartridge and set rifle & mount: barrel length, scope height, rail/mount incline. Set TARGET DISTANCE — it is also your zeroing distance.'],
+      ['2 · ZERO', 'Press ⊕ ZERO SCOPE. The scope is zeroed at the current target distance and conditions; turrets reset to 0. Fixed parameters (rifle, mount, cartridge, caliber) lock — shown dimmed. ✕ resets the zero.'],
+      ['3 · SHOOT & TEST', 'Now change distance, incline, wind, weather, muzzle velocity, bullet mass or BC — and FIRE. The impact shows the real deviation from your zero, like on a range. Dial turrets (MOA/MIL) to compensate.'],
+      ['TARGET VIEW', 'The right panel shows the target face with the last impact (red ×) and previous shot (grey ×). ZOOM cycles FIT → 2× → 4× → 8×, centered on the impact — useful at long range.'],
+      ['DOPE & TABLES', 'The DOPE card lists hold corrections per distance. Export it — or the full setup — to PDF. SAVE/LOAD stores all settings in a text file.'],
+      ['TRAINING', 'TRAINING MODE randomizes conditions and hides the impact: read the wind, dial your turrets, fire, then reveal to score points.'],
+    ],
     fire: 'FIRE', devScale: 'ARC MAGNIFICATION', skyLbl: 'SKY LIGHT',
     paramsL: 'PARAMETERS', dispL: 'DISPLAY',
     viewMode: 'VIEW MODE', trueBtn: 'TRUE', arcBtn: 'ARC', trueNote: 'TRUE GEOMETRY · 1:1',
@@ -574,6 +599,15 @@ const T = {
     pdfBtn: '⎙ PDF', pdfPrinted: 'WYGENEROWANO',
     cfgSave: 'ZAPISZ', cfgLoad: 'WCZYTAJ', cfgSaveTip: 'Zapisz wszystkie ustawienia do pliku tekstowego', cfgLoadTip: 'Wczytaj ustawienia z pliku', cfgSavePrompt: 'Nazwa pliku:', cfgLoadErr: 'Nie udało się odczytać tego pliku ustawień.',
     zeroBtn: 'ZERUJ', zeroClear: 'KASUJ ZEROWANIE', zeroedTag: 'WYZEROWANO',
+    helpBtn: 'INSTRUKCJA', helpTitle: 'INSTRUKCJA',
+    help: [
+      ['1 · PRZYGOTOWANIE', 'Wybierz nabój i ustaw broń oraz montaż: długość lufy, wysokość lunety, skos szyny/montażu. Ustaw ODLEGŁOŚĆ CELU — to zarazem odległość zerowania.'],
+      ['2 · ZEROWANIE', 'Wciśnij ⊕ ZERUJ. Optyka zeruje się na aktualny dystans i warunki; wieżyczki wracają na 0. Parametry stałe (broń, montaż, nabój, kaliber) blokują się — są przygaszone. ✕ kasuje zerowanie.'],
+      ['3 · STRZELANIE I TESTY', 'Teraz zmieniaj dystans, nachylenie, wiatr, pogodę, prędkość początkową, masę pocisku lub BC — i strzelaj. Trafienie pokazuje realną odchyłkę od zera, jak na strzelnicy. Kompensuj wieżyczkami (MOA/MIL).'],
+      ['WIDOK TARCZY', 'Panel po prawej pokazuje tarczę z ostatnim trafieniem (czerwony ×) i poprzednim strzałem (szary ×). ZOOM przełącza FIT → 2× → 4× → 8× z centrowaniem na trafieniu — przydatne na dużych dystansach.'],
+      ['DOPE I TABELE', 'Karta DOPE podaje poprawki dla kolejnych dystansów. Można ją — albo całe zestawienie — wyeksportować do PDF. ZAPISZ/WCZYTAJ przechowuje wszystkie ustawienia w pliku tekstowym.'],
+      ['TRENING', 'TRYB TRENINGOWY losuje warunki i ukrywa trafienie: odczytaj wiatr, ustaw wieżyczki, strzel i odsłoń wynik, by zdobyć punkty.'],
+    ],
     fire: 'OGNIA', devScale: 'POWIĘKSZENIE ŁUKU', skyLbl: 'JASNOŚĆ NIEBA',
     paramsL: 'PARAMETRY', dispL: 'EKRAN',
     viewMode: 'TRYB WIDOKU', trueBtn: 'REALNY', arcBtn: 'ŁUK', trueNote: 'GEOMETRIA RZECZYWISTA · 1:1',
@@ -977,7 +1011,7 @@ class Component extends DCLogic {
     barrelLen: 20, twist: 16,
     scopeH: 4.5, zeroDist: 50, cant: 0, railMoa: 0, mountMoa: 0, adjUnit: 'MOA', adjElev: 0, adjWind: 0,
     targetDist: 100, incline: 0, tgtType: 'ring50', tgtDiam: 50,
-    windSpeed: 3, windDir: 90, temp: 15, pressure: 1013, humidity: 50, distText: {},
+    windSpeed: 0, windDir: 90, temp: 15, pressure: 1013, humidity: 50, distText: {},
     advOpen: false, spinOn: false, corOn: false, lat: 45, az: 90,
     ammoOpen: true, rifleOpen: true, shotOpen: true, envOpen: true, dopeOpen: true, sdfOpen: true,
     exag: 8, viewMode: 'arc', cam: 'side', modelOpen: false, firing: false,
@@ -1069,6 +1103,7 @@ class Component extends DCLogic {
     this.setState({ zeroedAngle: solveZero(p, rho, sos), zeroDist: this.state.targetDist, adjElev: 0, adjWind: 0 });
   };
   clearZero = () => this.setState({ zeroedAngle: null });
+  toggleHelp = () => this.setState((s) => ({ helpOpen: !s.helpOpen, modelOpen: false }));
   cfgRef = React.createRef();
   CFG_SPEC = {
     preset: { enum: ['.22 LR', '9 mm', '5.56 NATO', '.308 Win', '6.5 Creedmoor', '.338 Lapua Mag', 'Custom'] },
@@ -1436,7 +1471,7 @@ class Component extends DCLogic {
   nextRound = () => { this.ghostTraj = null; const r = this.newRound(); SND.beep(); SND.setWind(r.windSpeed); this.setState((s) => ({ trainRound: s.trainRound + 1, ...r })); };
   exitTrain = () => this.setState({ trainOn: false, trainRevealed: false });
   toggleTrain = () => { if (this.state.trainOn) this.exitTrain(); else this.startTrain(); };
-  toggleModel = () => this.setState((s) => ({ modelOpen: !s.modelOpen }));
+  toggleModel = () => this.setState((s) => ({ modelOpen: !s.modelOpen, helpOpen: false }));
   togSnd = () => {
     SND.muted = !SND.muted;
     try { localStorage.setItem('vsr_snd', SND.muted ? 'off' : 'on'); } catch (e) {}
@@ -2483,6 +2518,9 @@ class Component extends DCLogic {
       infoText: inf ? inf[1] : L.infoHint,
       tTitle: L.title, tLegTraj: L.legTraj, tLegLos: L.legLos, tLegBore: L.legBore, tLegGhost: L.legGhost,
       tModelBtn: L.modelBtn, tModelTitle: L.modelTitle,
+      toggleHelp: this.toggleHelp, helpOpen: st.helpOpen,
+      tHelpBtn: L.helpBtn || 'GUIDE', tHelpTitle: L.helpTitle || 'USER GUIDE',
+      helpSecs: (L.help || getL('EN').help).map((h) => ({ t: h[0], b: h[1] })),
       m1: L.m[0], m2: L.m[1], m3: L.m[2], m4: L.m[3], m5: L.m[4], m6: L.m[5], m7: L.m[6], m8: L.m[7], m9: L.m[8],
       mFoot: L.mFoot,
       supportTxt: L.supportTxt, supportBtn: L.supportBtn,
